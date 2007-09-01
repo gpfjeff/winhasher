@@ -30,23 +30,23 @@ namespace com.gpfcomics.WinHasher
         {
             this.modeTabControl = new System.Windows.Forms.TabControl();
             this.singleTabPage = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.hashSingleTextBox = new System.Windows.Forms.TextBox();
+            this.hashSingleButton = new System.Windows.Forms.Button();
+            this.browseSingleButton = new System.Windows.Forms.Button();
+            this.fileSingleTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.compareTabPage = new System.Windows.Forms.TabPage();
+            this.clearButton = new System.Windows.Forms.Button();
+            this.compareButton = new System.Windows.Forms.Button();
+            this.removeButton = new System.Windows.Forms.Button();
+            this.addButton = new System.Windows.Forms.Button();
+            this.compareFilesListBox = new System.Windows.Forms.ListBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.hashComboBox = new System.Windows.Forms.ComboBox();
             this.closeButton = new System.Windows.Forms.Button();
             this.aboutButton = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.fileSingleTextBox = new System.Windows.Forms.TextBox();
-            this.browseSingleButton = new System.Windows.Forms.Button();
-            this.hashSingleButton = new System.Windows.Forms.Button();
-            this.hashSingleTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.compareFilesListBox = new System.Windows.Forms.ListBox();
-            this.addButton = new System.Windows.Forms.Button();
-            this.removeButton = new System.Windows.Forms.Button();
-            this.compareButton = new System.Windows.Forms.Button();
-            this.clearButton = new System.Windows.Forms.Button();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -65,6 +65,7 @@ namespace com.gpfcomics.WinHasher
             // 
             // singleTabPage
             // 
+            this.singleTabPage.AllowDrop = true;
             this.singleTabPage.Controls.Add(this.label3);
             this.singleTabPage.Controls.Add(this.hashSingleTextBox);
             this.singleTabPage.Controls.Add(this.hashSingleButton);
@@ -78,9 +79,69 @@ namespace com.gpfcomics.WinHasher
             this.singleTabPage.TabIndex = 0;
             this.singleTabPage.Text = "Hash Single File";
             this.singleTabPage.UseVisualStyleBackColor = true;
+            this.singleTabPage.DragDrop += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragDrop);
+            this.singleTabPage.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragEnter);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 78);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Hash:";
+            // 
+            // hashSingleTextBox
+            // 
+            this.hashSingleTextBox.Location = new System.Drawing.Point(6, 94);
+            this.hashSingleTextBox.Multiline = true;
+            this.hashSingleTextBox.Name = "hashSingleTextBox";
+            this.hashSingleTextBox.ReadOnly = true;
+            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 52);
+            this.hashSingleTextBox.TabIndex = 4;
+            // 
+            // hashSingleButton
+            // 
+            this.hashSingleButton.Enabled = false;
+            this.hashSingleButton.Location = new System.Drawing.Point(176, 45);
+            this.hashSingleButton.Name = "hashSingleButton";
+            this.hashSingleButton.Size = new System.Drawing.Size(94, 23);
+            this.hashSingleButton.TabIndex = 3;
+            this.hashSingleButton.Text = "Compute Hash";
+            this.hashSingleButton.UseVisualStyleBackColor = true;
+            this.hashSingleButton.Click += new System.EventHandler(this.hashSingleButton_Click);
+            // 
+            // browseSingleButton
+            // 
+            this.browseSingleButton.Location = new System.Drawing.Point(9, 45);
+            this.browseSingleButton.Name = "browseSingleButton";
+            this.browseSingleButton.Size = new System.Drawing.Size(75, 23);
+            this.browseSingleButton.TabIndex = 2;
+            this.browseSingleButton.Text = "Browse...";
+            this.browseSingleButton.UseVisualStyleBackColor = true;
+            this.browseSingleButton.Click += new System.EventHandler(this.browseSingleButton_Click);
+            // 
+            // fileSingleTextBox
+            // 
+            this.fileSingleTextBox.AllowDrop = true;
+            this.fileSingleTextBox.Location = new System.Drawing.Point(6, 19);
+            this.fileSingleTextBox.Name = "fileSingleTextBox";
+            this.fileSingleTextBox.Size = new System.Drawing.Size(264, 20);
+            this.fileSingleTextBox.TabIndex = 1;
+            this.fileSingleTextBox.TextChanged += new System.EventHandler(this.fileSingleTextBox_TextChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 3);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(64, 13);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "File to hash:";
             // 
             // compareTabPage
             // 
+            this.compareTabPage.AllowDrop = true;
             this.compareTabPage.Controls.Add(this.clearButton);
             this.compareTabPage.Controls.Add(this.compareButton);
             this.compareTabPage.Controls.Add(this.removeButton);
@@ -94,6 +155,72 @@ namespace com.gpfcomics.WinHasher
             this.compareTabPage.TabIndex = 1;
             this.compareTabPage.Text = "Compare Files";
             this.compareTabPage.UseVisualStyleBackColor = true;
+            this.compareTabPage.DragDrop += new System.Windows.Forms.DragEventHandler(this.compareFilesListBox_DragDrop);
+            this.compareTabPage.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragEnter);
+            // 
+            // clearButton
+            // 
+            this.clearButton.Enabled = false;
+            this.clearButton.Location = new System.Drawing.Point(101, 146);
+            this.clearButton.Name = "clearButton";
+            this.clearButton.Size = new System.Drawing.Size(75, 23);
+            this.clearButton.TabIndex = 3;
+            this.clearButton.Text = "Clear List";
+            this.clearButton.UseVisualStyleBackColor = true;
+            this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
+            // 
+            // compareButton
+            // 
+            this.compareButton.Enabled = false;
+            this.compareButton.Location = new System.Drawing.Point(72, 175);
+            this.compareButton.Name = "compareButton";
+            this.compareButton.Size = new System.Drawing.Size(132, 23);
+            this.compareButton.TabIndex = 5;
+            this.compareButton.Text = "Compare Hashes";
+            this.compareButton.UseVisualStyleBackColor = true;
+            this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
+            // 
+            // removeButton
+            // 
+            this.removeButton.Enabled = false;
+            this.removeButton.Location = new System.Drawing.Point(195, 146);
+            this.removeButton.Name = "removeButton";
+            this.removeButton.Size = new System.Drawing.Size(75, 23);
+            this.removeButton.TabIndex = 4;
+            this.removeButton.Text = "Remove";
+            this.removeButton.UseVisualStyleBackColor = true;
+            this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
+            // 
+            // addButton
+            // 
+            this.addButton.Location = new System.Drawing.Point(8, 146);
+            this.addButton.Name = "addButton";
+            this.addButton.Size = new System.Drawing.Size(75, 23);
+            this.addButton.TabIndex = 2;
+            this.addButton.Text = "Add...";
+            this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.Click += new System.EventHandler(this.addButton_Click);
+            // 
+            // compareFilesListBox
+            // 
+            this.compareFilesListBox.AllowDrop = true;
+            this.compareFilesListBox.FormattingEnabled = true;
+            this.compareFilesListBox.HorizontalScrollbar = true;
+            this.compareFilesListBox.Location = new System.Drawing.Point(8, 19);
+            this.compareFilesListBox.Name = "compareFilesListBox";
+            this.compareFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.compareFilesListBox.Size = new System.Drawing.Size(262, 121);
+            this.compareFilesListBox.TabIndex = 1;
+            this.compareFilesListBox.SelectedIndexChanged += new System.EventHandler(this.compareFilesListBox_SelectedIndexChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(5, 3);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(87, 13);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Files to compare:";
             // 
             // label1
             // 
@@ -134,127 +261,6 @@ namespace com.gpfcomics.WinHasher
             this.aboutButton.Text = "About...";
             this.aboutButton.UseVisualStyleBackColor = true;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 3);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 13);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "File to hash:";
-            // 
-            // fileSingleTextBox
-            // 
-            this.fileSingleTextBox.AllowDrop = true;
-            this.fileSingleTextBox.Location = new System.Drawing.Point(6, 19);
-            this.fileSingleTextBox.Name = "fileSingleTextBox";
-            this.fileSingleTextBox.Size = new System.Drawing.Size(264, 20);
-            this.fileSingleTextBox.TabIndex = 1;
-            this.fileSingleTextBox.TextChanged += new System.EventHandler(this.fileSingleTextBox_TextChanged);
-            // 
-            // browseSingleButton
-            // 
-            this.browseSingleButton.Location = new System.Drawing.Point(9, 45);
-            this.browseSingleButton.Name = "browseSingleButton";
-            this.browseSingleButton.Size = new System.Drawing.Size(75, 23);
-            this.browseSingleButton.TabIndex = 2;
-            this.browseSingleButton.Text = "Browse...";
-            this.browseSingleButton.UseVisualStyleBackColor = true;
-            this.browseSingleButton.Click += new System.EventHandler(this.browseSingleButton_Click);
-            // 
-            // hashSingleButton
-            // 
-            this.hashSingleButton.Enabled = false;
-            this.hashSingleButton.Location = new System.Drawing.Point(176, 45);
-            this.hashSingleButton.Name = "hashSingleButton";
-            this.hashSingleButton.Size = new System.Drawing.Size(94, 23);
-            this.hashSingleButton.TabIndex = 3;
-            this.hashSingleButton.Text = "Compute Hash";
-            this.hashSingleButton.UseVisualStyleBackColor = true;
-            this.hashSingleButton.Click += new System.EventHandler(this.hashSingleButton_Click);
-            // 
-            // hashSingleTextBox
-            // 
-            this.hashSingleTextBox.Location = new System.Drawing.Point(6, 94);
-            this.hashSingleTextBox.Multiline = true;
-            this.hashSingleTextBox.Name = "hashSingleTextBox";
-            this.hashSingleTextBox.ReadOnly = true;
-            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 52);
-            this.hashSingleTextBox.TabIndex = 4;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 78);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "Hash:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(5, 3);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(87, 13);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Files to compare:";
-            // 
-            // compareFilesListBox
-            // 
-            this.compareFilesListBox.AllowDrop = true;
-            this.compareFilesListBox.FormattingEnabled = true;
-            this.compareFilesListBox.HorizontalScrollbar = true;
-            this.compareFilesListBox.Location = new System.Drawing.Point(8, 19);
-            this.compareFilesListBox.Name = "compareFilesListBox";
-            this.compareFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.compareFilesListBox.Size = new System.Drawing.Size(262, 121);
-            this.compareFilesListBox.TabIndex = 1;
-            this.compareFilesListBox.SelectedIndexChanged += new System.EventHandler(this.compareFilesListBox_SelectedIndexChanged);
-            // 
-            // addButton
-            // 
-            this.addButton.Location = new System.Drawing.Point(8, 146);
-            this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(75, 23);
-            this.addButton.TabIndex = 2;
-            this.addButton.Text = "Add...";
-            this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.addButton_Click);
-            // 
-            // removeButton
-            // 
-            this.removeButton.Enabled = false;
-            this.removeButton.Location = new System.Drawing.Point(195, 146);
-            this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(75, 23);
-            this.removeButton.TabIndex = 4;
-            this.removeButton.Text = "Remove";
-            this.removeButton.UseVisualStyleBackColor = true;
-            this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
-            // 
-            // compareButton
-            // 
-            this.compareButton.Enabled = false;
-            this.compareButton.Location = new System.Drawing.Point(72, 175);
-            this.compareButton.Name = "compareButton";
-            this.compareButton.Size = new System.Drawing.Size(132, 23);
-            this.compareButton.TabIndex = 5;
-            this.compareButton.Text = "Compare Hashes";
-            this.compareButton.UseVisualStyleBackColor = true;
-            this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
-            // 
-            // clearButton
-            // 
-            this.clearButton.Enabled = false;
-            this.clearButton.Location = new System.Drawing.Point(101, 146);
-            this.clearButton.Name = "clearButton";
-            this.clearButton.Size = new System.Drawing.Size(75, 23);
-            this.clearButton.TabIndex = 3;
-            this.clearButton.Text = "Clear List";
-            this.clearButton.UseVisualStyleBackColor = true;
-            this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
             // 
             // MainForm
             // 
