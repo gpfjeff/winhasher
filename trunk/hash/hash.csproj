@@ -33,7 +33,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WinHasherCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\WinHasherCore\bin\Debug\WinHasherCore.dll</HintPath>
+      <HintPath>..\WinHasherCore\bin\Release\WinHasherCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
