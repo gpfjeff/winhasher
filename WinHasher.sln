@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinHasherCore", "WinHasherCore\WinHasherCore.csproj", "{29D718A4-53DC-4AF5-AA4F-3F9ADBC87F20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "md5", "md5\md5.csproj", "{EEE523FF-0B03-4A05-8368-8B48651D1251}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sha1", "sha1\sha1.csproj", "{8FEBA38C-D006-4E00-BAA8-7E21F5F2500F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hash", "hash\hash.csproj", "{B7EB3AC8-785C-4A6B-8688-34FE85E3522E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinHasher", "WinHasher\WinHasher.csproj", "{79F99B46-F03C-4413-8241-5737B2E9FE8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29D718A4-53DC-4AF5-AA4F-3F9ADBC87F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D718A4-53DC-4AF5-AA4F-3F9ADBC87F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D718A4-53DC-4AF5-AA4F-3F9ADBC87F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D718A4-53DC-4AF5-AA4F-3F9ADBC87F20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEE523FF-0B03-4A05-8368-8B48651D1251}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEE523FF-0B03-4A05-8368-8B48651D1251}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEE523FF-0B03-4A05-8368-8B48651D1251}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEE523FF-0B03-4A05-8368-8B48651D1251}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FEBA38C-D006-4E00-BAA8-7E21F5F2500F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FEBA38C-D006-4E00-BAA8-7E21F5F2500F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FEBA38C-D006-4E00-BAA8-7E21F5F2500F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FEBA38C-D006-4E00-BAA8-7E21F5F2500F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7EB3AC8-785C-4A6B-8688-34FE85E3522E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7EB3AC8-785C-4A6B-8688-34FE85E3522E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7EB3AC8-785C-4A6B-8688-34FE85E3522E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7EB3AC8-785C-4A6B-8688-34FE85E3522E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79F99B46-F03C-4413-8241-5737B2E9FE8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79F99B46-F03C-4413-8241-5737B2E9FE8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79F99B46-F03C-4413-8241-5737B2E9FE8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79F99B46-F03C-4413-8241-5737B2E9FE8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
