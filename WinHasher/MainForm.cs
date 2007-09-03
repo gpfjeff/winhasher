@@ -148,7 +148,11 @@ namespace com.gpfcomics.WinHasher
                 // what you want....
                 try
                 {
+                    UseWaitCursor = true;
+                    Refresh();
                     hashSingleTextBox.Text = HashEngine.HashFile(hash, fileSingleTextBox.Text.Trim());
+                    UseWaitCursor = false;
+                    Refresh();
                 }
                 // Catch any exceptions.  This should be prettied up later by catching individual
                 // exceptions and printing more useful error messages.  Either way, clear out
@@ -160,6 +164,8 @@ namespace com.gpfcomics.WinHasher
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
                     hashSingleTextBox.Text = "";
+                    UseWaitCursor = false;
+                    Refresh();
                 }
             }
         }
@@ -275,33 +281,55 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
+        // When the Compare Hashes button is clicked, compute the hash of each file in the list
+        // and compare them.  If they all match, then all the files are the same.  If at least
+        // one fails to match, then all the files fail the test.
         private void compareButton_Click(object sender, EventArgs e)
         {
+            // Lots of places where this could fail:
             try
             {
+                // The hash engine compare function takes an array of file path strings.
+                // There's probably a better way to do this, but we'll step through each
+                // element in the list box and put it into a proper string array first:
                 string[] fileList = new string[compareFilesListBox.Items.Count];
                 for (int i = 0; i < compareFilesListBox.Items.Count; i++)
                     fileList[i] = (string)compareFilesListBox.Items[i];
+                // Make sure the user knows we're busy:
+                UseWaitCursor = true;
+                Refresh();
+                // Do the comparison.  This returns either true or false:
                 if (HashEngine.CompareHashes(hash, fileList))
                 {
+                    // The test passed; all hashes matched:
                     MessageBox.Show("Congratulations! All " + fileList.Length +
                         " files match!", "Hashes Match", MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
                 }
                 else
                 {
+                    // The test failed; one of the hashes didn't match:
                     MessageBox.Show("WARNING! At least one of the " + fileList.Length +
                         " files did not match!", "Hashes Don't Match", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                 }
+                // Get rid of the wait cursor:
+                UseWaitCursor = false;
+                Refresh();
             }
+            // Catch the exceptions.  We need to make some nicer error messages, though:
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+                UseWaitCursor = false;
+                Refresh();
             }
         }
 
+        // When the Clear List button is clicked clear the list of all entires.
+        // Also make sure to disable the Remove, Compare, and Clear buttons, as they
+        // now have nothing to do:
         private void clearButton_Click(object sender, EventArgs e)
         {
             compareFilesListBox.Items.Clear();
@@ -316,6 +344,7 @@ namespace com.gpfcomics.WinHasher
 
         #region Other GUI Events
 
+        // When the hash dropdown changes, change the active hash:
         private void hashComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch ((string)hashComboBox.SelectedItem)
@@ -332,6 +361,8 @@ namespace com.gpfcomics.WinHasher
                 case "SHA512":
                     hash = Hashes.SHA512;
                     break;
+                // This should never happen, but default to MD5 if we get something
+                // invalid:
                 default:
                     MessageBox.Show("Error: Invalid hash. Defaulting to MD5", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -340,24 +371,33 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
+        // When the user switch which tab is active, change which button is the
+        // "accept" button, i.e. the default when the Enter button is pressed:
         private void modeTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // For the single hash page, make it the Compute Hash button:
             if (modeTabControl.SelectedIndex == 0)
             {
                 AcceptButton = hashSingleButton;
             }
+            // For the compare tab, make it the Compare Hashes button:
             else
             {
                 AcceptButton = compareButton;
             }
         }
 
+        // When the user changes the value of the file path text box, enable (or disable)
+        // the Compute Hash button:
         private void fileSingleTextBox_TextChanged(object sender, EventArgs e)
         {
             if (fileSingleTextBox.Text.Trim() == "") { hashSingleButton.Enabled = false; }
             else { hashSingleButton.Enabled = true; }
         }
 
+        // When the selected index on the file list box changes, enable or disable the
+        // Remove button.  Only enable the button if at least one item is selected;
+        // disable it if no files are selected.
         private void compareFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (compareFilesListBox.SelectedItems.Count > 0) removeButton.Enabled = true;
@@ -368,6 +408,10 @@ namespace com.gpfcomics.WinHasher
 
         #region Drag and Drop Event Handlers
 
+        // We only accept files as drag and drop data.  Since all GUI elements do the
+        // same basic thing when we drag stuff onto them (copy the values), all the
+        // drag enter events point to this one.  Note that we won't accept any other
+        // form of data other than files.
         void fileSingleTextBox_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -375,12 +419,21 @@ namespace com.gpfcomics.WinHasher
             else e.Effect = DragDropEffects.None;
         }
 
+        // When we drop files on the compare files tab, add those files paths to the
+        // file list box.  Note that we don't clear out the list first, but add the
+        // files to whatever may already be there.
         void compareFilesListBox_DragDrop(object sender, DragEventArgs e)
         {
+            // Stuff could barf here:
             try
             {
+                // Only accept file drop data:
                 if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 {
+                    // This is similar to the add button.  (In fact, I ought to abstract
+                    // this and combine this into a single method.)  Given the list of
+                    // file names as a string array, add them to the file list, making
+                    // sure no duplicates are added.
                     string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
                     bool addedFiles = false;
                     foreach (string file in fileList)
@@ -402,21 +455,28 @@ namespace com.gpfcomics.WinHasher
                             lastDirectory = fi.DirectoryName;
                         }
                     }
+                    // If any files were added, enable the compare and clear buttons
+                    // as appropriate:
                     if (addedFiles)
                     {
                         if (compareFilesListBox.Items.Count > 1)
                         {
                             compareButton.Enabled = true;
+                        }
+                        if (compareFilesListBox.Items.Count >= 1)
+                        {
                             clearButton.Enabled = true;
                         }
                     }
                 }
+                // Something other files were dropped:
                 else
                 {
                     MessageBox.Show("Error: Only files can be dropped onto this applet.",
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            // Expand this with more meaningful error messages:
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
@@ -424,6 +484,9 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
+        // When we drop a file on the single hash tab, add that file's path to the
+        // file text box.  Note that we'll only accept one file here; if multiple
+        // files are dropped, complain.
         void fileSingleTextBox_DragDrop(object sender, DragEventArgs e)
         {
             try
