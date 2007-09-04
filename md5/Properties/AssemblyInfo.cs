@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("md5")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("WinHasher MD5 (Console Version)")]
+[assembly: AssemblyDescription("This console application computes the MD5 hash of one or more files.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("md5")]
-[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington.  All rights reserved.")]
+[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

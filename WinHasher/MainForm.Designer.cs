@@ -28,6 +28,8 @@ namespace com.gpfcomics.WinHasher
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.modeTabControl = new System.Windows.Forms.TabControl();
             this.singleTabPage = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
@@ -47,6 +49,7 @@ namespace com.gpfcomics.WinHasher
             this.hashComboBox = new System.Windows.Forms.ComboBox();
             this.closeButton = new System.Windows.Forms.Button();
             this.aboutButton = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -78,6 +81,7 @@ namespace com.gpfcomics.WinHasher
             this.singleTabPage.Size = new System.Drawing.Size(276, 202);
             this.singleTabPage.TabIndex = 0;
             this.singleTabPage.Text = "Hash Single File";
+            this.toolTip1.SetToolTip(this.singleTabPage, resources.GetString("singleTabPage.ToolTip"));
             this.singleTabPage.UseVisualStyleBackColor = true;
             this.singleTabPage.DragDrop += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragDrop);
             this.singleTabPage.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragEnter);
@@ -97,8 +101,9 @@ namespace com.gpfcomics.WinHasher
             this.hashSingleTextBox.Multiline = true;
             this.hashSingleTextBox.Name = "hashSingleTextBox";
             this.hashSingleTextBox.ReadOnly = true;
-            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 52);
+            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 102);
             this.hashSingleTextBox.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.hashSingleTextBox, resources.GetString("hashSingleTextBox.ToolTip"));
             // 
             // hashSingleButton
             // 
@@ -108,6 +113,9 @@ namespace com.gpfcomics.WinHasher
             this.hashSingleButton.Size = new System.Drawing.Size(94, 23);
             this.hashSingleButton.TabIndex = 3;
             this.hashSingleButton.Text = "Compute Hash";
+            this.toolTip1.SetToolTip(this.hashSingleButton, "This button will activate the selected hashing\r\nalgorithm and compute the hash of" +
+                    " the\r\nspecified file.  This button only becomes\r\nactive if a file path is in the" +
+                    " text box above.");
             this.hashSingleButton.UseVisualStyleBackColor = true;
             this.hashSingleButton.Click += new System.EventHandler(this.hashSingleButton_Click);
             // 
@@ -118,6 +126,8 @@ namespace com.gpfcomics.WinHasher
             this.browseSingleButton.Size = new System.Drawing.Size(75, 23);
             this.browseSingleButton.TabIndex = 2;
             this.browseSingleButton.Text = "Browse...";
+            this.toolTip1.SetToolTip(this.browseSingleButton, "Click this button to browse your hard disk\r\nor network shares for a file to hash." +
+                    "");
             this.browseSingleButton.UseVisualStyleBackColor = true;
             this.browseSingleButton.Click += new System.EventHandler(this.browseSingleButton_Click);
             // 
@@ -128,6 +138,8 @@ namespace com.gpfcomics.WinHasher
             this.fileSingleTextBox.Name = "fileSingleTextBox";
             this.fileSingleTextBox.Size = new System.Drawing.Size(264, 20);
             this.fileSingleTextBox.TabIndex = 1;
+            this.toolTip1.SetToolTip(this.fileSingleTextBox, "This box should contain the full path to the file\r\nyou would like to compute the " +
+                    "hash of.");
             this.fileSingleTextBox.TextChanged += new System.EventHandler(this.fileSingleTextBox_TextChanged);
             // 
             // label2
@@ -154,6 +166,7 @@ namespace com.gpfcomics.WinHasher
             this.compareTabPage.Size = new System.Drawing.Size(276, 202);
             this.compareTabPage.TabIndex = 1;
             this.compareTabPage.Text = "Compare Files";
+            this.toolTip1.SetToolTip(this.compareTabPage, resources.GetString("compareTabPage.ToolTip"));
             this.compareTabPage.UseVisualStyleBackColor = true;
             this.compareTabPage.DragDrop += new System.Windows.Forms.DragEventHandler(this.compareFilesListBox_DragDrop);
             this.compareTabPage.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragEnter);
@@ -166,6 +179,7 @@ namespace com.gpfcomics.WinHasher
             this.clearButton.Size = new System.Drawing.Size(75, 23);
             this.clearButton.TabIndex = 3;
             this.clearButton.Text = "Clear List";
+            this.toolTip1.SetToolTip(this.clearButton, "Click this button to clear the\r\nentire file list in one click.");
             this.clearButton.UseVisualStyleBackColor = true;
             this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
             // 
@@ -177,6 +191,9 @@ namespace com.gpfcomics.WinHasher
             this.compareButton.Size = new System.Drawing.Size(132, 23);
             this.compareButton.TabIndex = 5;
             this.compareButton.Text = "Compare Hashes";
+            this.toolTip1.SetToolTip(this.compareButton, "Click this button to compute the hashes of\r\nall the files in the file list and co" +
+                    "mpare them.\r\nYou will receive a message indicating whether\r\nor not all the files" +
+                    " match.");
             this.compareButton.UseVisualStyleBackColor = true;
             this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
             // 
@@ -188,6 +205,7 @@ namespace com.gpfcomics.WinHasher
             this.removeButton.Size = new System.Drawing.Size(75, 23);
             this.removeButton.TabIndex = 4;
             this.removeButton.Text = "Remove";
+            this.toolTip1.SetToolTip(this.removeButton, "Click this button to remove the\r\nselected files from the list.");
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
             // 
@@ -198,6 +216,8 @@ namespace com.gpfcomics.WinHasher
             this.addButton.Size = new System.Drawing.Size(75, 23);
             this.addButton.TabIndex = 2;
             this.addButton.Text = "Add...";
+            this.toolTip1.SetToolTip(this.addButton, "Click this button to open a file dialog box and\r\nselect files to add to the list." +
+                    "");
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
@@ -211,6 +231,7 @@ namespace com.gpfcomics.WinHasher
             this.compareFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.compareFilesListBox.Size = new System.Drawing.Size(262, 121);
             this.compareFilesListBox.TabIndex = 1;
+            this.toolTip1.SetToolTip(this.compareFilesListBox, resources.GetString("compareFilesListBox.ToolTip"));
             this.compareFilesListBox.SelectedIndexChanged += new System.EventHandler(this.compareFilesListBox_SelectedIndexChanged);
             // 
             // label4
@@ -237,8 +258,9 @@ namespace com.gpfcomics.WinHasher
             this.hashComboBox.FormattingEnabled = true;
             this.hashComboBox.Location = new System.Drawing.Point(36, 240);
             this.hashComboBox.Name = "hashComboBox";
-            this.hashComboBox.Size = new System.Drawing.Size(71, 21);
+            this.hashComboBox.Size = new System.Drawing.Size(89, 21);
             this.hashComboBox.TabIndex = 2;
+            this.toolTip1.SetToolTip(this.hashComboBox, resources.GetString("hashComboBox.ToolTip"));
             this.hashComboBox.SelectedIndexChanged += new System.EventHandler(this.hashComboBox_SelectedIndexChanged);
             // 
             // closeButton
@@ -249,16 +271,20 @@ namespace com.gpfcomics.WinHasher
             this.closeButton.Size = new System.Drawing.Size(75, 23);
             this.closeButton.TabIndex = 4;
             this.closeButton.Text = "Close";
+            this.toolTip1.SetToolTip(this.closeButton, "Click this button to\r\nclose WinHasher.");
             this.closeButton.UseVisualStyleBackColor = true;
             this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
             // 
             // aboutButton
             // 
-            this.aboutButton.Location = new System.Drawing.Point(123, 238);
+            this.aboutButton.Location = new System.Drawing.Point(131, 238);
             this.aboutButton.Name = "aboutButton";
             this.aboutButton.Size = new System.Drawing.Size(75, 23);
             this.aboutButton.TabIndex = 3;
             this.aboutButton.Text = "About...";
+            this.toolTip1.SetToolTip(this.aboutButton, "Click this button to see more information about\r\nWinHasher, such as the full vers" +
+                    "ion number, the\r\nURL where you can find it online, and the\r\nlicense under which " +
+                    "it was released.");
             this.aboutButton.UseVisualStyleBackColor = true;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
             // 
@@ -308,6 +334,7 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.Button clearButton;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 

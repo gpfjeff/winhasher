@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WinHasher")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("This .NET application computes the cryptographic hash of one or more files.  Single file hashes can be used to verify downloads or ensure a file has not been tampered with.  The hashes of multiple files can be compared to see if the contents of those files are identical.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ManTech")]
+[assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("WinHasher")]
-[assembly: AssemblyCopyright("Copyright © ManTech 2007")]
+[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

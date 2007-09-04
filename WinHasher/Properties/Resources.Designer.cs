@@ -59,5 +59,35 @@ namespace com.gpfcomics.WinHasher.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GNU GENERAL PUBLIC LICENSE
+        ///		       Version 2, June 1991
+        ///
+        /// Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+        ///                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+        /// Everyone is permitted to copy and distribute verbatim copies
+        /// of this license document, but changing it is not allowed.
+        ///
+        ///			    Preamble
+        ///
+        ///  The licenses for most software are designed to take away your
+        ///freedom to share and change it.  By contrast, the GNU General Public
+        ///License is intended to guarantee  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string License {
+            get {
+                return ResourceManager.GetString("License", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to http://www.gpf-comics.com/dl/winhasher/.
+        /// </summary>
+        internal static string URL {
+            get {
+                return ResourceManager.GetString("URL", resourceCulture);
+            }
+        }
     }
 }

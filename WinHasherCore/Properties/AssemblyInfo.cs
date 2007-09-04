@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WinHasherCore")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("WinHasher Core Library")]
+[assembly: AssemblyDescription("This library contains common functions for all WinHasher products.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ManTech")]
+[assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("WinHasherCore")]
-[assembly: AssemblyCopyright("Copyright © ManTech 2007")]
+[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

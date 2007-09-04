@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("hash")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("WinHasher (Console Version)")]
+[assembly: AssemblyDescription("This console application computes the cryptographic hash of one or more files.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("hash")]
-[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington.  All rights reserved.")]
+[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

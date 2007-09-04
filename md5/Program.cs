@@ -7,7 +7,13 @@
  * REQUIRES:      com.gpfcomics.WinHasher.Core
  * REQUIRED BY:   (None)
  * 
- * (header comments go here)
+ * The command-line version of WinHasher MD5.  This console app computes the MD5 hash of one or
+ * more files.  In single file mode, it prints out the hash to the screen.  In multi-file mode,
+ * it compares the hash of each file to the hashes of the others:  if all match, all the files
+ * are said to be the same; if one or more do not match, the entire batch fails.   This is
+ * supposed to be roughly compatible to something like OpenSSL's command-line MD5 digest option.
+ * See the usage method for details on using this program.  For more hashing algorithms, use the
+ * command-line "hash" program or the full WinHasher GUI.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
