@@ -7,7 +7,10 @@
  * REQUIRES:      See using statements
  * REQUIRED BY:   All WinHasher programs
  * 
- * (header comments go here)
+ * This exception class is throw by any of the methods in the HashEngine class.  This isn't very
+ * elaborate.  It mostly consists of a message property that lets you specify a friendly error
+ * message to display back.  In general, catch all HashEngineExceptions thrown by HashEngine
+ * methods and echo their Message properites for the user to see.  That's all there is to it.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com

@@ -7,7 +7,24 @@
  * REQUIRES:      com.gpfcomics.WinHasher.Core
  * REQUIRED BY:   (None)
  * 
- * (header comments go here)
+ * The main program for WinHasher.  Unlike some of my other projects, this is a bit more advanced,
+ * and for good reason.  The WinHasher GUI app works in one of two ways.
+ * 
+ * When called with no command-line arguments, WinHasher works like any other Windows app.  It loads
+ * its GUI and lets the user work interactively.  This is handy if you're not used to command-line
+ * work, or if you want to do multiple drag & drop comparisons.
+ * 
+ * However, if called from the command line with a set of arguments, the main GUI (usually) doesn't
+ * load.  The idea is to put this in the user's "Send To" folder in their Windows Explorer context
+ * menu (or even better, find a way to add a dedicated WinHasher submenu; still working on this
+ * part).  The first argument should be which hash to use; if none is specified, MD5 is the default.
+ * Then all the other arguments are assumed to be file paths.  If only one file is provided, its
+ * hash is computed and a dialog box appears showing the hash.  If more than one file is provided,
+ * the hash of each file is computed and then all the hashes are compared.  If all the hashes match,
+ * all the files are said to be the same; if at least one hash does not match the others, the whole
+ * batch is said to be different.  This method of operation is similar to calling the command-line
+ * versions of the programs, but with the benefit of just right-clicking one or more files and
+ * getting instant results through dialog boxes without going through the main app.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com

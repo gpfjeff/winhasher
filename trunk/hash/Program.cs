@@ -7,7 +7,13 @@
  * REQUIRES:      com.gpfcomics.WinHasher.Core
  * REQUIRED BY:   (None)
  * 
- * (header comments go here)
+ * The command-line version of WinHasher.  This console app computes the hash of one or more files.
+ * In single file mode, it prints out the hash to the screen.  In multi-file mode, it compares the
+ * hash of each file to the hashes of the others:  if all match, all the files are said to be the
+ * same; if one or more do not match, the entire batch fails.  Which hash algorithm to use is
+ * specified as the first argument switch; if no algorithm is specified, MD5 is the default.
+ * This is supposed to be roughly compatible to something like OpenSSL's command-line digest
+ * options.  See the usage method for details on using this program.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -76,8 +82,14 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         case "-sha256":
                             hash = Hashes.SHA256;
                             break;
+                        case "-sha384":
+                            hash = Hashes.SHA384;
+                            break;
                         case "-sha512":
                             hash = Hashes.SHA512;
+                            break;
+                        case "-ripemd160":
+                            hash = Hashes.RIPEMD160;
                             break;
                         // If we didn't get a valid hash switch, complain, but proceed using
                         // the MD5 default:
@@ -196,7 +208,8 @@ namespace com.gpfcomics.WinHasher.hashconsole
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
-            Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha512] filename1 [filename2 ...]");
+            Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160] filename1");
+            Console.WriteLine("       [filename2 ...]");
             Console.WriteLine();
             Console.WriteLine("WinHasher first looks at the first argument to see if it is a switch that");
             Console.WriteLine("indicates which hash to use.  If found, it will use that hash algorithm;");

@@ -7,7 +7,19 @@
  * REQUIRES:      com.gpfcomics.WinHasher.Core
  * REQUIRED BY:   (None)
  * 
- * (header comments go here)
+ * The main form of the WinHasher GUI application.  This provides a nice point-and-click, drag &
+ * drop interface for computing the hashes of files.  I created this primarily because I was sick
+ * of downloading files off the Internet and see their MD5 or SHA1 hashes listed for verification,
+ * but not having a way to check these hashes in Windows.  Just about every other OS now has hashing
+ * either built-in or in standard add-ons; Microsoft, of course, is way behind the times.
+ * 
+ * This program operates in two modes:  single file hashing and multi-file comparisons.  In single
+ * file mode, it takes a single file, reads it, computes its hash, and displays the result.  In
+ * multi-file mode, it computes the hash of each file in a user-specified list and compares the
+ * results.  If all the hashes match, the whole set is said to be identical; if at least one hash
+ * does not match, the whole batch fails.  The user can specify which hash to use in either case.
+ * 
+ * This program uses the WinHasherCore library for its HashEngine methods.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -45,6 +57,9 @@ namespace com.gpfcomics.WinHasher
         // Get our version number from the assembly:
         private static string version = "WinHasher v. " +
             Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        private static string versionShort = "WinHasher v. " +
+            Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
+            Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
 
         // The currently selected hash algorithm:
         private Hashes hash;
@@ -64,7 +79,9 @@ namespace com.gpfcomics.WinHasher
             hashComboBox.Items.Add("MD5");
             hashComboBox.Items.Add("SHA1");
             hashComboBox.Items.Add("SHA256");
+            hashComboBox.Items.Add("SHA384");
             hashComboBox.Items.Add("SHA512");
+            hashComboBox.Items.Add("RIPEMD160");
             // Default to MD5:
             hashComboBox.SelectedIndex = 0;
             hash = Hashes.MD5;
@@ -77,7 +94,8 @@ namespace com.gpfcomics.WinHasher
             compareFilesListBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
             compareFilesListBox.DragDrop += new DragEventHandler(compareFilesListBox_DragDrop);
             // Set our title bar to include the version number:
-            Text = version;
+            Text = versionShort;
+            toolTip1.IsBalloon = true;
         }
 
         #region Button Events
@@ -92,7 +110,9 @@ namespace com.gpfcomics.WinHasher
         // about our little program:
         private void aboutButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Show about stuff here", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            AboutDialog ad = new AboutDialog(version, Properties.Resources.URL,
+                Properties.Resources.License);
+            ad.ShowDialog();
         }
 
         #region Hash Single File Tab Buttons
@@ -118,15 +138,71 @@ namespace com.gpfcomics.WinHasher
                     // Clear out any existing hash in the hash text box:
                     hashSingleTextBox.Text = "";
                 }
+                #region Catch Exceptions
+                // Most of these are thrown by the FileInfo constructor, although a couple
+                // are thrown by its DirectoryName property.  In each case, complain about
+                // the problem then restore the GUI to the default state.
+                catch (System.Security.SecurityException)
+                {
+                    MessageBox.Show("Error: You do not have permission to access the file \"" +
+                        ofd.FileName + "\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("Error: Access to the file \"" + ofd.FileName +
+                        "\" has been denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                catch (PathTooLongException)
+                {
+                    MessageBox.Show("Error: The path \"" + ofd.FileName +
+                        "\" is too long for the system to handle.", "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                catch (NotSupportedException)
+                {
+                    MessageBox.Show("Error: The path \"" + ofd.FileName +
+                        "\" contains invalid characters.", "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                catch (ArgumentNullException)
+                {
+                    MessageBox.Show("Error: The file path specified was empty.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show("Error: The file path was empty, contained only white spaces, " +
+                        "or contained invalid characters.", "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                }
+                // A generic catch, just in case:
                 catch (Exception ex)
                 {
-                    // If something goes wrong, complain then restore us to our default state:
                     MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
                     hashSingleTextBox.Text = "";
                 }
+                #endregion
             }
         }
 
@@ -154,9 +230,22 @@ namespace com.gpfcomics.WinHasher
                     UseWaitCursor = false;
                     Refresh();
                 }
-                // Catch any exceptions.  This should be prettied up later by catching individual
-                // exceptions and printing more useful error messages.  Either way, clear out
-                // the text boxes and disable the button.
+                #region Catch Exceptions
+                // The only thing we really need to catch here are HashEngineExceptions, which
+                // are thrown in the HashEngine.HashFile() call.  This should contain the error
+                // message already, so just print it out.  But as an extra precaution, we'll catch
+                // any other generic exception, just in case.  Note that in each case, we'll clear
+                // out the GUI and return it to its default state.
+                catch (HashEngineException hee)
+                {
+                    MessageBox.Show("Error: " + hee.ToString(), "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    fileSingleTextBox.Text = "";
+                    hashSingleButton.Enabled = false;
+                    hashSingleTextBox.Text = "";
+                    UseWaitCursor = false;
+                    Refresh();
+                }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
@@ -167,6 +256,7 @@ namespace com.gpfcomics.WinHasher
                     UseWaitCursor = false;
                     Refresh();
                 }
+                #endregion
             }
         }
 
@@ -187,57 +277,7 @@ namespace com.gpfcomics.WinHasher
             // If they clicked OK:
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                // Sorry, Yoda, but I can only do my best:
-                try
-                {
-                    // By default, assume no files are really being added:
-                    bool addedFiles = false;
-                    // Step through the list of selected files from the dialog:
-                    foreach (string file in ofd.FileNames)
-                    {
-                        // Assume that this particular file isn't already in the list:
-                        bool inList = false;
-                        // Step through the files currently in the list box:
-                        foreach (object listFile in compareFilesListBox.Items)
-                        {
-                            // If the selected file is already in the list, we don't want to
-                            // add it twice.  So mark that we found it and stop looping:
-                            if (file.CompareTo((string)listFile) == 0)
-                            {
-                                inList = true;
-                                break;
-                            }
-                        }
-                        // If the file isn't in the list, add it, noting that we've added at
-                        // least one file.  Also take note of the directory the file came
-                        // from.
-                        if (!inList)
-                        {
-                            compareFilesListBox.Items.Add(file);
-                            addedFiles = true;
-                            FileInfo fi = new FileInfo(file);
-                            lastDirectory = fi.DirectoryName;
-                        }
-                    }
-                    // If we added any files, enable the Compare Hashes and Clear List buttons:
-                    if (addedFiles)
-                    {
-                        if (compareFilesListBox.Items.Count > 1)
-                        {
-                            compareButton.Enabled = true;
-                            clearButton.Enabled = true;
-                        }
-                    }
-                }
-                // Expand this with more useful error messages later:
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
-                }
+                PopulateFileListBox(ofd.FileNames);
             }
 
         }
@@ -317,7 +357,17 @@ namespace com.gpfcomics.WinHasher
                 UseWaitCursor = false;
                 Refresh();
             }
-            // Catch the exceptions.  We need to make some nicer error messages, though:
+            #region Catch Exceptions
+            // Our primary concern is the HashEngineException.  This should already contain the
+            // error message, so just spit it back out:
+            catch (HashEngineException hee)
+            {
+                MessageBox.Show("Error: " + hee.ToString(), "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                UseWaitCursor = false;
+                Refresh();
+            }
+            // Generic exception catch, just in case:
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
@@ -325,6 +375,7 @@ namespace com.gpfcomics.WinHasher
                 UseWaitCursor = false;
                 Refresh();
             }
+            #endregion
         }
 
         // When the Clear List button is clicked clear the list of all entires.
@@ -358,8 +409,14 @@ namespace com.gpfcomics.WinHasher
                 case "SHA256":
                     hash = Hashes.SHA256;
                     break;
+                case "SHA384":
+                    hash = Hashes.SHA384;
+                    break;
                 case "SHA512":
                     hash = Hashes.SHA512;
+                    break;
+                case "RIPEMD160":
+                    hash = Hashes.RIPEMD160;
                     break;
                 // This should never happen, but default to MD5 if we get something
                 // invalid:
@@ -424,63 +481,21 @@ namespace com.gpfcomics.WinHasher
         // files to whatever may already be there.
         void compareFilesListBox_DragDrop(object sender, DragEventArgs e)
         {
-            // Stuff could barf here:
-            try
+            // Only accept file drop data:
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                // Only accept file drop data:
-                if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                {
-                    // This is similar to the add button.  (In fact, I ought to abstract
-                    // this and combine this into a single method.)  Given the list of
-                    // file names as a string array, add them to the file list, making
-                    // sure no duplicates are added.
-                    string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
-                    bool addedFiles = false;
-                    foreach (string file in fileList)
-                    {
-                        bool inList = false;
-                        foreach (object listFile in compareFilesListBox.Items)
-                        {
-                            if (file.CompareTo((string)listFile) == 0)
-                            {
-                                inList = true;
-                                break;
-                            }
-                        }
-                        if (!inList)
-                        {
-                            compareFilesListBox.Items.Add(file);
-                            addedFiles = true;
-                            FileInfo fi = new FileInfo(file);
-                            lastDirectory = fi.DirectoryName;
-                        }
-                    }
-                    // If any files were added, enable the compare and clear buttons
-                    // as appropriate:
-                    if (addedFiles)
-                    {
-                        if (compareFilesListBox.Items.Count > 1)
-                        {
-                            compareButton.Enabled = true;
-                        }
-                        if (compareFilesListBox.Items.Count >= 1)
-                        {
-                            clearButton.Enabled = true;
-                        }
-                    }
-                }
-                // Something other files were dropped:
-                else
-                {
-                    MessageBox.Show("Error: Only files can be dropped onto this applet.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                // This is similar to the add button.  (In fact, I ought to abstract
+                // this and combine this into a single method.)  Given the list of
+                // file names as a string array, add them to the file list, making
+                // sure no duplicates are added.
+                string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
+                PopulateFileListBox(fileList);
             }
-            // Expand this with more meaningful error messages:
-            catch (Exception ex)
+            // Something other files were dropped:
+            else
             {
-                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Error: Only files can be dropped onto this applet.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -489,36 +504,134 @@ namespace com.gpfcomics.WinHasher
         // files are dropped, complain.
         void fileSingleTextBox_DragDrop(object sender, DragEventArgs e)
         {
-            try
+            // Make sure we're only getting files dropped and nothing else:
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                // Get the file list.  We only want one file dropped on this tab, not multiples,
+                // so complain if they try to drop more than one.  If we get just one, though,
+                // drop its path into the file text box.
+                string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (fileList.Length == 1)
                 {
-                    string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
-                    if (fileList.Length == 1)
-                    {
-                        modeTabControl.SelectedTab = singleTabPage;
-                        fileSingleTextBox.Text = fileList[0];
-                    }
-                    else
-                    {
-                        MessageBox.Show("Error: Two many files; only drop one into this box.",
-                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    modeTabControl.SelectedTab = singleTabPage;
+                    fileSingleTextBox.Text = fileList[0];
                 }
+                // Got too many files:
                 else
                 {
-                    MessageBox.Show("Error: Only files can be dropped onto this applet.",
+                    MessageBox.Show("Error: Two many files; only drop one into this box.",
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch (Exception ex)
+            // The data dropped wasn't a file:
+            else
             {
-                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Error: Only files can be dropped onto this applet.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         #endregion
 
+        #region Generic Private Methods
+
+        // Abstracted here for code reuse, this method takes a string array which is assumed to
+        // contain a list of file path strings.  These can come from a drap & drop operation or
+        // from an OpenFileDialog.FileNames property.  Given this list, step through each file.
+        // Compare each one to the items already in the list box and make sure it isn't a duplicate.
+        // If it isn't, add it to the list.  The do any necessary GUI tweaking to make sure the
+        // right buttons are enabled.  Note that this method catches its own exceptions so the
+        // caller doesn't need to worry about them.
+        private void PopulateFileListBox(string[] fileList)
+        {
+            try
+            {
+                // By default, assume no files are really being added:
+                bool addedFiles = false;
+                // Step through the list of selected files from the dialog:
+                foreach (string file in fileList)
+                {
+                    // Assume that this particular file isn't already in the list:
+                    bool inList = false;
+                    // Step through the files currently in the list box:
+                    foreach (object listFile in compareFilesListBox.Items)
+                    {
+                        // If the selected file is already in the list, we don't want to
+                        // add it twice.  So mark that we found it and stop looping:
+                        if (file.CompareTo((string)listFile) == 0)
+                        {
+                            inList = true;
+                            break;
+                        }
+                    }
+                    // If the file isn't in the list, add it, noting that we've added at
+                    // least one file.  Also take note of the directory the file came
+                    // from.
+                    if (!inList)
+                    {
+                        compareFilesListBox.Items.Add(file);
+                        addedFiles = true;
+                        FileInfo fi = new FileInfo(file);
+                        lastDirectory = fi.DirectoryName;
+                    }
+                }
+                // If we added any files, enable the Compare Hashes and Clear List buttons:
+                if (addedFiles)
+                {
+                    if (compareFilesListBox.Items.Count > 1) { compareButton.Enabled = true; }
+                    if (compareFilesListBox.Items.Count > 0) { clearButton.Enabled = true; }
+                }
+            }
+            #region Catch Exceptions
+            // Most of these are thrown by the FileInfo constructor, although a couple
+            // are thrown by its DirectoryName property.
+            catch (System.Security.SecurityException)
+            {
+                MessageBox.Show("Error: You do not have permission to access one or more of " +
+                    "the files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Error: Access to one or more of the files has been denied.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (PathTooLongException)
+            {
+                MessageBox.Show("Error: One or more of the file paths is too long for the " +
+                    "system to handle.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (NotSupportedException)
+            {
+                MessageBox.Show("Error: One or more of the file paths contains invalid " +
+                    "characters.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (ArgumentNullException)
+            {
+                MessageBox.Show("Error: One or more of the file paths specified was empty.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (ArgumentException)
+            {
+                MessageBox.Show("Error: One or more of the file paths was empty, contained " +
+                    "only white spaces, or contained invalid characters.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            // This could be thrown by ListBox.Items.Add():
+            catch (SystemException)
+            {
+                MessageBox.Show("Error: The system ran out of memory while adding files to the " +
+                    "list. Try removing a few files and comparing them again.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            // A generic catch, just in case:
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            #endregion
+        }
+
+        #endregion
     }
 }

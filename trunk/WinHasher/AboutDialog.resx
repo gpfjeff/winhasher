@@ -117,64 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="singleTabPage.ToolTip" xml:space="preserve">
-    <value>This tab can be used to compute the hash of
-an individual file.  This can be useful for validating
-downloads or checking to see if a file has been
-tampered with.  Select a file and put its path in
-the File to hash text box, then click the Compute
-Hash button.  The generated hash will appear in
-the Hash text box.  To change the hashing
-algorithm, select a different hash from the drop-
-down box at the bottom of the form.</value>
-  </data>
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="compareFilesListBox.ToolTip" xml:space="preserve">
-    <value>This is the list of currently selected files to compare.
-To add more files to this list, click the Add button and
-select as many files as you would like.  You can also
-drag files from somewhere else and drop them onto
-this tab to add them to the list.</value>
-  </data>
-  <data name="compareTabPage.ToolTip" xml:space="preserve">
-    <value>This tab can be used to compare two or more files
-to see if they are the same.  It does this by
-calculating the hash fo each file and comparing
-them.  Select one or more files by clicking the Add
-button and picking files from the list, or drag and
-drop files directly on to the tab.  Then select a
-hashing algorithm from the drop-down list on the
-bottom of the form and click the Compare Hashes
-button.  This comparison is an all-or-nothing check;
-if any does not match any of the others, the entire
-batch is said to fail.</value>
-  </data>
-  <data name="hashSingleTextBox.ToolTip" xml:space="preserve">
-    <value>This text box contains the resulting hash computed
-on the file whose path is in the text box above,
-using the hashing algorithm specified below.  You
-can copy this value and paste it anywhere you
-like, such as to a text file, HTML page, or other
-document.</value>
-  </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="hashComboBox.ToolTip" xml:space="preserve">
-    <value>This drop-down list contains the available hashing
-algorithms on this system.  Select a hashing
-algorithm from the list to change which one to
-use.  The default is MD5, although it is not
-recommended for extensive use as MD5 has been
-proven to have collisions.  The higher SHA
-algorithms are considered more secure.</value>
-  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>44</value>
+    <value>51</value>
   </metadata>
 </root>
