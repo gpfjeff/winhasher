@@ -1,0 +1,95 @@
+[Setup]
+InternalCompressLevel=ultra
+OutputDir=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\bin
+OutputBaseFilename=WinHasher_1.0_Setup
+VersionInfoVersion=1.0.0.0
+VersionInfoCompany=GPF Comics
+VersionInfoDescription=This program will install WinHasher on your computer.
+VersionInfoTextVersion=WinHasher Setup 1.0
+VersionInfoCopyright=Copyright 2007, Jeffrey T. Darlington.
+AppCopyright=Copyright 2007, Jeffrey T. Darlington.
+AppName=WinHasher
+AppVerName=WinHasher 1.0
+LicenseFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\gpl.rtf
+PrivilegesRequired=poweruser
+MinVersion=4.1.1998,5.0.2195sp3
+DefaultDirName={pf}\WinHasher
+DefaultGroupName=WinHasher
+AppID=GPFComicsWinHasher
+UninstallDisplayIcon={app}\WinHasher.exe
+Compression=lzma/ultra
+ChangesEnvironment=true
+AppPublisher=GPF Comics
+AppPublisherURL=http://www.gpf-comics.com/dl/winhasher/
+AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
+AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
+AppVersion=WinHasher 1.0
+UninstallDisplayName=WinHasher 1.0
+[Files]
+Source: ..\WinHasherCore\bin\Release\WinHasherCore.dll; DestDir: {app}; Components: Windows_application Console_applications
+Source: ..\WinHasher\bin\Release\WinHasher.exe; DestDir: {app}; Components: Windows_application
+Source: ..\hash\bin\Release\hash.exe; DestDir: {app}; Components: Console_applications
+Source: ..\md5\bin\Release\md5.exe; DestDir: {app}; Components: Console_applications
+Source: ..\sha1\bin\Release\sha1.exe; DestDir: {app}; Components: Console_applications
+Source: ..\..\Mandelbrot_Madness\PathTweaker\bin\Release\PathTweaker.exe; DestDir: {app}; Components: Console_applications
+[Components]
+Name: Windows_application; Description: Check this box to install the Windows GUI version of WinHasher; Types: custom compact full
+Name: Windows_application\MD5_SendTo; Description: Add an MD5 shortcut to the SendTo menu; Types: custom full
+Name: Windows_application\SHA1_SendTo; Description: Add an SHA1 shortcut to the SendTo menu; Types: custom full
+Name: Windows_application\SHA256_SendTo; Description: Add an SHA256 shortcut to the SendTo menu; Types: full
+Name: Windows_application\SHA384_SendTo; Description: Add an SHA384 shortcut to the SendTo menu; Types: full
+Name: Windows_application\SHA512_SendTo; Description: Add an SHA512 shortcut to the SendTo menu; Types: full
+Name: Windows_application\RIPEMD160_SendTo; Description: Add an RIPEMD160 shortcut to the SendTo menu; Types: full
+Name: Console_applications; Description: Check this box to install the console (command-line) versions of WinHasher.  This will also add the WinHasher program path to your PATH environment variable.; Types: custom full
+Name: HTML_help_file; Description: Check this box to install the HTML help file, which will be accessible through the Start Menu.; Types: full compact custom
+[Icons]
+Name: {group}\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application
+Name: {sendto}\WinHasher MD5; Filename: {app}\WinHasher.exe; Parameters: -md5; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\MD5_SendTo
+Name: {sendto}\WinHasher SHA1; Filename: {app}\WinHasher.exe; Parameters: -sha1; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA1_SendTo
+Name: {sendto}\WinHasher SHA256; Filename: {app}\WinHasher.exe; Parameters: -sha256; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA256_SendTo
+Name: {sendto}\WinHasher SHA384; Filename: {app}\WinHasher.exe; Parameters: -sha384; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA384_SendTo
+Name: {sendto}\WinHasher SHA512; Filename: {app}\WinHasher.exe; Parameters: -sha512; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA512_SendTo
+Name: {sendto}\WinHasher RIPEMD160; Filename: {app}\WinHasher.exe; Parameters: -ripemd160; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\RIPEMD160_SendTo
+[Run]
+Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}; Flags: runminimized runhidden; Components: Console_applications
+[UninstallRun]
+Filename: {app}\PathTweaker.exe; Parameters: "-remove ""{app}"""; WorkingDir: {app}; Flags: runhidden; Components: Console_applications
+[Code]
+function InitializeSetup(): Boolean;
+var
+   DotNetRegKey: String;
+   DotNetDlURL:  String;
+   ErrorCode:    Integer;
+begin
+   // Set up our constants, abstracted here to make changing them
+   // later easier.  The first is the .NET 2.0 registry key.
+   // Actually, it's the setup program's regkey, but a Google
+   // search said this was the best place to look.  .NET setup will
+   // not install if it finds this key, so if it's good enough for
+   // Microsoft, it's good enough for us.
+   DotNetRegKey := 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727';
+   // The URL of where to download .NET:
+   DotNetDlURL := 'http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx';
+   // Check the registry to see if the .NET registry key exists.
+   // If not, then we go to work:
+   if not RegKeyExists(HKLM, DotNetRegKey) then begin
+      // Ask the user if they want to download .NET:
+      if MsgBox('The Microsoft .NET Framework version 2.0 or higher is required to run this application, but I couldn''t find it installed on your system.  Would you like to download it now?', mbConfirmation, MB_YESNO) = IDYES then begin
+         // Open the download URL in the default browser:
+         ShellExec('open', DotNetDlURL, '', '', SW_SHOW, ewNoWait, ErrorCode);
+      end
+      // If they decided not to download .NET now, tell them they
+      // can always get it from Windows Update:
+      else begin
+         MsgBox('Ok, but you can also install the framework through Windows Update.  This installer will now exit.', mbInformation, MB_OK);
+      end;
+      // In all cases above, we want to stop the installation here:
+      Result := False;
+   end
+   // If .NET was found, everything is rosy.  Proceed with the
+   // installation:
+   else begin
+      //MsgBox('Found .NET Framework 2.0 or higher', mbInformation, MB_OK);
+      Result := True;
+   end;
+end;
