@@ -2,7 +2,7 @@
  * 
  * PROGRAMMER:    Jeffrey T. Darlington
  * DATE:          August 31, 2007
- * PROJECT:       WinHasher MD5 core library
+ * PROJECT:       WinHasher core library
  * .NET VERSION:  2.0
  * REQUIRES:      See using statements
  * REQUIRED BY:   All WinHasher programs
@@ -72,7 +72,8 @@ namespace com.gpfcomics.WinHasher.Core
         SHA256,
         SHA384,
         SHA512,
-        RIPEMD160
+        RIPEMD160/*,
+        Whirlpool*/
     }
 
     /// <summary>
@@ -307,6 +308,9 @@ namespace com.gpfcomics.WinHasher.Core
                 case Hashes.RIPEMD160:
                     hasher = new RIPEMD160Managed();
                     break;
+                //case Hashes.Whirlpool:
+                //    hasher = new WhirlpoolManaged();
+                //    break;
                 // If we didn't get something we expected, default to MD5:
                 default:
                     hasher = new MD5CryptoServiceProvider();

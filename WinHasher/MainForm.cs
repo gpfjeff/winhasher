@@ -110,8 +110,13 @@ namespace com.gpfcomics.WinHasher
         // about our little program:
         private void aboutButton_Click(object sender, EventArgs e)
         {
+            // Get the full path to the HTML help file:
+            string helpFile = Application.StartupPath;
+            if (!helpFile.EndsWith("\\")) helpFile += "\\";
+            helpFile += Properties.Resources.HelpFile;
+            // Now build and show the about dialog:
             AboutDialog ad = new AboutDialog(version, Properties.Resources.URL,
-                Properties.Resources.License);
+                Properties.Resources.License, helpFile);
             ad.ShowDialog();
         }
 
@@ -509,12 +514,13 @@ namespace com.gpfcomics.WinHasher
             {
                 // Get the file list.  We only want one file dropped on this tab, not multiples,
                 // so complain if they try to drop more than one.  If we get just one, though,
-                // drop its path into the file text box.
+                // drop its path into the file text box and go ahead and trigger the hash.
                 string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (fileList.Length == 1)
                 {
                     modeTabControl.SelectedTab = singleTabPage;
                     fileSingleTextBox.Text = fileList[0];
+                    hashSingleButton_Click(sender, e);
                 }
                 // Got too many files:
                 else

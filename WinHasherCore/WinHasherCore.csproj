@@ -37,6 +37,7 @@
     <Compile Include="HashEngine.cs" />
     <Compile Include="HashEngineException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WhirlpoolManaged.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon1.ico" />
