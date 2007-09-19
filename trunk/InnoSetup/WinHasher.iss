@@ -4,7 +4,7 @@ OutputDir=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Project
 OutputBaseFilename=WinHasher_1.0_Setup
 VersionInfoVersion=1.0.0.0
 VersionInfoCompany=GPF Comics
-VersionInfoDescription=This program will install WinHasher on your computer.
+VersionInfoDescription=This program will install WinHasher on your computer.  WinHasher is a cryptographic file hashing program using the Microsoft .NET 2.0 Framework.
 VersionInfoTextVersion=WinHasher Setup 1.0
 VersionInfoCopyright=Copyright 2007, Jeffrey T. Darlington.
 AppCopyright=Copyright 2007, Jeffrey T. Darlington.
@@ -20,7 +20,7 @@ UninstallDisplayIcon={app}\WinHasher.exe
 Compression=lzma/ultra
 ChangesEnvironment=true
 AppPublisher=GPF Comics
-AppPublisherURL=http://www.gpf-comics.com/dl/winhasher/
+AppPublisherURL=http://www.gpf-comics.com/
 AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
 AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
 AppVersion=WinHasher 1.0
@@ -32,8 +32,11 @@ Source: ..\hash\bin\Release\hash.exe; DestDir: {app}; Components: Console_applic
 Source: ..\md5\bin\Release\md5.exe; DestDir: {app}; Components: Console_applications
 Source: ..\sha1\bin\Release\sha1.exe; DestDir: {app}; Components: Console_applications
 Source: ..\..\Mandelbrot_Madness\PathTweaker\bin\Release\PathTweaker.exe; DestDir: {app}; Components: Console_applications
+Source: cmdhelp.html; DestDir: {app}; Flags: ignoreversion; Components: Console_applications and HTML_help_file
+Source: guihelp.html; DestDir: {app}; Flags: ignoreversion; Components: Windows_application and HTML_help_file
 [Components]
 Name: Windows_application; Description: Check this box to install the Windows GUI version of WinHasher; Types: custom compact full
+Name: Windows_application\Desktop_icon; Description: Place an icon for WinHasher on your desktop.  If you are an administrator, this will make the icon available to all users.; Types: custom full
 Name: Windows_application\MD5_SendTo; Description: Add an MD5 shortcut to the SendTo menu; Types: custom full
 Name: Windows_application\SHA1_SendTo; Description: Add an SHA1 shortcut to the SendTo menu; Types: custom full
 Name: Windows_application\SHA256_SendTo; Description: Add an SHA256 shortcut to the SendTo menu; Types: full
@@ -41,9 +44,13 @@ Name: Windows_application\SHA384_SendTo; Description: Add an SHA384 shortcut to 
 Name: Windows_application\SHA512_SendTo; Description: Add an SHA512 shortcut to the SendTo menu; Types: full
 Name: Windows_application\RIPEMD160_SendTo; Description: Add an RIPEMD160 shortcut to the SendTo menu; Types: full
 Name: Console_applications; Description: Check this box to install the console (command-line) versions of WinHasher.  This will also add the WinHasher program path to your PATH environment variable.; Types: custom full
-Name: HTML_help_file; Description: Check this box to install the HTML help file, which will be accessible through the Start Menu.; Types: full compact custom
+Name: HTML_help_file; Description: Check this box to install the HTML help files, which will be accessible through the Start Menu.; Types: full compact custom
 [Icons]
-Name: {group}\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application
+Name: {group}\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application; Comment: WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files
+Name: {group}\Command-line Help; Filename: {app}\cmdhelp.html; WorkingDir: {app}; Components: Console_applications and HTML_help_file; Comment: Display help information for the command-line version of WinHasher in your default Web browser
+Name: {group}\Windows App Help; Filename: {app}\guihelp.html; WorkingDir: {app}; Components: Windows_application and HTML_help_file; Comment: Display help information for the Windows version of WinHasher in your default Web browser
+Name: {group}\Uninstall WinHasher; Filename: {uninstallexe}; WorkingDir: {app}; Comment: Uninstall all WinHasher components
+Name: {commondesktop}\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\Desktop_icon; Comment: WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files
 Name: {sendto}\WinHasher MD5; Filename: {app}\WinHasher.exe; Parameters: -md5; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\MD5_SendTo
 Name: {sendto}\WinHasher SHA1; Filename: {app}\WinHasher.exe; Parameters: -sha1; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA1_SendTo
 Name: {sendto}\WinHasher SHA256; Filename: {app}\WinHasher.exe; Parameters: -sha256; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA256_SendTo
@@ -51,7 +58,7 @@ Name: {sendto}\WinHasher SHA384; Filename: {app}\WinHasher.exe; Parameters: -sha
 Name: {sendto}\WinHasher SHA512; Filename: {app}\WinHasher.exe; Parameters: -sha512; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA512_SendTo
 Name: {sendto}\WinHasher RIPEMD160; Filename: {app}\WinHasher.exe; Parameters: -ripemd160; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\RIPEMD160_SendTo
 [Run]
-Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}; Flags: runminimized runhidden; Components: Console_applications
+Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}; Flags: runminimized runhidden; Components: Console_applications; StatusMsg: "Adding ""{app}"" to the PATH..."
 [UninstallRun]
 Filename: {app}\PathTweaker.exe; Parameters: "-remove ""{app}"""; WorkingDir: {app}; Flags: runhidden; Components: Console_applications
 [Code]
