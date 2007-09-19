@@ -36,6 +36,7 @@ namespace com.gpfcomics.WinHasher
             this.label2 = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.helpButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // versionLabel
@@ -95,7 +96,7 @@ namespace com.gpfcomics.WinHasher
             // okButton
             // 
             this.okButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.okButton.Location = new System.Drawing.Point(145, 238);
+            this.okButton.Location = new System.Drawing.Point(185, 238);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 5;
@@ -104,6 +105,17 @@ namespace com.gpfcomics.WinHasher
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
+            // helpButton
+            // 
+            this.helpButton.Location = new System.Drawing.Point(104, 238);
+            this.helpButton.Name = "helpButton";
+            this.helpButton.Size = new System.Drawing.Size(75, 23);
+            this.helpButton.TabIndex = 6;
+            this.helpButton.Text = "Help...";
+            this.toolTip1.SetToolTip(this.helpButton, "Click this button to launch the HTML file\r\nif your default Web browser");
+            this.helpButton.UseVisualStyleBackColor = true;
+            this.helpButton.Click += new System.EventHandler(this.helpButton_Click);
+            // 
             // AboutDialog
             // 
             this.AcceptButton = this.okButton;
@@ -111,6 +123,7 @@ namespace com.gpfcomics.WinHasher
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.okButton;
             this.ClientSize = new System.Drawing.Size(364, 273);
+            this.Controls.Add(this.helpButton);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.gplTextBox);
@@ -138,5 +151,6 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Button helpButton;
     }
 }

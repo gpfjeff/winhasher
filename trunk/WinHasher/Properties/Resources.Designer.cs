@@ -61,6 +61,15 @@ namespace com.gpfcomics.WinHasher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to guihelp.html.
+        /// </summary>
+        internal static string HelpFile {
+            get {
+                return ResourceManager.GetString("HelpFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GNU GENERAL PUBLIC LICENSE
         ///		       Version 2, June 1991
         ///

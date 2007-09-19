@@ -91,6 +91,9 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         case "-ripemd160":
                             hash = Hashes.RIPEMD160;
                             break;
+                        //case "-whirlpool":
+                        //    hash = Hashes.Whirlpool;
+                        //    break;
                         // If we didn't get a valid hash switch, complain, but proceed using
                         // the MD5 default:
                         default:

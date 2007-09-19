@@ -34,6 +34,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace com.gpfcomics.WinHasher
 {
@@ -41,9 +42,10 @@ namespace com.gpfcomics.WinHasher
     {
         // The URL our link goes to:
         private string URL;
+        private string helpFile;
 
         // Our constructor, which basically just copies our inputs into the appropriate GUI elements:
-        public AboutDialog(string version, string url, string license)
+        public AboutDialog(string version, string url, string license, string helpFile)
         {
             InitializeComponent();
             versionLabel.Text = version;
@@ -51,6 +53,10 @@ namespace com.gpfcomics.WinHasher
             linkLabel.Text = url;
             URL = url;
             toolTip1.IsBalloon = true;
+            // See if the HTML help file is in the same location as the program.  If it isn't,
+            // disable the Help button.
+            this.helpFile = helpFile;
+            if (!File.Exists(helpFile)) helpButton.Enabled = false;
         }
 
         // When the link button is clicked, take us to the URL using the default browser:
@@ -70,6 +76,18 @@ namespace com.gpfcomics.WinHasher
         private void okButton_Click(object sender, EventArgs e)
         {
             Dispose();
+        }
+
+        // If the help button is clicked, try to open the HTML help file in the default browser:
+        private void helpButton_Click(object sender, EventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(helpFile); }
+            catch
+            {
+                MessageBox.Show("Error: Could not launch default Web browser. Please use the " +
+                    "Start menu shortcut to load the HTML help file manually.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
