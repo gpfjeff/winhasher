@@ -127,10 +127,17 @@ WARNING! One or more of these 2 files do not match!</pre></blockquote>
 <blockquote><pre>C:\Program Files\WinHasher>hash -sha256 somefile.jpg
 
 ed25e7af09323d82af975641cbcd291368e50f173fd191e7760d05244aada29f</pre></blockquote>
-
-<blockquote><pre></pre></blockquote>
+<p>The algorithm switch consists of a hyphen (not a slash, which is the standard Windows command-line switch prefix, because it's always my <em>hope</em> to support other platforms) followed by the algorithm name in all lower case. Any punctuation (like the hyphens for the SHA family) are dropped. If you're ever in doubt on what a switch for a particular algorithm is, just run <code>hash</code> with no arguments to get the usage text. The algorithm switches will be listed and should be pretty easy to figure out.</p>
+<p>The algorithm switch is <em>always</em> the first argument supplied, when present. If the first argument is not a recognized algorithm switch (say, you made a typo and typed <code>hash -sha258</code>), an error message is displayed and the algorithm defaults to MD5. Then the first argument is treated as a file name, which may or may not be what you wanted. (In this example, "-sha258" is not likely to be a valid file name.)</p>
+<p>The algorithm switch can, of course, be combined with multiple file arguments to do a comparison using that particular hash. For example, to compare three files using RIPEMD-160:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -ripemd160 file1.jpg file2.jpg file3.jpg</pre></blockquote>
 
 <a name="md5andsha1"><h3>A Matter of Convenience: <code>md5</code> and <code>sha1</code></h3></a>
+
+<p>Because MD5 and SHA-1 are so prevalent on the Internet, as a convenience, I've also included two alternate programs, <code>md5</code> and <code>sha1</code>, that perform just these hashes. <code>md5</code> is equivalent to running <code>hash -md5</code>, while <code>sha1</code> is equivalent to <code>hash -sha1</code>. Neither of these programs will accept the algorithm switches as the first argument.</p>
+<p>Creating these extra programs is a bit redundant, but Windows does not have a mechanism for aliases or symbolic links. If there is enough demand, I can create other "convenience" programs for the other algorithms. However, I also believe in the concept of less is more, so I will only go that route if there are enough requests.</p>
+
+<blockquote><pre></pre></blockquote>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
