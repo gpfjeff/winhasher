@@ -34,6 +34,7 @@ Source: ..\sha1\bin\Release\sha1.exe; DestDir: {app}; Components: Console_applic
 Source: ..\..\Mandelbrot_Madness\PathTweaker\bin\Release\PathTweaker.exe; DestDir: {app}; Components: Console_applications
 Source: cmdhelp.html; DestDir: {app}; Flags: ignoreversion; Components: Console_applications and HTML_help_file
 Source: guihelp.html; DestDir: {app}; Flags: ignoreversion; Components: Windows_application and HTML_help_file
+Source: gpl.html; DestDir: {app}; Flags: ignoreversion; Components: HTML_help_file
 [Components]
 Name: Windows_application; Description: Check this box to install the Windows GUI version of WinHasher; Types: custom compact full
 Name: Windows_application\Desktop_icon; Description: Place an icon for WinHasher on your desktop.  If you are an administrator, this will make the icon available to all users.; Types: custom full
