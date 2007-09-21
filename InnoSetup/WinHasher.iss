@@ -25,6 +25,7 @@ AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
 AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
 AppVersion=WinHasher 1.0
 UninstallDisplayName=WinHasher 1.0
+SetupIconFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\WinHasher\Icon1.ico
 [Files]
 Source: ..\WinHasherCore\bin\Release\WinHasherCore.dll; DestDir: {app}; Components: Windows_application Console_applications
 Source: ..\WinHasher\bin\Release\WinHasher.exe; DestDir: {app}; Components: Windows_application
