@@ -100,15 +100,27 @@ namespace com.gpfcomics.WinHasher
                             break;
                         case "-sha1":
                             hash = Hashes.SHA1;
-                            hashString = "SHA1";
+                            hashString = "SHA-1";
                             break;
                         case "-sha256":
                             hash = Hashes.SHA256;
-                            hashString = "SHA256";
+                            hashString = "SHA-256";
                             break;
                         case "-sha512":
                             hash = Hashes.SHA512;
-                            hashString = "SHA512";
+                            hashString = "SHA-512";
+                            break;
+                        case "-ripemd106":
+                            hash = Hashes.RIPEMD160;
+                            hashString = "RIPEMD-160";
+                            break;
+                        case "-whirlpool":
+                            hash = Hashes.Whirlpool;
+                            hashString = "Whirlpool";
+                            break;
+                        case "-tiger":
+                            hash = Hashes.Tiger;
+                            hashString = "Tiger";
                             break;
                         // If we didn't get a valid hash switch, complain, but proceed using
                         // the MD5 default:

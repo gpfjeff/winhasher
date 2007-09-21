@@ -77,11 +77,13 @@ namespace com.gpfcomics.WinHasher
             // Build the hash combobox.  There's probably a better way to do this, but I couldn't
             // get it to enumerate over the Hashes enumeration.  So we'll do it manually.
             hashComboBox.Items.Add("MD5");
-            hashComboBox.Items.Add("SHA1");
-            hashComboBox.Items.Add("SHA256");
-            hashComboBox.Items.Add("SHA384");
-            hashComboBox.Items.Add("SHA512");
-            hashComboBox.Items.Add("RIPEMD160");
+            hashComboBox.Items.Add("SHA-1");
+            hashComboBox.Items.Add("SHA-256");
+            hashComboBox.Items.Add("SHA-384");
+            hashComboBox.Items.Add("SHA-512");
+            hashComboBox.Items.Add("RIPEMD-160");
+            hashComboBox.Items.Add("Whirlpool");
+            hashComboBox.Items.Add("Tiger");
             // Default to MD5:
             hashComboBox.SelectedIndex = 0;
             hash = Hashes.MD5;
@@ -408,20 +410,26 @@ namespace com.gpfcomics.WinHasher
                 case "MD5":
                     hash = Hashes.MD5;
                     break;
-                case "SHA1":
+                case "SHA-1":
                     hash = Hashes.SHA1;
                     break;
-                case "SHA256":
+                case "SHA-256":
                     hash = Hashes.SHA256;
                     break;
-                case "SHA384":
+                case "SHA-384":
                     hash = Hashes.SHA384;
                     break;
-                case "SHA512":
+                case "SHA-512":
                     hash = Hashes.SHA512;
                     break;
-                case "RIPEMD160":
+                case "RIPEMD-160":
                     hash = Hashes.RIPEMD160;
+                    break;
+                case "Whirlpool":
+                    hash = Hashes.Whirlpool;
+                    break;
+                case "Tiger":
+                    hash = Hashes.Tiger;
                     break;
                 // This should never happen, but default to MD5 if we get something
                 // invalid:

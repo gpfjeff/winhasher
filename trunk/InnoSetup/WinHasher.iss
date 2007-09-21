@@ -38,12 +38,15 @@ Source: gpl.html; DestDir: {app}; Flags: ignoreversion; Components: HTML_help_fi
 [Components]
 Name: Windows_application; Description: Check this box to install the Windows GUI version of WinHasher; Types: custom compact full
 Name: Windows_application\Desktop_icon; Description: Place an icon for WinHasher on your desktop.  If you are an administrator, this will make the icon available to all users.; Types: custom full
-Name: Windows_application\MD5_SendTo; Description: Add an MD5 shortcut to the SendTo menu; Types: custom full
-Name: Windows_application\SHA1_SendTo; Description: Add an SHA1 shortcut to the SendTo menu; Types: custom full
-Name: Windows_application\SHA256_SendTo; Description: Add an SHA256 shortcut to the SendTo menu; Types: full
-Name: Windows_application\SHA384_SendTo; Description: Add an SHA384 shortcut to the SendTo menu; Types: full
-Name: Windows_application\SHA512_SendTo; Description: Add an SHA512 shortcut to the SendTo menu; Types: full
-Name: Windows_application\RIPEMD160_SendTo; Description: Add an RIPEMD160 shortcut to the SendTo menu; Types: full
+Name: Windows_application\QuickLaunch_icon; Description: Place an icon for WinHasher on your Quick Launch toolbar.  Note that if you are an administrator, this will only install the icon for yourself.; Types: full
+Name: Windows_application\MD5_SendTo; Description: Add an MD5 shortcut to the Send To menu; Types: custom full
+Name: Windows_application\SHA1_SendTo; Description: Add an SHA-1 shortcut to the Send To menu; Types: custom full
+Name: Windows_application\SHA256_SendTo; Description: Add an SHA-256 shortcut to the Send To menu; Types: full
+Name: Windows_application\SHA384_SendTo; Description: Add an SHA-384 shortcut to the Send To menu; Types: full
+Name: Windows_application\SHA512_SendTo; Description: Add an SHA-512 shortcut to the Send To menu; Types: full
+Name: Windows_application\RIPEMD160_SendTo; Description: Add an RIPEMD-160 shortcut to the Send To menu; Types: full
+Name: Windows_application\Whirlpool_SendTo; Description: Add a Whirlpool shortcut to the Send To menu; Types: full
+Name: Windows_application\Tiger_SendTo; Description: Add a Tiger shortcut to the Send To menu; Types: full
 Name: Console_applications; Description: Check this box to install the console (command-line) versions of WinHasher.  This will also add the WinHasher program path to your PATH environment variable.; Types: custom full
 Name: HTML_help_file; Description: Check this box to install the HTML help files, which will be accessible through the Start Menu.; Types: full compact custom
 [Icons]
@@ -52,12 +55,15 @@ Name: {group}\Command-line Help; Filename: {app}\cmdhelp.html; WorkingDir: {app}
 Name: {group}\Windows App Help; Filename: {app}\guihelp.html; WorkingDir: {app}; Components: Windows_application and HTML_help_file; Comment: Display help information for the Windows version of WinHasher in your default Web browser
 Name: {group}\Uninstall WinHasher; Filename: {uninstallexe}; WorkingDir: {app}; Comment: Uninstall all WinHasher components
 Name: {commondesktop}\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\Desktop_icon; Comment: WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files
-Name: {sendto}\WinHasher MD5; Filename: {app}\WinHasher.exe; Parameters: -md5; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\MD5_SendTo
-Name: {sendto}\WinHasher SHA1; Filename: {app}\WinHasher.exe; Parameters: -sha1; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA1_SendTo
-Name: {sendto}\WinHasher SHA256; Filename: {app}\WinHasher.exe; Parameters: -sha256; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA256_SendTo
-Name: {sendto}\WinHasher SHA384; Filename: {app}\WinHasher.exe; Parameters: -sha384; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA384_SendTo
-Name: {sendto}\WinHasher SHA512; Filename: {app}\WinHasher.exe; Parameters: -sha512; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA512_SendTo
-Name: {sendto}\WinHasher RIPEMD160; Filename: {app}\WinHasher.exe; Parameters: -ripemd160; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\RIPEMD160_SendTo
+Name: {appdata}\Microsoft\Internet Explorer\Quick Launch\WinHasher; Filename: {app}\WinHasher.exe; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\QuickLaunch_icon; Comment: WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files
+Name: {sendto}\WinHasher\MD5; Filename: {app}\WinHasher.exe; Parameters: -md5; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\MD5_SendTo
+Name: {sendto}\WinHasher\SHA-1; Filename: {app}\WinHasher.exe; Parameters: -sha1; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA1_SendTo
+Name: {sendto}\WinHasher\SHA-256; Filename: {app}\WinHasher.exe; Parameters: -sha256; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA256_SendTo
+Name: {sendto}\WinHasher\SHA-384; Filename: {app}\WinHasher.exe; Parameters: -sha384; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA384_SendTo
+Name: {sendto}\WinHasher\SHA-512; Filename: {app}\WinHasher.exe; Parameters: -sha512; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\SHA512_SendTo
+Name: {sendto}\WinHasher\RIPEMD-160; Filename: {app}\WinHasher.exe; Parameters: -ripemd160; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\RIPEMD160_SendTo
+Name: {sendto}\WinHasher\Whirlpool; Filename: {app}\WinHasher.exe; Parameters: -whirlpool; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\Whirlpool_SendTo
+Name: {sendto}\WinHasher\Tiger; Filename: {app}\WinHasher.exe; Parameters: -tiger; WorkingDir: {userdocs}; IconFilename: {app}\WinHasher.exe; IconIndex: 0; Components: Windows_application\Tiger_SendTo
 [Run]
 Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}; Flags: runminimized runhidden; Components: Console_applications; StatusMsg: "Adding ""{app}"" to the PATH..."
 [UninstallRun]

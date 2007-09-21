@@ -91,9 +91,12 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         case "-ripemd160":
                             hash = Hashes.RIPEMD160;
                             break;
-                        //case "-whirlpool":
-                        //    hash = Hashes.Whirlpool;
-                        //    break;
+                        case "-whirlpool":
+                            hash = Hashes.Whirlpool;
+                            break;
+                        case "-tiger":
+                            hash = Hashes.Tiger;
+                            break;
                         // If we didn't get a valid hash switch, complain, but proceed using
                         // the MD5 default:
                         default:
@@ -211,8 +214,8 @@ namespace com.gpfcomics.WinHasher.hashconsole
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
-            Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160] filename1");
-            Console.WriteLine("       [filename2 ...]");
+            Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|");
+            Console.WriteLine("       -tiger] filename1 [filename2 ...]");
             Console.WriteLine();
             Console.WriteLine("WinHasher first looks at the first argument to see if it is a switch that");
             Console.WriteLine("indicates which hash to use.  If found, it will use that hash algorithm;");
