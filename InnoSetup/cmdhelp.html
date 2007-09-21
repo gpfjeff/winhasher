@@ -1,7 +1,7 @@
 <html><head><title>WinHasher Command-Line Help</title></head>
 <body><h1>WinHasher Command-Line Help</h1>
 <p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
-Last Updated September 19, 2007</p>
+Last Updated September 21, 2007</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -53,14 +53,12 @@ Last Updated September 19, 2007</p>
 	<li><strong>SHA-512:</strong> Like SHA-256, this algorithm is a SHA-2 successor to SHA-1. It produces a 512-bit digest, using 64-bit words and a block size of 1024 bits. It has no known weaknesses.</li>
 	<li><strong>RIPEMD-160:</strong> This 160-bit digest algorithm was developed in Europe and first published in 1996. It was designed in the open academic community and is not known to be constrained by any patents. It is not as widely used as MD5 or the SHA family, which may have caused it to be less scrutinized. A collision was found in the original 128-bit RIPEMD algorithm in 2004, so its use should be discouraged. However, no known collision exists in RIPEMD-160.</li>
 </ul>
-<p>It is my eventual goal to include other cryptographic hashes into this application, either by including code from freely available sources or by writing the algorithms myself.</p>
-<!--
 <p>In addition, the following hashing algorithms have been added, either from freely available sources or completely written from scratch by myself:</p>
 <ul>
-	<li></li>
+	<li><strong>Whirlpool:</strong> This 512-bit digest algorithm was designed by Vincent Rijmen and Paulo S. L. M. Barreto. Note that this is the 2003 second revision of Whirlpool, not the original "Whirlpool-0" of 2000 or the 2001 first revision "Whirlpool-T". For hashes of data shorter than 64 bits (8 bytes) this hash function has some of the same fundamental problems of hashes like MD5 or SHA-1. Longer hashes should be relatively safe, however. The Whirlpool code used by WinHasher is adapted from the <a href="http://www.bouncycastle.org/csharp/">Legion of the Bouncy Castle Crypto API</a>, which in turn was ported from the <a href="http://paginas.terra.com.br/informatica/paulobarreto/WhirlpoolPage.html">original Java source</a> developed by Rijmen and Barreto.</li>
+	<li><strong>Tiger:</strong> This 192-bit digest algorithm was designed by Ross Anderson and Eli Biham in 1995 for efficiency on 64-bit platforms. Note that this is the original implementation of Tiger that uses padding similar to MD4, not "Tiger2" which is closer to MD5 or SHA-1. There are no known attacks against the full number of rounds of Tiger, although collisions have been detected in several reduced-round versions. The Tiger code used by WinHasher is adapted from the <a href="http://www.bouncycastle.org/csharp/">Legion of the Bouncy Castle Crypto API</a>, which in turn was ported from the <a href="http://www.cs.technion.ac.il/~biham/Reports/Tiger">reference implementations</a> developed by Anderson and Biham.</li>
 </ul>
--->
-
+<p>It is my eventual goal to include other cryptographic hashes into this application, either by including code from freely available sources or by writing the algorithms myself.</p>
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
 <a name="install"><h2>Installing WinHasher</h2></a>
@@ -94,8 +92,8 @@ WinHasher v. 1.0.0.0
 Copyright 2007, Jeffrey T. Darlington.  All rights reserved.
 http://www.gpf-comics.com/dl/winhasher/
 
-Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160] filename1
-       [filename2 ...]
+Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|
+       -tiger] filename1 [filename2 ...]
 
 WinHasher first looks at the first argument to see if it is a switch that
 indicates which hash to use.  If found, it will use that hash algorithm;

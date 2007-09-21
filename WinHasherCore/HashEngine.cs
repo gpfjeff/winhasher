@@ -72,8 +72,9 @@ namespace com.gpfcomics.WinHasher.Core
         SHA256,
         SHA384,
         SHA512,
-        RIPEMD160/*,
-        Whirlpool*/
+        RIPEMD160,
+        Whirlpool,
+        Tiger
     }
 
     /// <summary>
@@ -308,9 +309,12 @@ namespace com.gpfcomics.WinHasher.Core
                 case Hashes.RIPEMD160:
                     hasher = new RIPEMD160Managed();
                     break;
-                //case Hashes.Whirlpool:
-                //    hasher = new WhirlpoolManaged();
-                //    break;
+                case Hashes.Whirlpool:
+                    hasher = new WhirlpoolManaged();
+                    break;
+                case Hashes.Tiger:
+                    hasher = new TigerManaged();
+                    break;
                 // If we didn't get something we expected, default to MD5:
                 default:
                     hasher = new MD5CryptoServiceProvider();
