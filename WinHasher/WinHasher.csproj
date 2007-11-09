@@ -47,6 +47,12 @@
     <Compile Include="AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="HashInProgressDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HashInProgressDialog.Designer.cs">
+      <DependentUpon>HashInProgressDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,14 +60,28 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="ProgressDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgressDialog.Designer.cs">
+      <DependentUpon>ProgressDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="HashInProgressDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>HashInProgressDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProgressDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ProgressDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

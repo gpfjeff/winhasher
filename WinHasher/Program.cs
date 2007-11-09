@@ -147,9 +147,25 @@ namespace com.gpfcomics.WinHasher
                     // it a try:
                     try
                     {
-                        // This should be simple enough:
-                        MessageBox.Show(hashString + ": " + HashEngine.HashFile(hash, files[0]),
-                            hashString + " Hash", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Only do this if the file exists:
+                        if (File.Exists(files[0]))
+                        {
+                            // Create a new hash-in-progress dialog.  This does the actual work:
+                            HashInProgressDialog hipd = new HashInProgressDialog(files[0], hash, true);
+                            hipd.ShowDialog();
+                            // If we got back a successful result, show the hash.  Otherwise,
+                            // the error message should already be shown.
+                            if (hipd.Result == HashInProgressDialog.ResultStatus.Success &&
+                                hipd.Hash != null)
+                                MessageBox.Show(hashString + ": " + hipd.Hash, hashString + " Hash",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        // The file didn't exist:
+                        else
+                        {
+                            MessageBox.Show("Error: The specified file does not exist.", "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                     #region Catch Exceptions
                     // Our hash engine can throw its own exceptions, which usually are just other
@@ -183,16 +199,28 @@ namespace com.gpfcomics.WinHasher
                 {
                     try
                     {
-                        if (HashEngine.CompareHashes(hash, files))
+                        // Create a new progress dialog and show it.  This is where the actual
+                        // work will be done.
+                        ProgressDialog pd = new ProgressDialog(files, hash, true);
+                        pd.ShowDialog();
+                        // If we got a successful result, keep going.  Anything else should have
+                        // already thrown an error message.
+                        if (pd.Result == ProgressDialog.ResultStatus.Success)
                         {
-                            MessageBox.Show("Congratulations!  All " + files.Length + " files match!",
-                                hashString + " Hash", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("WARNING! One or more of these " + files.Length + 
-                                " files do not match!", hashString + " Hash", MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
+                            // If the files matched, congratulate the user:
+                            if (pd.FilesMatch)
+                            {
+                                MessageBox.Show("Congratulations!  All " + files.Length +
+                                    " files match!", hashString + " Hash", MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                            }
+                            // Otherwise, warn them:
+                            else
+                            {
+                                MessageBox.Show("WARNING! One or more of these " + files.Length +
+                                    " files do not match!", hashString + " Hash",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
                         }
                     }
                     #region Catch Exceptions
