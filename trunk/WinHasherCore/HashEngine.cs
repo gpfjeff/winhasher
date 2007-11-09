@@ -37,6 +37,18 @@
  * Note that all methods have a chance to throw a HashEngineException.  Essentially, this just
  * wraps any other exception that could be thrown and gives us a relatively friendly error message
  * we can display.  When calling one of these, make sure to catch this exception.
+ * 
+ * Also note that the two methods of each group that take the most arguments include a
+ * System.ComponentModel.BackgroundWorker object and a System.ComponentModel.DoWorkEventArgs object.
+ * This allows us to report status when this is called from a BackgroundWorker process.  This way,
+ * the GUI can be more responsive instead of appearing to lock up on large files or comparing
+ * numerous files.  If both of these objects are null (the default for methods that don't specify
+ * them), no kind of reporting is performed.  Note, however, that no real progress gets reported
+ * during HashFile() calls, and CompareHashes() only reports how many files have been fully processed.
+ * This is because System.Security.Cryptography.HashAlgorithm.ComputeHash() does not provide any
+ * kind of progress itself, so there's no way to tell how far we are into a given file.  We only
+ * know the file is currently being checked, or when comparing files how many files we've finished
+ * out of the list.
  *  
  * This program is Copyright 2007, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -59,6 +71,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
+using System.ComponentModel;
 
 namespace com.gpfcomics.WinHasher.Core
 {
@@ -83,6 +96,8 @@ namespace com.gpfcomics.WinHasher.Core
     /// </summary>
     public static class HashEngine
     {
+        private static FileStream fs;
+
         #region Public Methods
 
         /// <summary>
@@ -91,16 +106,32 @@ namespace com.gpfcomics.WinHasher.Core
         /// </summary>
         /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
         /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
+        /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
+        /// if necessary</param>
         /// <returns>A hexadecimal string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
-        public static string HashFile(Hashes hash, string filename)
+        public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe)
         {
-            // Find out which hash algorithm to use:
-            HashAlgorithm hasher = GetHashAlgorithm(hash);
             // Lots of things can go wrong here, so ignore Yoda's advice and give it a try:
             try
             {
+                // On the off chance we're using a BackgroundWorker and the user cancels the
+                // process, formalize the cancel, close the file, and return false:
+                if (bgWorker != null && dwe != null && bgWorker.CancellationPending)
+                {
+                    dwe.Cancel = true;
+                    if (fs != null)
+                    {
+                        fs.Unlock(0, fs.Length);
+                        fs.Close();
+                    }
+                    return null;
+                }
+                // Find out which hash algorithm to use:
+                HashAlgorithm hasher = GetHashAlgorithm(hash);
                 // Read in the contents of the file as bytes, then compute the hash.
                 // There's no need to worry about encodings and such, as the hash algorithms
                 // work on raw bytes.  I switched this from using File.ReadAllBytes() to
@@ -108,9 +139,12 @@ namespace com.gpfcomics.WinHasher.Core
                 // before the hash is computed.  This should be a bit more memory efficient.
                 // Also note that we need to open and close the FileStream manually; I originally
                 // passed this into the HashAlgorithm.ComputeHash() call, but then it wouldn't
-                // release the file when it was done.
-                FileStream fs = File.Open(filename, FileMode.Open, FileAccess.Read);
+                // release the file when it was done.  Also note that we lock the file during
+                // the read to prevent other processes from changing it.
+                fs = File.Open(filename, FileMode.Open, FileAccess.Read);
+                fs.Lock(0, fs.Length);
                 byte[] theHash = hasher.ComputeHash(fs);
+                fs.Unlock(0, fs.Length);
                 fs.Close();
                 // Begin to build the output string.  There's probably a more efficient way
                 // of doing this, but this method has worked for me in the past.
@@ -174,12 +208,28 @@ namespace com.gpfcomics.WinHasher.Core
                     "security setting is enabled on your system. The hash algorithm you selected " +
                     "is not available.");
             }
+            // Re-throw any HashEngineExceptions that may have been thrown upstream:
+            catch (HashEngineException hee) { throw hee; }
             // Finally, a catch-all to catch all exceptions that haven't already been caught:
             catch (Exception)
             {
                 throw new HashEngineException();
             }
             #endregion
+        }
+
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <returns>A hexadecimal string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename)
+        {
+            return HashFile(hash, filename, null, null);
         }
 
         /// <summary>
@@ -215,40 +265,69 @@ namespace com.gpfcomics.WinHasher.Core
         /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
         /// <param name="fileList">A string array representing the path to each file to
         /// process</param>
+        /// <param name="bgWorker">A BackgroundWorker task to notify of our progress</param>
+        /// <param name="dwe">A DoWorkEventArgs object to let us know if the user has cancelled
+        /// the comparison</param>
         /// <returns>A boolean flag representing whether or not all the hashes matched or not</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
-        public static bool CompareHashes(Hashes hash, string[] fileList)
+        public static bool CompareHashes(Hashes hash, string[] fileList, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe)
         {
+            // On the off chance we're using a BackgroundWorker and the user cancels the
+            // process, formalize the cancel and return false:
+            if (bgWorker != null && dwe != null && bgWorker.CancellationPending)
+            {
+                dwe.Cancel = true;
+                return false;
+            }
             // If we only got one file path or none at all, go ahead and fail, as there's
             // nothing to compare:
             if (fileList.Length <= 1) return false;
             // We need to keep track of the first file's hash so we can compare the other hashes
             // to it:
             string firstHash = String.Empty;
+            // Keep track of how many files we've processed so far:
+            double fileCounter = 0;
             // Step through the entire file list:
             foreach (string file in fileList)
             {
                 // If this is the first file in the list, compute its hash and store it.  Note
                 // that we just call the HashFile() method above to do the dirty work.
                 if (firstHash.CompareTo(String.Empty) == 0)
-                {
-                    firstHash = HashFile(hash, file).ToUpper();
-                }
+                    firstHash = HashFile(hash, file, bgWorker, dwe).ToUpper();
                 // Otherwise, compare the current file's hash to the first file's hash.  If
                 // the hashes do not match, fail the entire batch.  Note that this kind of
                 // short-ciruits, so if we're comparing a bunch of files but the first two
                 // don't match, we won't bother with the rest.
                 else
-                {
-                    if (firstHash.CompareTo(HashFile(hash, file).ToUpper()) != 0)
-                    {
+                    if (firstHash.CompareTo(HashFile(hash, file, bgWorker, dwe).ToUpper()) != 0)
                         return false;
-                    }
-                }
+                // Increment the file counter:
+                fileCounter++;
+                // Report our progress to the background worker if one is present:
+                if (bgWorker != null)
+                    bgWorker.ReportProgress((int)((fileCounter / (double)fileList.Length) * 100));
             }
             // If we get to this point, all of the hashes match:
             return true;
+        }
+
+        /// <summary>
+        /// Compares the hashes of all the files in the file list and determine whether or not
+        /// they all match.  Note that this is an all-or-nothing deal; if just one hash does
+        /// not match, the entire batch failes.  If no files or only one are passed in, the
+        /// method also fails, as there's nothing to compare.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="fileList">A string array representing the path to each file to
+        /// process</param>
+        /// <returns>A boolean flag representing whether or not all the hashes matched or not</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static bool CompareHashes(Hashes hash, string[] fileList)
+        {
+            return CompareHashes(hash, fileList, null, null);
         }
 
         /// <summary>

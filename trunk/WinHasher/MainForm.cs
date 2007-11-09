@@ -231,9 +231,36 @@ namespace com.gpfcomics.WinHasher
                 // what you want....
                 try
                 {
+                    // Make it look like we're busy:
                     UseWaitCursor = true;
+                    hashSingleTextBox.Text = "Hashing in progress...";
                     Refresh();
-                    hashSingleTextBox.Text = HashEngine.HashFile(hash, fileSingleTextBox.Text.Trim());
+                    // Create the hash-in-progress dialog and show it.  This kicks off the
+                    // actual hashing process.
+                    HashInProgressDialog hipd =
+                        new HashInProgressDialog(fileSingleTextBox.Text.Trim(), hash);
+                    hipd.ShowDialog();
+                    // What we do next depends on the result:
+                    switch (hipd.Result)
+                    {
+                        // Success:  Display the hash:
+                        case HashInProgressDialog.ResultStatus.Success:
+                            hashSingleTextBox.Text = hipd.Hash;
+                            break;
+                        // Cancelled:  Let the user know they cancelled the hash:
+                        case HashInProgressDialog.ResultStatus.Cancelled:
+                            hashSingleTextBox.Text = "The hash of this file was cancelled.";
+                            break;
+                        // Error:  Warn the user of the error:
+                        case HashInProgressDialog.ResultStatus.Error:
+                            hashSingleTextBox.Text = "An error occurred while hasing this file.";
+                            break;
+                        // Anything else:  Clear out the hash text box:
+                        default:
+                            hashSingleTextBox.Text = "";
+                            break;
+                    }
+                    // Get ready to do stuff again:
                     UseWaitCursor = false;
                     Refresh();
                 }
@@ -345,17 +372,24 @@ namespace com.gpfcomics.WinHasher
                 // Make sure the user knows we're busy:
                 UseWaitCursor = true;
                 Refresh();
-                // Do the comparison.  This returns either true or false:
-                if (HashEngine.CompareHashes(hash, fileList))
+                // Create the progress dialog and show it.  This will start the actual comparison
+                // process.
+                ProgressDialog pd = new ProgressDialog(fileList, hash);
+                pd.ShowDialog();
+                // Check the progress dialog and make sure we got a result.  If it says the files
+                // match, show the success message:
+                if (pd.Result == ProgressDialog.ResultStatus.Success && pd.FilesMatch)
                 {
                     // The test passed; all hashes matched:
                     MessageBox.Show("Congratulations! All " + fileList.Length +
                         " files match!", "Hashes Match", MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
                 }
-                else
+                // If the dialog returns success, but the files didn't match, warn the user.
+                // If the dialog returned anything but success, we'll assume they've already
+                // seen the error message.
+                else if (pd.Result == ProgressDialog.ResultStatus.Success)
                 {
-                    // The test failed; one of the hashes didn't match:
                     MessageBox.Show("WARNING! At least one of the " + fileList.Length +
                         " files did not match!", "Hashes Don't Match", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
