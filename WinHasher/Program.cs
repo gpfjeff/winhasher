@@ -150,14 +150,13 @@ namespace com.gpfcomics.WinHasher
                         // Only do this if the file exists:
                         if (File.Exists(files[0]))
                         {
-                            // Create a new hash-in-progress dialog.  This does the actual work:
-                            HashInProgressDialog hipd = new HashInProgressDialog(files[0], hash, true);
-                            hipd.ShowDialog();
+                            // Create a new progress dialog.  This does the actual work:
+                            ProgressDialog pd = new ProgressDialog(files[0], hash, true);
+                            pd.ShowDialog();
                             // If we got back a successful result, show the hash.  Otherwise,
                             // the error message should already be shown.
-                            if (hipd.Result == HashInProgressDialog.ResultStatus.Success &&
-                                hipd.Hash != null)
-                                MessageBox.Show(hashString + ": " + hipd.Hash, hashString + " Hash",
+                            if (pd.Result == ProgressDialog.ResultStatus.Success && pd.Hash != null)
+                                MessageBox.Show(hashString + ": " + pd.Hash, hashString + " Hash",
                                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         // The file didn't exist:

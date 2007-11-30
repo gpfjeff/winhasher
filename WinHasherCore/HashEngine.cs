@@ -97,6 +97,7 @@ namespace com.gpfcomics.WinHasher.Core
     public static class HashEngine
     {
         private static FileStream fs;
+        private static int bufferSize = 1024;
 
         #region Public Methods
 
@@ -109,11 +110,20 @@ namespace com.gpfcomics.WinHasher.Core
         /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
         /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
         /// if necessary</param>
+        /// <param name="totalByteLength">The total length in bytes of all items being hashed.
+        /// This is primarily for multi-file hash comparison, where this value would be the the sum
+        /// of all the lengths of all the files being hashed.  This is used to compute the progress
+        /// passed to the progress dialog box.  If set to anything less than or equal to zero, it
+        /// derives this value from the specified file's length.</param>
+        /// <param name="totalBytesSoFar">The total number of bytes already hashed in a multi-file
+        /// hash comparison.  This should be the sum of the lengths of all the files hashed before
+        /// this file.  This should be zero for the first file in a comparison or for a single file
+        /// hash.  If set to anything less than zero, this value is reset to zero.</param>
         /// <returns>A hexadecimal string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
-            DoWorkEventArgs dwe)
+            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar)
         {
             // Lots of things can go wrong here, so ignore Yoda's advice and give it a try:
             try
@@ -143,7 +153,59 @@ namespace com.gpfcomics.WinHasher.Core
                 // the read to prevent other processes from changing it.
                 fs = File.Open(filename, FileMode.Open, FileAccess.Read);
                 fs.Lock(0, fs.Length);
-                byte[] theHash = hasher.ComputeHash(fs);
+                // For multi-file comparisons, we want to know the total number of bytes in all the
+                // files that need to be hashed.  That is passed in here as the total byte length.
+                // But this doesn't make sense for single file hashes.  So if we get anything less
+                // than or equal to zero, set the total byte length to the length of this particular
+                // file.  This is used to calculate the percent complete for the process, so this way
+                // it should get the progress for a single hash when hashing a single file, or for
+                // the entire batch if comparing multiple.
+                if (totalByteLength <= 0) totalByteLength = fs.Length;
+                // Similarly, this is the total number of bytes already hashed.  For a multi-file
+                // comparison, this would be the sum of the lengths of the files previously hashed
+                // in this batch.  If we get anything less than zero, assume there were no other
+                // files and reset this to zero, so when it gets added to the progress calculations
+                // below, we'll only calculate the progress of the single hash.
+                if (totalBytesSoFar < 0) totalBytesSoFar = 0;
+                // We'll need a buffer to read in our data:
+                byte[] buffer = new byte[bufferSize];
+                // And we'll need to know how many bytes we've read so far in this file:
+                int bytesSoFar = 0;
+                // Keep going until there's nothing left to read:
+                while (true)
+                {
+                    // Read in the next batch of bytes into the buffer:
+                    int bytesRead = fs.Read(buffer, 0, bufferSize);
+                    // Increment our so-far count:
+                    bytesSoFar += bytesRead;
+                    // If we didn't read anything this pass, break out of the loop:
+                    if (bytesRead == 0) break;
+                    // Otherwise, look at how many bytes we've ready this pass.  If that number
+                    // is less than the buffer size, then we should be at the end of the file.
+                    // Similarly, if the total number of bytes read is equal to the length of
+                    // the file, we should be done.  If that's the case, pass the buffer into
+                    // the hash and transform the final block.  This finalizes the hash so we
+                    // can get the final value.
+                    if (bytesRead < bufferSize || (long)bytesSoFar == fs.Length)
+                        hasher.TransformFinalBlock(buffer, 0, bytesRead);
+                    // If neither of the above conditions were met, assume we've got more to read
+                    // in the next pass.  Feed what's currently in the buffer to the hash and
+                    // keep going.
+                    else
+                        hasher.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+                    // Report our progress to the background worker if one is present.  Note that
+                    // we're also including the total values.  Thus, for a multi-file comparison,
+                    // this should give us the progress through the entire batch, every byte of
+                    // every file.  For a single file hash, the "bytes so far" value is zero and
+                    // the total byte length is the length of the file, so we'll just get the
+                    // progress through this single file.
+                    if (bgWorker != null)
+                        bgWorker.ReportProgress((int)(((double)((long)bytesSoFar + totalBytesSoFar) /
+                            (double)totalByteLength) * 100.0));
+                }
+                // If we broke out of the loop, grab the final hash value and unlock and close
+                // the file:
+                byte[] theHash = hasher.Hash;
                 fs.Unlock(0, fs.Length);
                 fs.Close();
                 // Begin to build the output string.  There's probably a more efficient way
@@ -190,6 +252,10 @@ namespace com.gpfcomics.WinHasher.Core
             {
                 throw new HashEngineException("No file was specified (the file name was null).");
             }
+            //catch (ArgumentOutOfRangeException)
+            //{
+            //    throw new HashEngineException("ArgumentOutOfRangeException");
+            //}
             catch (ArgumentException)
             {
                 throw new HashEngineException("No file was specified (the file path was empty, " +
@@ -200,6 +266,10 @@ namespace com.gpfcomics.WinHasher.Core
                 throw new HashEngineException("An unknown I/O error occurred while trying to read " +
                     "the file \"" + filename + "\".");
             }
+            //catch (ObjectDisposedException)
+            //{
+            //    throw new HashEngineException("ObjectDisposedExcpetion");
+            //}
             // This can be thrown by SHA256Managed and SHA512Managed constructors, where are
             // called down in GetHashAlgorithm():
             catch (InvalidOperationException)
@@ -211,11 +281,49 @@ namespace com.gpfcomics.WinHasher.Core
             // Re-throw any HashEngineExceptions that may have been thrown upstream:
             catch (HashEngineException hee) { throw hee; }
             // Finally, a catch-all to catch all exceptions that haven't already been caught:
+            catch (CryptographicUnexpectedOperationException)
+            {
+                throw new HashEngineException("The hash failed to return a useful result. (The " +
+                    "returned value was empty.)");
+            }
             catch (Exception)
             {
                 throw new HashEngineException();
             }
             #endregion
+            // Just in case we threw an exception, check to see if the file stream is still there,
+            // and unlock and close it if we haven't already.  Note the catch block doesn't do
+            // anything; we just silently give up if it didn't work.
+            finally
+            {
+                if (fs != null)
+                {
+                    try
+                    {
+                        fs.Unlock(0, fs.Length);
+                        fs.Close();
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
+        /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
+        /// if necessary</param>
+        /// <returns>A hexadecimal string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe)
+        {
+            return HashFile(hash, filename, bgWorker, dwe, -1, -1);
         }
 
         /// <summary>
@@ -229,7 +337,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename)
         {
-            return HashFile(hash, filename, null, null);
+            return HashFile(hash, filename, null, null, -1, -1);
         }
 
         /// <summary>
@@ -241,7 +349,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string MD5HashFile(string filename)
         {
-            return HashFile(Hashes.MD5, filename);
+            return HashFile(Hashes.MD5, filename, null, null, -1, -1);
         }
 
         /// <summary>
@@ -253,7 +361,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string SHA1HashFile(string filename)
         {
-            return HashFile(Hashes.SHA1, filename);
+            return HashFile(Hashes.SHA1, filename, null, null, -1, -1);
         }
 
         /// <summary>
@@ -287,27 +395,51 @@ namespace com.gpfcomics.WinHasher.Core
             // We need to keep track of the first file's hash so we can compare the other hashes
             // to it:
             string firstHash = String.Empty;
-            // Keep track of how many files we've processed so far:
-            double fileCounter = 0;
-            // Step through the entire file list:
+            // In order to report our progress, we need to know how many total bytes we have to
+            // hash and how many bytes we've hashed so far.  This needs to be across all files in
+            // the batch.  So declare these two variables and we'll keep track of that information
+            // as we go.
+            long totalByteLength = 0;
+            long totalBytesSoFar = 0;
+            // Only bother calculating the total number of bytes if we'll be reporting it back
+            // to a GUI background worker:
+            if (bgWorker != null)
+            {
+                // Step through the files, get their lengths, and add them to the total.  I'd
+                // rather not step through the file list more than once, but we need this total
+                // before we process the first file.
+                foreach (string file in fileList)
+                {
+                    FileInfo fi = new FileInfo(file);
+                    totalByteLength += fi.Length;
+                }
+            }
+            // We don't care about the total if we're not reporting progress:
+            else totalByteLength = -1;
+            // Now step through the entire file list:
             foreach (string file in fileList)
             {
                 // If this is the first file in the list, compute its hash and store it.  Note
                 // that we just call the HashFile() method above to do the dirty work.
                 if (firstHash.CompareTo(String.Empty) == 0)
-                    firstHash = HashFile(hash, file, bgWorker, dwe).ToUpper();
+                    firstHash = HashFile(hash, file, bgWorker, dwe, totalByteLength,
+                        totalBytesSoFar).ToUpper();
                 // Otherwise, compare the current file's hash to the first file's hash.  If
                 // the hashes do not match, fail the entire batch.  Note that this kind of
                 // short-ciruits, so if we're comparing a bunch of files but the first two
                 // don't match, we won't bother with the rest.
                 else
-                    if (firstHash.CompareTo(HashFile(hash, file, bgWorker, dwe).ToUpper()) != 0)
+                    if (firstHash.CompareTo(HashFile(hash, file, bgWorker, dwe,
+                        totalByteLength, totalBytesSoFar).ToUpper()) != 0)
                         return false;
-                // Increment the file counter:
-                fileCounter++;
-                // Report our progress to the background worker if one is present:
+                // If we didn't return there, add the length of the file we just processed to the
+                // total number of bytes hashed, so we can add that to the progress in the next
+                // pass:
                 if (bgWorker != null)
-                    bgWorker.ReportProgress((int)((fileCounter / (double)fileList.Length) * 100));
+                {
+                    FileInfo fi = new FileInfo(file);
+                    totalBytesSoFar += fi.Length;
+                }
             }
             // If we get to this point, all of the hashes match:
             return true;

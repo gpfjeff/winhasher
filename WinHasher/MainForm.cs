@@ -235,25 +235,24 @@ namespace com.gpfcomics.WinHasher
                     UseWaitCursor = true;
                     hashSingleTextBox.Text = "Hashing in progress...";
                     Refresh();
-                    // Create the hash-in-progress dialog and show it.  This kicks off the
+                    // Create the progress dialog and show it.  This kicks off the
                     // actual hashing process.
-                    HashInProgressDialog hipd =
-                        new HashInProgressDialog(fileSingleTextBox.Text.Trim(), hash);
-                    hipd.ShowDialog();
+                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text.Trim(), hash);
+                    pd.ShowDialog();
                     // What we do next depends on the result:
-                    switch (hipd.Result)
+                    switch (pd.Result)
                     {
                         // Success:  Display the hash:
-                        case HashInProgressDialog.ResultStatus.Success:
-                            hashSingleTextBox.Text = hipd.Hash;
+                        case ProgressDialog.ResultStatus.Success:
+                            hashSingleTextBox.Text = pd.Hash;
                             break;
                         // Cancelled:  Let the user know they cancelled the hash:
-                        case HashInProgressDialog.ResultStatus.Cancelled:
+                        case ProgressDialog.ResultStatus.Cancelled:
                             hashSingleTextBox.Text = "The hash of this file was cancelled.";
                             break;
                         // Error:  Warn the user of the error:
-                        case HashInProgressDialog.ResultStatus.Error:
-                            hashSingleTextBox.Text = "An error occurred while hasing this file.";
+                        case ProgressDialog.ResultStatus.Error:
+                            hashSingleTextBox.Text = "An error occurred while hashing this file.";
                             break;
                         // Anything else:  Clear out the hash text box:
                         default:

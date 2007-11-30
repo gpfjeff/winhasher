@@ -90,9 +90,19 @@ namespace com.gpfcomics.WinHasher
         private ResultStatus resultStatus;
 
         /// <summary>
-        /// A boolean flag indicating whether or not all the files match
+        /// A boolean flag indicating whether or not all the files match in a comparison
         /// </summary>
         private bool filesMatch;
+
+        /// <summary>
+        /// Are we in single-file or multi-file mode?
+        /// </summary>
+        private bool singleMode;
+
+        /// <summary>
+        /// A string containing the hexadecimal hash in single file mode
+        /// </summary>
+        private string singleHash;
 
         #endregion
 
@@ -125,11 +135,19 @@ namespace com.gpfcomics.WinHasher
         }
 
         /// <summary>
-        /// A boolean flag indicating whether or not all the files match
+        /// A boolean flag indicating whether or not all the files match in a comparison
         /// </summary>
         public bool FilesMatch
         {
             get { return filesMatch; }
+        }
+
+        /// <summary>
+        /// A string containing the hexadecimal hash a the file in single file mode
+        /// </summary>
+        public string Hash
+        {
+            get { return singleHash; }
         }
 
         #endregion
@@ -152,17 +170,52 @@ namespace com.gpfcomics.WinHasher
             filesMatch = false;
             if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
             else StartPosition = FormStartPosition.CenterParent;
+            singleMode = false;
         }
 
         /// <summary>
         /// Constructs a progress dialog box with the given file path string list and the
-        /// specified hashing algorithm
+        /// specified hashing algorithm.  The dialog by default is centered in the parent window.
         /// </summary>
         /// <param name="fileList">An array of file path strings to compare</param>
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm)
             :
             this(fileList, hashAlgorithm, false)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string and the
+        /// specified hashing algorithm
+        /// </summary>
+        /// <param name="filename">A string containing the path to the file to be hashed</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use</param>
+        /// <param name="centerInScreen">True to center in the middle of the screen, false to
+        /// center around the parent window</param>
+        public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
+        {
+            InitializeComponent();
+            progressBar1.Value = 0;
+            files = new string[1];
+            files[0] = filename;
+            this.hashAlgorithm = hashAlgorithm;
+            resultStatus = ResultStatus.NotStarted;
+            filesMatch = false;
+            if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
+            else StartPosition = FormStartPosition.CenterParent;
+            singleMode = true;
+        }
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string and the
+        /// specified hashing algorithm.  The dialog by default is centered in the parent window.
+        /// </summary>
+        /// <param name="filename">A string containing the path to the file to be hashed</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use</param>
+        public ProgressDialog(string filename, Hashes hashAlgorithm)
+            :
+            this(filename, hashAlgorithm, false)
         {
         }
 
@@ -179,10 +232,17 @@ namespace com.gpfcomics.WinHasher
             // Lots of things can go wrong:
             try
             {
-                // Don't do anything if there are no files to compare:
-                if (files == null || files.Length <= 0)
+                // Don't do anything if there are no files to compare in comparison mode:
+                if (!singleMode && (files == null || files.Length <= 0))
                 {
                     MessageBox.Show("No files were specified.", "Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    resultStatus = ResultStatus.Error;
+                }
+                // Similarly, if in single-file mode, don't do anything if there's no file:
+                else if (singleMode && (files == null || files.Length != 1))
+                {
+                    MessageBox.Show("No file was specified.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     resultStatus = ResultStatus.Error;
                 }
@@ -217,7 +277,7 @@ namespace com.gpfcomics.WinHasher
             // it anyway:
             catch (InvalidOperationException)
             {
-                MessageBox.Show("Error: The background rendering process is already busy.", "Error",
+                MessageBox.Show("Error: The background hashing process is already busy.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Dispose();
             }
@@ -242,8 +302,8 @@ namespace com.gpfcomics.WinHasher
             {
                 // Confirm with the user that they really want to cancel.  Note that the worker
                 // will continue to work even while this is being shown.
-                if (MessageBox.Show("Are you sure you want to cancel this comparison?",
-                    "Cancel Comparison", MessageBoxButtons.YesNo,
+                if (MessageBox.Show("Are you sure you want to cancel this process?",
+                    "Cancel Hash", MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     // Send the worker the cancel signal:
@@ -296,24 +356,28 @@ namespace com.gpfcomics.WinHasher
             // completeness:
             else if (e.Cancelled)
             {
-                MessageBox.Show("The comparison has been cancelled at your request.",
-                    "Comparison Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("The hash operation has been cancelled.",
+                    "Hash Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 resultStatus = ResultStatus.Cancelled;
             }
             else
             {
-                // Try and get the bitmap from the event args:
+                // Try and get the result from the event args:
                 try
                 {
-                    filesMatch = (bool)e.Result;
+                    // In single file mode, it's the hash string:
+                    if (singleMode) singleHash = (string)e.Result;
+                    // In comparison mode, it's a boolean flag:
+                    else filesMatch = (bool)e.Result;
+                    // Let everyone know we're done:
                     resultStatus = ResultStatus.Success;
                 }
                 // This could throw a couple exceptions.  This one should only occur if the
                 // process was cancelled, but I haven't seen it ever get reached yet:
                 catch (InvalidOperationException)
                 {
-                    MessageBox.Show("The comparison has been cancelled at your request.",
-                        "Comparison Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("The hash operation has been cancelled.",
+                        "Hash Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     resultStatus = ResultStatus.Cancelled;
                 }
                 // The other exception is rather obscure and theoretically shouldn't happen.
@@ -337,8 +401,15 @@ namespace com.gpfcomics.WinHasher
         {
             try
             {
+                // We're off and running:
                 resultStatus = ResultStatus.Running;
-                e.Result = HashEngine.CompareHashes(hashAlgorithm, files, bgWorker, e);
+                // What we do depends on what mode we're in.  In single-file mode, start hashing
+                // the specified file:
+                if (singleMode)
+                    e.Result = HashEngine.HashFile(hashAlgorithm, files[0], bgWorker, e);
+                // Otherwise, start comparing the hashes of the files in the list:
+                else
+                    e.Result = HashEngine.CompareHashes(hashAlgorithm, files, bgWorker, e);
             }
             catch (Exception ex)
             {
@@ -346,7 +417,10 @@ namespace com.gpfcomics.WinHasher
                     MessageBoxIcon.Error);
                 resultStatus = ResultStatus.Error;
                 e.Cancel = true;
-                Close();
+                // Close is commented out here, because if this occurs, we'll be closing the dialog
+                // from the background worker thread, not the GUI thread, and that throws an
+                // exception.
+                //Close();
             }
         }
 
