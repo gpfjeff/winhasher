@@ -1,7 +1,7 @@
 <html><head><title>WinHasher Windows App Help</title></head>
 <body><h1>WinHasher Windows App Help</h1>
 <p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
-Last Updated September 21, 2007</p>
+Last Updated November 30, 2007</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -103,7 +103,7 @@ Last Updated September 21, 2007</p>
 
 <p>The <strong>Hash Single File tab</strong> allows you to compute the cryptographic hash of a single file. To select a file, either type the full path to its location in the <strong>File to Hash text box</strong>, or click the <strong>Browse button</strong> to open a file dialog and select the file from there. If you browse to find a file, its location will be populated into the File to Hash box once the browse window closes. Once a file is selected, the <strong>Compute Hash button</strong> becomes enabled. Select a hash from the <a href="#commongui">Hash drop-down</a> and click this button, and the computed hash will appear in the <strong>Hash text box</strong>. To hash a different file, repeat the same process for each file that you want to hash. If for some reason an error occurs, the File to Hash box will clear and the Compute Hash button will become disabled.</p>
 <p>In general, computing the hash of a single file is a quick operation. However, note that the larger the file is, the longer it will take to compute its hash. The size of the file should not cause any problems; WinHasher streams the file once it opens it, so it can be of any arbitrary length. However, if there's a lot of data to hash, it will take longer to get the result.</p>
-<p>While performing the hash, WinHasher displays a small dialog box indicating that the hash is in progress. There is a <strong>Cancel button</strong> on this dialog; click this button will abort the hashing process. The dialog will disappear when the hash is complete. Unfortunately, due to the way .NET implements its hashing algorithms, there is no way to display a progress bar to indicate how far along the hashing process is. You'll just have to wait for the process to complete or interrupt it by clicking Cancel.</p>
+<p>While performing the hash, WinHasher displays a small <strong>progress dialog box</strong> showing how far along the hash is. There is a <strong>Cancel button</strong> on this dialog; click this button will abort the hashing process. The dialog will disappear when the hash is complete.</p>
 
 <a name="comparetab"><h3>The Compare Files Tab</h3></a>
 
@@ -120,7 +120,7 @@ Last Updated September 21, 2007</p>
 <a name="sendto"><h3>The "SendTo" Shortcuts</h3></a>
 
 <p>When you install WinHasher, you are given the option to add WinHasher shortcuts in the "Send To" portion of the Windows Explorer context menu. This menu appears when you (usually) right-click a file in Explorer and gives you the option to open, copy, cut, rename, see the properties of, etc. the selected file or files. (Of course, if you've swapped your mouse buttons, left-click to bring up the context menu.) With the WinHasher shortcuts in your Send To menu, computing the hash of a file or comparing multiple files is as simple as a click away.</p>
-<p>To compute the hash of a single file, select that file in Windows Explorer and right-click to bring up the context menu. Select Send To, then the WinHasher hash to compute. What hashes are available depends on which shortcuts you created during the install. Note that each shortcut will use a single hashing algorithm (for example, "WinHasher MD5" will only perform MD5 hashes). Once the shortcut is selected, WinHasher will silently load the file and compute the hash. The "in progress" dialog will let you know the process is running; the main application window will not open. When the hash is ready, the progress dialog will disappear and a dialog box will appear, displaying the computed hash. When the dialog is dismissed, WinHasher will silently close.</p>
+<p>To compute the hash of a single file, select that file in Windows Explorer and right-click to bring up the context menu. Select Send To, then the WinHasher hash to compute. What hashes are available depends on which shortcuts you created during the install. Note that each shortcut will use a single hashing algorithm (for example, "WinHasher MD5" will only perform MD5 hashes). Once the shortcut is selected, WinHasher will silently load the file and compute the hash. The progress dialog will let you know the process is running; the main application window will not open. When the hash is ready, the progress dialog will disappear and a dialog box will appear, displaying the computed hash. When the dialog is dismissed, WinHasher will silently close.</p>
 <p>To compare multiple files, select each file to compare using the standard Windows Explorer Shift+Click and Control+Click actions. Once all the files are selected, right-click to bring up the context menu, select Send To, and then the WinHasher shortcut of the preferred hash. The hash of each file will be silently computed and compared and the progress dialog will let you know how far along the process is. A single dialog will eventually appear showing the results. When the dialog is cleared, WinHasher will exit.</p>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>

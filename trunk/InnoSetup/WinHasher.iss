@@ -1,15 +1,15 @@
 [Setup]
 InternalCompressLevel=ultra
 OutputDir=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\bin
-OutputBaseFilename=WinHasher_1.1_Setup
-VersionInfoVersion=1.1.0.0
+OutputBaseFilename=WinHasher_1.2_Setup
+VersionInfoVersion=1.2.0.0
 VersionInfoCompany=GPF Comics
 VersionInfoDescription=This program will install WinHasher on your computer.  WinHasher is a cryptographic file hashing program using the Microsoft .NET 2.0 Framework.
-VersionInfoTextVersion=WinHasher Setup 1.1
+VersionInfoTextVersion=WinHasher Setup 1.2
 VersionInfoCopyright=Copyright 2007, Jeffrey T. Darlington.
 AppCopyright=Copyright 2007, Jeffrey T. Darlington.
 AppName=WinHasher
-AppVerName=WinHasher 1.1
+AppVerName=WinHasher 1.2
 LicenseFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\gpl.rtf
 PrivilegesRequired=poweruser
 MinVersion=4.1.1998,5.0.2195sp3
@@ -23,8 +23,8 @@ AppPublisher=GPF Comics
 AppPublisherURL=http://www.gpf-comics.com/
 AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
 AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
-AppVersion=WinHasher 1.1
-UninstallDisplayName=WinHasher 1.1
+AppVersion=WinHasher 1.2
+UninstallDisplayName=WinHasher 1.2
 SetupIconFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\WinHasher\Icon1.ico
 [Files]
 Source: ..\WinHasherCore\bin\Release\WinHasherCore.dll; DestDir: {app}; Components: Windows_application Console_applications
