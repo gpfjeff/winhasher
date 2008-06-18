@@ -20,8 +20,13 @@
  * does not match, the whole batch fails.  The user can specify which hash to use in either case.
  * 
  * This program uses the WinHasherCore library for its HashEngine methods.
- *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * 
+ * UPDATE June 18, 2008 (1.3):  Added new Hash Text tab to allow hashing of arbitrary text.  Enter
+ * the text in the box, choose a text encoding (defaults to system default), then click the button
+ * to get the hash.  Also added the output drop-down to allow choosing between hexadecimal (which
+ * is the most common output format) and Base64 (which I personally tend to use more often).
+ * 
+ * This program is Copyright 2008, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -54,22 +59,40 @@ namespace com.gpfcomics.WinHasher
     {
         #region Private Variables
 
-        // Get our version number from the assembly:
+        /// <summary>
+        /// The full version number of the assmebly for display:
+        /// </summary>
         private static string version = "WinHasher v. " +
             Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        /// <summary>
+        /// The shortened (major + minor) version number for display:
+        /// </summary>
         private static string versionShort = "WinHasher v. " +
             Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
             Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
 
-        // The currently selected hash algorithm:
+        /// <summary>
+        /// The currently selected hash algorithm
+        /// </summary>
         private Hashes hash;
 
-        // The last selected directory:
+        /// <summary>
+        /// The last selected directory
+        /// </summary>
         private string lastDirectory;
+
+        /// <summary>
+        /// Whether or not to display output in Base64 (true); by default (false), show
+        /// hexadecimal instead
+        /// </summary>
+        private bool outputBase64 = false;
 
         #endregion
 
-        // Our main constructor:
+        /// <summary>
+        /// Main constructor
+        /// </summary>
         public MainForm()
         {
             // Let .NET do its initialization stuff:
@@ -87,6 +110,17 @@ namespace com.gpfcomics.WinHasher
             // Default to MD5:
             hashComboBox.SelectedIndex = 0;
             hash = Hashes.MD5;
+            // Populate the encoding drop-down:
+            foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
+            {
+                encodingComboBox.Items.Add(encodingInfo.GetEncoding());
+            }
+            // Set it to show the display name in the dropdown:
+            encodingComboBox.DisplayMember = "EncodingName";
+            // And select the system default encoding by default:
+            encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
+            // Force the output drop-down to the first item, or hex output:
+            outputFormatComboBox.SelectedIndex = 0;
             // Set our the last directory to My Documents:
             try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
             catch { lastDirectory = Environment.CurrentDirectory; }
@@ -102,14 +136,22 @@ namespace com.gpfcomics.WinHasher
 
         #region Button Events
 
-        // What to do when the Close button is clicked.  This one's really simple....
+        /// <summary>
+        /// What to do when the Close button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void closeButton_Click(object sender, EventArgs e)
         {
             Dispose();
         }
 
-        // The About button will launch the About dialog box, giving the user information
-        // about our little program:
+        /// <summary>
+        /// The About button will launch the About dialog box, giving the user information
+        /// about our little program
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void aboutButton_Click(object sender, EventArgs e)
         {
             // Get the full path to the HTML help file:
@@ -124,8 +166,12 @@ namespace com.gpfcomics.WinHasher
 
         #region Hash Single File Tab Buttons
 
-        // When the Browse button is clicked, open a file dialog to let the user select a file.
-        // If everything checks out, put the path to that file into the File to Hash text box.
+        /// <summary>
+        /// When the Browse button is clicked, open a file dialog to let the user select a file.
+        /// If everything checks out, put the path to that file into the File to Hash text box.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void browseSingleButton_Click(object sender, EventArgs e)
         {
             // Create our open file dialog box and show it:
@@ -213,14 +259,18 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
-        // When the Computer Hash button is clicked, take the path from the File to Hash text
-        // box, open the file and read it, then compute the specified hash for that file:
+        /// <summary>
+        /// When the Compute Hash button is clicked, take the path from the File to Hash text
+        /// box, open the file and read it, then compute the specified hash for that file:
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void hashSingleButton_Click(object sender, EventArgs e)
         {
             // If the file box is empty or just contains white space, complain:
             if (fileSingleTextBox.Text.Trim() == "")
             {
-                MessageBox.Show("Error: Now file has been specified, so there's nothing to do.",
+                MessageBox.Show("Error: No file has been specified, so there's nothing to do.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
@@ -237,7 +287,8 @@ namespace com.gpfcomics.WinHasher
                     Refresh();
                     // Create the progress dialog and show it.  This kicks off the
                     // actual hashing process.
-                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text.Trim(), hash);
+                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text.Trim(), hash, 
+                        false, outputBase64);
                     pd.ShowDialog();
                     // What we do next depends on the result:
                     switch (pd.Result)
@@ -297,9 +348,13 @@ namespace com.gpfcomics.WinHasher
 
         #region Compare Files Tab Buttons
 
-        // When the Add button is clicked, open a file dialog and allow the user to select one
-        // or more files.  Then add those files to the list box, making sure that each file is
-        // only added once.
+        /// <summary>
+        /// When the Add button is clicked, open a file dialog and allow the user to select one
+        /// or more files.  Then add those files to the list box, making sure that each file is
+        /// only added once.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void addButton_Click(object sender, EventArgs e)
         {
             // Open and display the file dialog.  Note that multi-select is on, so the user
@@ -315,7 +370,11 @@ namespace com.gpfcomics.WinHasher
 
         }
 
-        // When the Remove button is clicked, remove any selected files from the file list:
+        /// <summary>
+        /// When the Remove button is clicked, remove any selected files from the file list:
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void removeButton_Click(object sender, EventArgs e)
         {
             // Make sure at least one file is selected.  This shouldn't be problem, but it's
@@ -354,9 +413,13 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
-        // When the Compare Hashes button is clicked, compute the hash of each file in the list
-        // and compare them.  If they all match, then all the files are the same.  If at least
-        // one fails to match, then all the files fail the test.
+        /// <summary>
+        /// When the Compare Hashes button is clicked, compute the hash of each file in the list
+        /// and compare them.  If they all match, then all the files are the same.  If at least
+        /// one fails to match, then all the files fail the test.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void compareButton_Click(object sender, EventArgs e)
         {
             // Lots of places where this could fail:
@@ -418,9 +481,13 @@ namespace com.gpfcomics.WinHasher
             #endregion
         }
 
-        // When the Clear List button is clicked clear the list of all entires.
-        // Also make sure to disable the Remove, Compare, and Clear buttons, as they
-        // now have nothing to do:
+        /// <summary>
+        /// When the Clear List button is clicked clear the list of all entires.
+        /// Also make sure to disable the Remove, Compare, and Clear buttons, as they
+        /// now have nothing to do
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void clearButton_Click(object sender, EventArgs e)
         {
             compareFilesListBox.Items.Clear();
@@ -431,11 +498,45 @@ namespace com.gpfcomics.WinHasher
 
         #endregion
 
+        /// <summary>
+        /// When the Hash button on the Hash Text tab is clicked, hash the text in the text box
+        /// using the selected text encoding
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void hashTextButton_Click(object sender, EventArgs e)
+        {
+            // Only bother if there's text to hash:
+            if (inputTextBox.Text != null && inputTextBox.Text != "")
+            {
+                // This one's simple enough:  Grab the selected hash, the text, the selected
+                // encoding and output formats, and hash it:
+                try
+                {
+                    outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
+                        (Encoding)encodingComboBox.SelectedItem, outputBase64);
+                }
+                // This should be more specific:
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            // If no text is in the box, complain:
+            else MessageBox.Show("Error: No text has been specified, so there's nothing to do.",
+                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+
         #endregion
 
         #region Other GUI Events
 
-        // When the hash dropdown changes, change the active hash:
+        /// <summary>
+        /// When the hash dropdown changes, change the active hash
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void hashComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch ((string)hashComboBox.SelectedItem)
@@ -474,8 +575,12 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
-        // When the user switch which tab is active, change which button is the
-        // "accept" button, i.e. the default when the Enter button is pressed:
+        /// <summary>
+        /// When the user switch which tab is active, change which button is the
+        /// "accept" button, i.e. the default when the Enter button is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void modeTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             // For the single hash page, make it the Compute Hash button:
@@ -490,31 +595,54 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
-        // When the user changes the value of the file path text box, enable (or disable)
-        // the Compute Hash button:
+        /// <summary>
+        /// When the user changes the value of the file path text box, enable (or disable)
+        /// the Compute Hash button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void fileSingleTextBox_TextChanged(object sender, EventArgs e)
         {
             if (fileSingleTextBox.Text.Trim() == "") { hashSingleButton.Enabled = false; }
             else { hashSingleButton.Enabled = true; }
         }
 
-        // When the selected index on the file list box changes, enable or disable the
-        // Remove button.  Only enable the button if at least one item is selected;
-        // disable it if no files are selected.
+        /// <summary>
+        /// When the selected index on the file list box changes, enable or disable the
+        /// Remove button.  Only enable the button if at least one item is selected;
+        /// disable it if no files are selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void compareFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (compareFilesListBox.SelectedItems.Count > 0) removeButton.Enabled = true;
             else removeButton.Enabled = false;
         }
 
+        /// <summary>
+        /// When the selected index on the output format list box changes, set the flag to
+        /// determine whether to output hexadeciaml or Base64 output
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void outputFormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            outputBase64 = (string)outputFormatComboBox.SelectedItem == "Base64";
+        }
+
         #endregion
 
         #region Drag and Drop Event Handlers
 
-        // We only accept files as drag and drop data.  Since all GUI elements do the
-        // same basic thing when we drag stuff onto them (copy the values), all the
-        // drag enter events point to this one.  Note that we won't accept any other
-        // form of data other than files.
+        /// <summary>
+        /// We only accept files as drag and drop data.  Since all GUI elements do the
+        /// same basic thing when we drag stuff onto them (copy the values), all the
+        /// drag enter events point to this one.  Note that we won't accept any other
+        /// form of data other than files.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void fileSingleTextBox_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -522,9 +650,13 @@ namespace com.gpfcomics.WinHasher
             else e.Effect = DragDropEffects.None;
         }
 
-        // When we drop files on the compare files tab, add those files paths to the
-        // file list box.  Note that we don't clear out the list first, but add the
-        // files to whatever may already be there.
+        /// <summary>
+        /// When we drop files on the compare files tab, add those files paths to the
+        /// file list box.  Note that we don't clear out the list first, but add the
+        /// files to whatever may already be there.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void compareFilesListBox_DragDrop(object sender, DragEventArgs e)
         {
             // Only accept file drop data:
@@ -545,9 +677,13 @@ namespace com.gpfcomics.WinHasher
             }
         }
 
-        // When we drop a file on the single hash tab, add that file's path to the
-        // file text box.  Note that we'll only accept one file here; if multiple
-        // files are dropped, complain.
+        /// <summary>
+        /// When we drop a file on the single hash tab, add that file's path to the
+        /// file text box.  Note that we'll only accept one file here; if multiple
+        /// files are dropped, complain.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void fileSingleTextBox_DragDrop(object sender, DragEventArgs e)
         {
             // Make sure we're only getting files dropped and nothing else:
@@ -582,13 +718,16 @@ namespace com.gpfcomics.WinHasher
 
         #region Generic Private Methods
 
-        // Abstracted here for code reuse, this method takes a string array which is assumed to
-        // contain a list of file path strings.  These can come from a drap & drop operation or
-        // from an OpenFileDialog.FileNames property.  Given this list, step through each file.
-        // Compare each one to the items already in the list box and make sure it isn't a duplicate.
-        // If it isn't, add it to the list.  The do any necessary GUI tweaking to make sure the
-        // right buttons are enabled.  Note that this method catches its own exceptions so the
-        // caller doesn't need to worry about them.
+        /// <summary>
+        /// Abstracted here for code reuse, this method takes a string array which is assumed to
+        /// contain a list of file path strings.  These can come from a drap & drop operation or
+        /// from an OpenFileDialog.FileNames property.  Given this list, step through each file.
+        /// Compare each one to the items already in the list box and make sure it isn't a duplicate.
+        /// If it isn't, add it to the list.  The do any necessary GUI tweaking to make sure the
+        /// right buttons are enabled.  Note that this method catches its own exceptions so the
+        /// caller doesn't need to worry about them.
+        /// </summary>
+        /// <param name="fileList">The string array of file names</param>
         private void PopulateFileListBox(string[] fileList)
         {
             try
@@ -680,5 +819,7 @@ namespace com.gpfcomics.WinHasher
         }
 
         #endregion
+
+
     }
 }

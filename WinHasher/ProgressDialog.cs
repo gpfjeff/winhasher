@@ -17,8 +17,11 @@
  * status message to the user that the hash is in progress and that they need to be patient.  If you
  * are going to hash multiple files, use this dialog instead instead; with it, you can at least find
  * out how many files have been processed so far.
- *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * 
+ * UPDATED June 18, 2008 (1.3):  Added necessary flags and members to introduce Base64 output as
+ * an option along with hexadecimal.
+ * 
+ * This program is Copyright 2008, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -104,6 +107,12 @@ namespace com.gpfcomics.WinHasher
         /// </summary>
         private string singleHash;
 
+        /// <summary>
+        /// A boolean flag indicating whether the output should be in Base64 format (true) or
+        /// hexadecimal (false).  The default is false, or output in hexadecimal.
+        /// </summary>
+        private bool base64 = false;
+
         #endregion
 
         #region Public Properties
@@ -150,6 +159,16 @@ namespace com.gpfcomics.WinHasher
             get { return singleHash; }
         }
 
+        /// <summary>
+        /// A boolean flag indicating whether the output should be in Base64 format (true) or
+        /// hexadecimal (false).  The default is false, or output in hexadecimal.
+        /// </summary>
+        public bool Base64
+        {
+            get { return base64; }
+            set { base64 = value; }
+        }
+
         #endregion
 
         /// <summary>
@@ -160,7 +179,9 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
-        public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen)
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen,
+            bool base64)
         {
             InitializeComponent();
             progressBar1.Value = 0;
@@ -171,7 +192,21 @@ namespace com.gpfcomics.WinHasher
             if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
             else StartPosition = FormStartPosition.CenterParent;
             singleMode = false;
+            this.base64 = base64;
         }
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string list and the
+        /// specified hashing algorithm
+        /// </summary>
+        /// <param name="fileList">An array of file path strings to compare</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
+        /// <param name="centerInScreen">True to center in the middle of the screen, false to
+        /// center around the parent window</param>
+        public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen)
+            : this(fileList, hashAlgorithm, centerInScreen, false)
+        { }
+
 
         /// <summary>
         /// Constructs a progress dialog box with the given file path string list and the
@@ -181,7 +216,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm)
             :
-            this(fileList, hashAlgorithm, false)
+            this(fileList, hashAlgorithm, false, false)
         {
         }
 
@@ -193,7 +228,9 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use</param>
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
-        public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen,
+            bool base64)
         {
             InitializeComponent();
             progressBar1.Value = 0;
@@ -205,6 +242,20 @@ namespace com.gpfcomics.WinHasher
             if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
             else StartPosition = FormStartPosition.CenterParent;
             singleMode = true;
+            this.base64 = base64;
+        }
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string and the
+        /// specified hashing algorithm
+        /// </summary>
+        /// <param name="filename">A string containing the path to the file to be hashed</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use</param>
+        /// <param name="centerInScreen">True to center in the middle of the screen, false to
+        /// center around the parent window</param>
+        public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
+            : this(filename, hashAlgorithm, centerInScreen, false)
+        {
         }
 
         /// <summary>
@@ -215,7 +266,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm)
             :
-            this(filename, hashAlgorithm, false)
+            this(filename, hashAlgorithm, false, false)
         {
         }
 
@@ -406,7 +457,7 @@ namespace com.gpfcomics.WinHasher
                 // What we do depends on what mode we're in.  In single-file mode, start hashing
                 // the specified file:
                 if (singleMode)
-                    e.Result = HashEngine.HashFile(hashAlgorithm, files[0], bgWorker, e);
+                    e.Result = HashEngine.HashFile(hashAlgorithm, files[0], bgWorker, e, base64);
                 // Otherwise, start comparing the hashes of the files in the list:
                 else
                     e.Result = HashEngine.CompareHashes(hashAlgorithm, files, bgWorker, e);
