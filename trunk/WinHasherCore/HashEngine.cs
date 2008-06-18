@@ -50,7 +50,12 @@
  * know the file is currently being checked, or when comparing files how many files we've finished
  * out of the list.
  *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * UPDATE June 18, 2008 (1.3):  Abstracted the byte-array-to-hex-string code into a new private
+ * method, then added a byte-array-to-Base64-string method as well.  Then added a flag to all
+ * the hashing methods to allow the choice between hex output and Base64.  Also added the HashText()
+ * methods to take a string and a text encoding and return the associated hash.
+ * 
+ * This program is Copyright 2008, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -96,7 +101,15 @@ namespace com.gpfcomics.WinHasher.Core
     /// </summary>
     public static class HashEngine
     {
+        /// <summary>
+        /// A <see cref="FileStream"/> object, pulled out into the class for potential reuse
+        /// </summary>
         private static FileStream fs;
+
+        /// <summary>
+        /// The buffer size for file reads.  Adjust this value if it is found to be too
+        /// inefficient.
+        /// </summary>
         private static int bufferSize = 1024;
 
         #region Public Methods
@@ -119,11 +132,12 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash comparison.  This should be the sum of the lengths of all the files hashed before
         /// this file.  This should be zero for the first file in a comparison or for a single file
         /// hash.  If set to anything less than zero, this value is reset to zero.</param>
-        /// <returns>A hexadecimal string representing the computed hash</returns>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <returns>A string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
-            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar)
+            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar, bool base64)
         {
             // Lots of things can go wrong here, so ignore Yoda's advice and give it a try:
             try
@@ -208,14 +222,9 @@ namespace com.gpfcomics.WinHasher.Core
                 byte[] theHash = hasher.Hash;
                 fs.Unlock(0, fs.Length);
                 fs.Close();
-                // Begin to build the output string.  There's probably a more efficient way
-                // of doing this, but this method has worked for me in the past.
-                StringBuilder sOutput = new StringBuilder(theHash.Length);
-                for (int i = 0; i < theHash.Length; i++)
-                {
-                    sOutput.Append(theHash[i].ToString("x2"));
-                }
-                return sOutput.ToString();
+                // Return the output string in the chosen format:
+                if (base64) return BytesToBase64String(theHash);
+                else return BytesToHexString(theHash);
             }
             #region Catch Exceptions
             // The following exceptions can be thrown by File.ReadAllBytes():
@@ -317,13 +326,74 @@ namespace com.gpfcomics.WinHasher.Core
         /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
         /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
         /// if necessary</param>
+        /// <param name="totalByteLength">The total length in bytes of all items being hashed.
+        /// This is primarily for multi-file hash comparison, where this value would be the the sum
+        /// of all the lengths of all the files being hashed.  This is used to compute the progress
+        /// passed to the progress dialog box.  If set to anything less than or equal to zero, it
+        /// derives this value from the specified file's length.</param>
+        /// <param name="totalBytesSoFar">The total number of bytes already hashed in a multi-file
+        /// hash comparison.  This should be the sum of the lengths of all the files hashed before
+        /// this file.  This should be zero for the first file in a comparison or for a single file
+        /// hash.  If set to anything less than zero, this value is reset to zero.</param>
+        /// <returns>A hexadecimal string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar)
+        {
+            return HashFile(hash, filename, bgWorker, dwe, totalByteLength, totalBytesSoFar, false);
+        }
+
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
+        /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
+        /// if necessary</param>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <returns>A string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe, bool base64)
+        {
+            return HashFile(hash, filename, bgWorker, dwe, -1, -1, base64);
+        }
+
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
+        /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
+        /// if necessary</param>
         /// <returns>A hexadecimal string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
             DoWorkEventArgs dwe)
         {
-            return HashFile(hash, filename, bgWorker, dwe, -1, -1);
+            return HashFile(hash, filename, bgWorker, dwe, -1, -1, false);
+        }
+        
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <returns>A string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, bool base64)
+        {
+            return HashFile(hash, filename, null, null, -1, -1, base64);
         }
 
         /// <summary>
@@ -337,7 +407,20 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename)
         {
-            return HashFile(hash, filename, null, null, -1, -1);
+            return HashFile(hash, filename, null, null, -1, -1, false);
+        }
+
+        /// <summary>
+        /// A convenience method that computes the MD5 hash of a given file.
+        /// </summary>
+        /// <param name="filename">The path to the file to compute the hash of</param>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <returns>A string representing the MD5 hash of the file</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string MD5HashFile(string filename, bool base64)
+        {
+            return HashFile(Hashes.MD5, filename, null, null, -1, -1, base64);
         }
 
         /// <summary>
@@ -349,7 +432,20 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string MD5HashFile(string filename)
         {
-            return HashFile(Hashes.MD5, filename, null, null, -1, -1);
+            return HashFile(Hashes.MD5, filename, null, null, -1, -1, false);
+        }
+
+        /// <summary>
+        /// A convenience method that computes the SHA1 hash of a given file.
+        /// </summary>
+        /// <param name="filename">The path to the file to compute the hash of</param>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <returns>A string representing the MD5 hash of the file</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string SHA1HashFile(string filename, bool base64)
+        {
+            return HashFile(Hashes.SHA1, filename, null, null, -1, -1, base64);
         }
 
         /// <summary>
@@ -361,7 +457,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string SHA1HashFile(string filename)
         {
-            return HashFile(Hashes.SHA1, filename, null, null, -1, -1);
+            return HashFile(Hashes.SHA1, filename, null, null, -1, -1, false);
         }
 
         /// <summary>
@@ -488,6 +584,55 @@ namespace com.gpfcomics.WinHasher.Core
             return CompareHashes(Hashes.SHA1, fileList);
         }
 
+        /// <summary>
+        /// Given a hash algorithm, a text string, and a text encoding (presumably in which the
+        /// string was encoded), compute the specified hash
+        /// </summary>
+        /// <param name="hash">The hash to perform</param>
+        /// <param name="text">The input text</param>
+        /// <param name="encoding">The text encoding of the input text</param>
+        /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
+        /// <returns>A string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashText(Hashes hash, string text, Encoding encoding, bool base64)
+        {
+            // This one is pretty simple:
+            try
+            {
+                // Get the hash algorithm:
+                HashAlgorithm hasher = GetHashAlgorithm(hash);
+                // Convert the input string to raw bytes given the encoding:
+                byte[] textBytes = encoding.GetBytes(text);
+                // Hash it and get the hash:
+                hasher.TransformFinalBlock(textBytes, 0, textBytes.Length);
+                byte[] theHash = hasher.Hash;
+                // And build the output:
+                if (base64) return BytesToBase64String(theHash);
+                else return BytesToHexString(theHash);
+            }
+            // Pretty this up by catching specific exceptions:
+            catch (Exception ex)
+            {
+                throw new HashEngineException(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Given a hash algorithm, a text string, and a text encoding (presumably in which the
+        /// string was encoded), compute the specified hash and return the hexadecimal output
+        /// </summary>
+        /// <param name="hash">The hash to perform</param>
+        /// <param name="text">The input text</param>
+        /// <param name="encoding">The text encoding of the input text</param>
+        /// <returns>A hexadecimal output of the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashText(Hashes hash, string text, Encoding encoding)
+        {
+            return HashText(hash, text, encoding, false);
+        }
+
         #endregion
 
         #region Private Methods
@@ -532,6 +677,34 @@ namespace com.gpfcomics.WinHasher.Core
                     break;
             }
             return hasher;
+        }
+
+        /// <summary>
+        /// Convert a byte array into a string of hexadecimal digits
+        /// </summary>
+        /// <param name="bytes">The input byte array</param>
+        /// <returns>A string of hexadecimal digits representing the input array</returns>
+        private static string BytesToHexString(byte[] bytes)
+        {
+            // There's probably a more efficient way to do this, but this is all I've found
+            // so far:
+            StringBuilder sOutput = new StringBuilder(bytes.Length);
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                sOutput.Append(bytes[i].ToString("x2"));
+            }
+            return sOutput.ToString();
+        }
+
+        /// <summary>
+        /// Convert a byte array into a Base64-encoded string
+        /// </summary>
+        /// <param name="bytes">The input byte array</param>
+        /// <returns>A Base64-encoded string representing the input array</returns>
+        private static string BytesToBase64String(byte[] bytes)
+        {
+            // This is simple enough:
+            return Convert.ToBase64String(bytes);
         }
 
         #endregion

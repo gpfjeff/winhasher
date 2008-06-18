@@ -45,20 +45,31 @@ namespace com.gpfcomics.WinHasher
             this.addButton = new System.Windows.Forms.Button();
             this.compareFilesListBox = new System.Windows.Forms.ListBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.textTabPage = new System.Windows.Forms.TabPage();
+            this.outputTextBox = new System.Windows.Forms.TextBox();
+            this.hashTextButton = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.encodingComboBox = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.inputTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.hashComboBox = new System.Windows.Forms.ComboBox();
             this.closeButton = new System.Windows.Forms.Button();
             this.aboutButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label7 = new System.Windows.Forms.Label();
+            this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
+            this.textTabPage.SuspendLayout();
             this.SuspendLayout();
             // 
             // modeTabControl
             // 
             this.modeTabControl.Controls.Add(this.singleTabPage);
             this.modeTabControl.Controls.Add(this.compareTabPage);
+            this.modeTabControl.Controls.Add(this.textTabPage);
             this.modeTabControl.Location = new System.Drawing.Point(3, 3);
             this.modeTabControl.Name = "modeTabControl";
             this.modeTabControl.SelectedIndex = 0;
@@ -243,22 +254,100 @@ namespace com.gpfcomics.WinHasher
             this.label4.TabIndex = 0;
             this.label4.Text = "Files to compare:";
             // 
+            // textTabPage
+            // 
+            this.textTabPage.Controls.Add(this.outputTextBox);
+            this.textTabPage.Controls.Add(this.hashTextButton);
+            this.textTabPage.Controls.Add(this.label6);
+            this.textTabPage.Controls.Add(this.encodingComboBox);
+            this.textTabPage.Controls.Add(this.label5);
+            this.textTabPage.Controls.Add(this.inputTextBox);
+            this.textTabPage.Location = new System.Drawing.Point(4, 22);
+            this.textTabPage.Name = "textTabPage";
+            this.textTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.textTabPage.Size = new System.Drawing.Size(276, 202);
+            this.textTabPage.TabIndex = 2;
+            this.textTabPage.Text = "Hash Text";
+            this.toolTip1.SetToolTip(this.textTabPage, resources.GetString("textTabPage.ToolTip"));
+            this.textTabPage.UseVisualStyleBackColor = true;
+            // 
+            // outputTextBox
+            // 
+            this.outputTextBox.Location = new System.Drawing.Point(6, 127);
+            this.outputTextBox.Multiline = true;
+            this.outputTextBox.Name = "outputTextBox";
+            this.outputTextBox.ReadOnly = true;
+            this.outputTextBox.Size = new System.Drawing.Size(264, 69);
+            this.outputTextBox.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.outputTextBox, "This box contains the result of hashing the\r\ntext in the box above, using the cho" +
+                    "sen\r\nencoding and hashing algorithm.");
+            // 
+            // hashTextButton
+            // 
+            this.hashTextButton.Location = new System.Drawing.Point(205, 97);
+            this.hashTextButton.Name = "hashTextButton";
+            this.hashTextButton.Size = new System.Drawing.Size(65, 24);
+            this.hashTextButton.TabIndex = 4;
+            this.hashTextButton.Text = "Hash";
+            this.toolTip1.SetToolTip(this.hashTextButton, "Click this button to compute the hash of the\r\ntext in the box above.");
+            this.hashTextButton.UseVisualStyleBackColor = true;
+            this.hashTextButton.Click += new System.EventHandler(this.hashTextButton_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 100);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(55, 13);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Encoding:";
+            // 
+            // encodingComboBox
+            // 
+            this.encodingComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.encodingComboBox.FormattingEnabled = true;
+            this.encodingComboBox.Location = new System.Drawing.Point(67, 97);
+            this.encodingComboBox.Name = "encodingComboBox";
+            this.encodingComboBox.Size = new System.Drawing.Size(132, 21);
+            this.encodingComboBox.TabIndex = 2;
+            this.toolTip1.SetToolTip(this.encodingComboBox, "This drop-down box lists all the available text\r\nencodings for your system.  Your" +
+                    " system\'s\r\ndefault encoding is chosen by default and\r\nwill be what you want to u" +
+                    "se most of the time.");
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(6, 5);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(69, 13);
+            this.label5.TabIndex = 1;
+            this.label5.Text = "Text to hash:";
+            // 
+            // inputTextBox
+            // 
+            this.inputTextBox.Location = new System.Drawing.Point(6, 21);
+            this.inputTextBox.Multiline = true;
+            this.inputTextBox.Name = "inputTextBox";
+            this.inputTextBox.Size = new System.Drawing.Size(264, 69);
+            this.inputTextBox.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.inputTextBox, "Enter your text to hash in this text box.");
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(4, 243);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.Size = new System.Drawing.Size(80, 13);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Hash:";
+            this.label1.Text = "Hash algorithm:";
             // 
             // hashComboBox
             // 
             this.hashComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.hashComboBox.FormattingEnabled = true;
-            this.hashComboBox.Location = new System.Drawing.Point(36, 240);
+            this.hashComboBox.Location = new System.Drawing.Point(90, 240);
             this.hashComboBox.Name = "hashComboBox";
-            this.hashComboBox.Size = new System.Drawing.Size(89, 21);
+            this.hashComboBox.Size = new System.Drawing.Size(116, 21);
             this.hashComboBox.TabIndex = 2;
             this.toolTip1.SetToolTip(this.hashComboBox, resources.GetString("hashComboBox.ToolTip"));
             this.hashComboBox.SelectedIndexChanged += new System.EventHandler(this.hashComboBox_SelectedIndexChanged);
@@ -266,7 +355,7 @@ namespace com.gpfcomics.WinHasher
             // closeButton
             // 
             this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.closeButton.Location = new System.Drawing.Point(212, 238);
+            this.closeButton.Location = new System.Drawing.Point(212, 269);
             this.closeButton.Name = "closeButton";
             this.closeButton.Size = new System.Drawing.Size(75, 23);
             this.closeButton.TabIndex = 4;
@@ -277,7 +366,7 @@ namespace com.gpfcomics.WinHasher
             // 
             // aboutButton
             // 
-            this.aboutButton.Location = new System.Drawing.Point(131, 238);
+            this.aboutButton.Location = new System.Drawing.Point(212, 238);
             this.aboutButton.Name = "aboutButton";
             this.aboutButton.Size = new System.Drawing.Size(75, 23);
             this.aboutButton.TabIndex = 3;
@@ -288,12 +377,37 @@ namespace com.gpfcomics.WinHasher
             this.aboutButton.UseVisualStyleBackColor = true;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(4, 272);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(74, 13);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "Output format:";
+            // 
+            // outputFormatComboBox
+            // 
+            this.outputFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.outputFormatComboBox.FormattingEnabled = true;
+            this.outputFormatComboBox.Items.AddRange(new object[] {
+            "Hexadecimal",
+            "Base64"});
+            this.outputFormatComboBox.Location = new System.Drawing.Point(90, 269);
+            this.outputFormatComboBox.Name = "outputFormatComboBox";
+            this.outputFormatComboBox.Size = new System.Drawing.Size(116, 21);
+            this.outputFormatComboBox.TabIndex = 6;
+            this.toolTip1.SetToolTip(this.outputFormatComboBox, resources.GetString("outputFormatComboBox.ToolTip"));
+            this.outputFormatComboBox.SelectedIndexChanged += new System.EventHandler(this.outputFormatComboBox_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.closeButton;
-            this.ClientSize = new System.Drawing.Size(292, 266);
+            this.ClientSize = new System.Drawing.Size(292, 304);
+            this.Controls.Add(this.outputFormatComboBox);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.aboutButton);
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.hashComboBox);
@@ -308,6 +422,8 @@ namespace com.gpfcomics.WinHasher
             this.singleTabPage.PerformLayout();
             this.compareTabPage.ResumeLayout(false);
             this.compareTabPage.PerformLayout();
+            this.textTabPage.ResumeLayout(false);
+            this.textTabPage.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -335,6 +451,15 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.Button clearButton;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TabPage textTabPage;
+        private System.Windows.Forms.TextBox outputTextBox;
+        private System.Windows.Forms.Button hashTextButton;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox encodingComboBox;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox inputTextBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox outputFormatComboBox;
     }
 }
 
