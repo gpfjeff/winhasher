@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("WinHasherCore")]
-[assembly: AssemblyCopyright("© Copyright 2007, Jeffrey T. Darlington")]
+[assembly: AssemblyCopyright("© Copyright 2008, Jeffrey T. Darlington")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

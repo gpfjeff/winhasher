@@ -15,7 +15,9 @@
  * See the usage method for details on using this program.  For more hashing algorithms, use the
  * command-line "hash" program or the full WinHasher GUI.
  *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * UPDATE June 19, 2008 (1.3):  Added -base64 switch and Base64 output option.
+ * 
+ * This program is Copyright 2008, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -52,7 +54,29 @@ namespace com.gpfcomics.WinHasher.sha1console
             // Set the console title for a little bit of advertising:
             Console.Title = version;
             // If called with no command-line arguments, print out the usage statement:
-            if (args.Length == 0) { Usage(); }
+            if (args.Length == 0)
+            {
+                Usage();
+                return;
+            }
+            // Default to hexadecimal output:
+            bool base64 = false;
+            // Look to see if we got the Base64 flag and, if so, turn it on:
+            while (args.Length > 0 && args[0].StartsWith("-"))
+            {
+                if (args[0].ToLower() == "-base64") base64 = true;
+                string[] args2 = new string[args.Length - 1];
+                Array.Copy(args, 1, args2, 0, args.Length - 1);
+                args = args2;
+            }
+            // Test again for files:
+            if (args.Length == 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("ERROR:  No files specified, nothing to do");
+                Usage();
+                return;
+            }
             // Treat all arguments as file paths.  If only one argument is specified, assume
             // we are to read in that file, compute the SHA1 hash, and spit out the hex dump
             // to the screen.
@@ -64,7 +88,7 @@ namespace com.gpfcomics.WinHasher.sha1console
                 {
                     // This should be simple enough:
                     Console.WriteLine();
-                    Console.WriteLine(HashEngine.SHA1HashFile(args[0]));
+                    Console.WriteLine(HashEngine.SHA1HashFile(args[0], base64));
                 }
                 #region Catch Exceptions
                 // Our hash engine can throw its own exceptions, which usually are just other
@@ -142,17 +166,25 @@ namespace com.gpfcomics.WinHasher.sha1console
         {
             Console.WriteLine();
             Console.WriteLine(version);
-            Console.WriteLine("Copyright 2007, Jeffrey T. Darlington.  All rights reserved.");
+            Console.WriteLine("Copyright 2008, Jeffrey T. Darlington.  All rights reserved.");
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
-            Console.WriteLine("To use WinHasher SHA1, feed it one more more paths to files.  If the file");
-            Console.WriteLine("path contains spaces, make sure to enclose the entire path in quotes.");
-            Console.WriteLine("If only one file is specified, its SHA1 hash will be returned.  If more");
-            Console.WriteLine("than one file is specified, the SHA1 hash of each file will be computed");
-            Console.WriteLine("and then compared.  If all the hashes of all the files match, you will");
-            Console.WriteLine("receive a happy notification as such.  If one or more of the hashes do");
-            Console.WriteLine("not match the others, a warning will be displayed.");
+            Console.WriteLine("Usage: sha1 [-base64] filename1 [filename2 ...]");
+            Console.WriteLine();
+            Console.WriteLine("WinHasher SHA-1 is a command-line SHA-1 cryptographic hash generator for files.");
+            Console.WriteLine("It runs in one of two modes:  single file hashing and multi-file comparison.");
+            Console.WriteLine();
+            Console.WriteLine("In single file mode, WinHasher computes the SHA-1 hash of the given file and");
+            Console.WriteLine("prints it to the screen.  The \"-base64\" switch causes WinHasher to output");
+            Console.WriteLine("hashes in MIME Base64 (RFC 2045) format rather than hexadecimal.");
+            Console.WriteLine();
+            Console.WriteLine("In multi-file comparison mode, WinHasher computes the SHA-1 hash for each file");
+            Console.WriteLine("given and compares the results.  If the hash of every file matches, then all");
+            Console.WriteLine("files in the batch are declared to be the same.  If one or more hashes do not");
+            Console.WriteLine("match the others, a warning will be displayed indicating as such.  In this");
+            Console.WriteLine("way, you can determine whether two or more files share the same contents");
+            Console.WriteLine("despite file name, path, and modification time differences.");
         }
     }
 }

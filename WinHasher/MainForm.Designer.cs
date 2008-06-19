@@ -57,8 +57,8 @@ namespace com.gpfcomics.WinHasher
             this.closeButton = new System.Windows.Forms.Button();
             this.aboutButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label7 = new System.Windows.Forms.Label();
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -377,15 +377,6 @@ namespace com.gpfcomics.WinHasher
             this.aboutButton.UseVisualStyleBackColor = true;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(4, 272);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(74, 13);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "Output format:";
-            // 
             // outputFormatComboBox
             // 
             this.outputFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -399,6 +390,15 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox.TabIndex = 6;
             this.toolTip1.SetToolTip(this.outputFormatComboBox, resources.GetString("outputFormatComboBox.ToolTip"));
             this.outputFormatComboBox.SelectedIndexChanged += new System.EventHandler(this.outputFormatComboBox_SelectedIndexChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(4, 272);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(74, 13);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "Output format:";
             // 
             // MainForm
             // 

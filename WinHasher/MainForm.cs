@@ -527,7 +527,6 @@ namespace com.gpfcomics.WinHasher
                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-
         #endregion
 
         #region Other GUI Events
@@ -672,7 +671,7 @@ namespace com.gpfcomics.WinHasher
             // Something other files were dropped:
             else
             {
-                MessageBox.Show("Error: Only files can be dropped onto this applet.",
+                MessageBox.Show("Error: Only files can be dropped onto this tab.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -709,7 +708,7 @@ namespace com.gpfcomics.WinHasher
             // The data dropped wasn't a file:
             else
             {
-                MessageBox.Show("Error: Only files can be dropped onto this applet.",
+                MessageBox.Show("Error: Only files can be dropped onto this tab.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -819,7 +818,6 @@ namespace com.gpfcomics.WinHasher
         }
 
         #endregion
-
 
     }
 }
