@@ -1,7 +1,7 @@
 <html><head><title>WinHasher Command-Line Help</title></head>
 <body><h1>WinHasher Command-Line Help</h1>
 <p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
-Last Updated September 21, 2007</p>
+Last Updated June 19, 2008</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -88,23 +88,31 @@ Last Updated September 21, 2007</p>
 <p>The primary console program for WinHasher is <code>hash.</code> Run without any arguments, <code>hash</code> will display a somewhat standard usage statement:</p>
 <blockquote><pre>C:\Program Files\WinHasher>hash
 
-WinHasher v. 1.0.0.0
-Copyright 2007, Jeffrey T. Darlington.  All rights reserved.
+WinHasher v. 1.3.0.0
+Copyright 2008, Jeffrey T. Darlington.  All rights reserved.
 http://www.gpf-comics.com/dl/winhasher/
 
 Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|
-       -tiger] filename1 [filename2 ...]
+       -tiger] [-base64] filename1 [filename2 ...]
 
-WinHasher first looks at the first argument to see if it is a switch that
-indicates which hash to use.  If found, it will use that hash algorithm;
-if a switch is not found or is otherwise invalid, it will default to MD5.
-It will then treat the rest of the inputs as paths to files.  If the file
-path contains spaces, make sure to enclose the entire path in quotes.
-If only one file is specified, its hash will be returned.  If more
-than one file is specified, the hash of each file will be computed
-and then compared.  If all the hashes of all the files match, you will
-receive a happy notification as such.  If one or more of the hashes do
-not match the others, a warning will be displayed.</pre></blockquote>
+WinHasher is a command-line cryptographic hash generator for files.  It
+runs in one of two modes:  single file hashing and multi-file comparison.
+
+In single file mode, WinHasher computes the cryptographic hash of the
+given file and prints it to the screen.  With no command-line switches,
+it computes the MD5 hash and displays it in hexadecimal format.  Various
+switches allow you to change to other hashing algorithms, such as the
+SHA family, RIPEMD-160, Whirlpool, and Tiger.  The "-base64" switch
+causes WinHasher to output hashes in MIME Base64 (RFC 2045) format rather
+than hexadecimal.
+
+In multi-file comparison mode, WinHasher computes the specified hash for
+each file given and compares the results.  If the hash of every file
+matches, then all files in the batch are declared to be the same.  If
+one or more hashes do not match the others, a warning will be displayed
+indicating as such.  In this way, you can determine whether two or more
+files share the same contents despite file name, path, and modification
+time differences..</pre></blockquote>
 <p><code>hash</code> expects at least one command-line argument: a file to compute a hash for. If you supply a file name as an argument, <code>hash</code> will by default compute the MD5 hash of the file and return a hexadecimal representation of it:</p>
 <blockquote><pre>C:\Program Files\WinHasher>hash C:\some\path\to\somefile.jpg
 
@@ -126,13 +134,22 @@ WARNING! One or more of these 2 files do not match!</pre></blockquote>
 
 ed25e7af09323d82af975641cbcd291368e50f173fd191e7760d05244aada29f</pre></blockquote>
 <p>The algorithm switch consists of a hyphen (not a slash, which is the standard Windows command-line switch prefix, because it's always my <em>hope</em> to support other platforms) followed by the algorithm name in all lower case. Any punctuation (like the hyphens for the SHA family) are dropped. If you're ever in doubt on what a switch for a particular algorithm is, just run <code>hash</code> with no arguments to get the usage text. The algorithm switches will be listed and should be pretty easy to figure out.</p>
-<p>The algorithm switch is <em>always</em> the first argument supplied, when present. If the first argument is not a recognized algorithm switch (say, you made a typo and typed <code>hash -sha258</code>), an error message is displayed and the algorithm defaults to MD5. Then the first argument is treated as a file name, which may or may not be what you wanted. (In this example, "-sha258" is not likely to be a valid file name.)</p>
+<p>To generate hash output in MIME Base64 rather than hexadecimal, include the <code>-base64</code> switch. The following produces the MD5 hash of a file in Base64 format:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -base64 somefile.jpg
+
+vCu3WkIn8wug/2TUBCRXHA==</pre></blockquote>
+<p>The Base64 switch can be combined with any hash algorithm switch. The order of the two switches is unimportant, but all switches <em>must</em> come before the list of files to hash. For example:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -sha256 -base64 somefile.jpg
+
+zIdgsm9nv4AoeEwZ+hMyL5h+JuiOGRr3v6siCXIogKc=</pre></blockquote>
+<p><code>hash -sha256 -base64</code> is equivalent to <code>hash -base64 -sha256</code>. While you can specify the Base64 switch on multi-file comparisons, it is silently ignored. It doesn't really matter whether the comparisons are made on strings of hexadecimal characters or strings of Base64 characters, just that the two strings either match or not.</p>
+<p>If the first argument is not a recognized switch (say, you made a typo and typed <code>hash -sha258</code>), an error message is displayed and the algorithm defaults to MD5, hexadecimal output. Then the first argument is treated as a file name, which may or may not be what you wanted. (In this example, "-sha258" is not likely to be a valid file name.)</p>
 <p>The algorithm switch can, of course, be combined with multiple file arguments to do a comparison using that particular hash. For example, to compare three files using RIPEMD-160:</p>
 <blockquote><pre>C:\Program Files\WinHasher>hash -ripemd160 file1.jpg file2.jpg file3.jpg</pre></blockquote>
 
 <a name="md5andsha1"><h3>A Matter of Convenience: <code>md5</code> and <code>sha1</code></h3></a>
 
-<p>Because MD5 and SHA-1 are so prevalent on the Internet, as a convenience, I've also included two alternate programs, <code>md5</code> and <code>sha1</code>, that perform just these hashes. <code>md5</code> is equivalent to running <code>hash -md5</code>, while <code>sha1</code> is equivalent to <code>hash -sha1</code>. Neither of these programs will accept the algorithm switches as the first argument.</p>
+<p>Because MD5 and SHA-1 are so prevalent on the Internet, as a convenience, I've also included two alternate programs, <code>md5</code> and <code>sha1</code>, that perform just these hashes. <code>md5</code> is equivalent to running <code>hash -md5</code>, while <code>sha1</code> is equivalent to <code>hash -sha1</code>. Neither of these programs will accept the algorithm switches as the first argument. They will, however, accept the <code>-base64</code> switch, but only if it comes first.</p>
 <p>Creating these extra programs is a bit redundant, but Windows does not have a mechanism for aliases or symbolic links. If there is enough demand, I can create other "convenience" programs for the other algorithms. However, I also believe in the concept of less is more, so I will only go that route if there are enough requests.</p>
 
 <blockquote><pre></pre></blockquote>
@@ -141,5 +158,5 @@ ed25e7af09323d82af975641cbcd291368e50f173fd191e7760d05244aada29f</pre></blockquo
 
 <a name=""><h2></h2></a>
 
-<p>This document is &#169; Copyright 2007, Jeffrey T. Darlington. It and the software it describes are released under the <a href="gpl.html">GNU General Public License, Version 2</a>.</p>
+<p>This document is &#169; Copyright 2008, Jeffrey T. Darlington. It and the software it describes are released under the <a href="gpl.html">GNU General Public License, Version 2</a>.</p>
 </body></html>

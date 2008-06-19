@@ -14,8 +14,10 @@
  * specified as the first argument switch; if no algorithm is specified, MD5 is the default.
  * This is supposed to be roughly compatible to something like OpenSSL's command-line digest
  * options.  See the usage method for details on using this program.
- *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * 
+ * UPDATE June 19, 2008 (1.3):  Added -base64 switch and Base64 output option.
+ * 
+ * This program is Copyright 2008, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -62,17 +64,14 @@ namespace com.gpfcomics.WinHasher.hashconsole
                 string[] files = null;
                 // Default to doing MD5 unless otherwise instructed:
                 Hashes hash = Hashes.MD5;
-                // Look at the first argument.  If it starts with a hyphen, we'll take it to
-                // be a switch telling us which hash to use.
-                if (args[0].StartsWith("-"))
+                // Default to hexadecimal output rather than Base64:
+                bool base64 = false;
+                // All command line arguments come first, so step through those:
+                while (args[0].StartsWith("-"))
                 {
-                    // Check again to see if there are no other arguments and print the usage
-                    // statement if that's the case:
-                    if (args.Length == 1) { Usage(); return 1; }
-
-                    // Examine the switch and pick which hash to use:
                     switch (args[0].ToLower())
                     {
+                        // Most of these determine which hash to use:
                         case "-md5":
                             hash = Hashes.MD5;
                             break;
@@ -97,136 +96,160 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         case "-tiger":
                             hash = Hashes.Tiger;
                             break;
-                        // If we didn't get a valid hash switch, complain, but proceed using
-                        // the MD5 default:
+                        // But this one puts us in Base64 mode:
+                        case "-base64":
+                            base64 = true;
+                            break;
+                        // If we didn't get a valid switch, complain:
                         default:
-                            Console.WriteLine();
-                            Console.WriteLine("ERROR: Invalid hash switch. I don't know about \"" +
-                                args[0] + "\". Doing MD5 instead.");
+                            Console.WriteLine("ERROR: Invalid switch \"" + args[0] + "\"");
                             break;
                     }
-                    // Copy the rest of the array into the files array:
-                    files = new string[args.Length - 1];
-                    Array.Copy(args, 1, files, 0, args.Length - 1);
+                    // Now shift the array down to the next argument.  I wish there was a better,
+                    // more efficient way of doing this (like a Perl or PHP shift()), but this is
+                    // all I know of using simple arrays:
+                    string[] args2 = new string[args.Length - 1];
+                    Array.Copy(args, 1, args2, 0, args.Length - 1);
+                    args = args2;
                 }
-                // If there was no switch, then we'll assume the rest of the arguments are
-                // file paths.  Just make the files array a reference to the args array:
-                else
+                // By now, all our switches should be exhausted.  We should only have strings
+                // not starting with hyphens, which we'll interpret as file path strings.
+                // Only proceed if we have files to work with:
+                files = args;
+                if (files.Length > 0)
                 {
-                    files = args;
-                }
-                // If we got one file, compute the hash and print it back:
-                if (files.Length == 1)
-                {
-                    // We could throw some exceptions here, so ignore Yoda's advice and give
-                    // it a try:
-                    try
+
+                    // If we got one file, compute the hash and print it back:
+                    if (files.Length == 1)
                     {
-                        // This should be simple enough:
-                        Console.WriteLine();
-                        Console.WriteLine(HashEngine.HashFile(hash, files[0]));
-                    }
-                    #region Catch Exceptions
-                    // Our hash engine can throw its own exceptions, which usually are just other
-                    // exceptions wrapped in our own message format.  We'll look for those first
-                    // and foremost:
-                    catch (HashEngineException hee)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: " + hee.Message);
-                        Usage();
-                        return 1;
-                    }
-                    // Console.WriteLine() can throw this one:
-                    catch (IOException)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: An unknown I/O error has occured.");
-                        Usage();
-                        return 1;
-                    }
-                    // A catch-all to handle anything else:
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: " + ex.ToString());
-                        Usage();
-                        return 1;
-                    }
-                    #endregion
-                }
-                // If we receive more than one argument, will treat each one as a file path and
-                // reach each one in turn, computing its hash.  The hash of each file is compared
-                // against the hash of the first file.  If all the hashes match, we'll print out
-                // a happy congratulatory message.  If just one of the hashes doesn't match the
-                // others, we say the whole batch fails.
-                else
-                {
-                    try
-                    {
-                        if (HashEngine.CompareHashes(hash, files))
+                        // We could throw some exceptions here, so ignore Yoda's advice and give
+                        // it a try:
+                        try
+                        {
+                            // This should be simple enough:
+                            Console.WriteLine();
+                            Console.WriteLine(HashEngine.HashFile(hash, files[0], base64));
+                        }
+                        #region Catch Exceptions
+                        // Our hash engine can throw its own exceptions, which usually are just other
+                        // exceptions wrapped in our own message format.  We'll look for those first
+                        // and foremost:
+                        catch (HashEngineException hee)
                         {
                             Console.WriteLine();
-                            Console.WriteLine("Congratulations!  All " + files.Length + " files match!");
+                            Console.WriteLine("ERROR: " + hee.Message);
+                            Usage();
+                            return 1;
                         }
-                        else
+                        // Console.WriteLine() can throw this one:
+                        catch (IOException)
                         {
                             Console.WriteLine();
-                            Console.WriteLine("WARNING! One or more of these " + files.Length + " files do not match!");
+                            Console.WriteLine("ERROR: An unknown I/O error has occured.");
+                            Usage();
+                            return 1;
                         }
+                        // A catch-all to handle anything else:
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("ERROR: " + ex.ToString());
+                            Usage();
+                            return 1;
+                        }
+                        #endregion
                     }
-                    #region Catch Exceptions
-                    // Same as above:
-                    catch (HashEngineException hee)
+                    // If we receive more than one argument, will treat each one as a file path and
+                    // reach each one in turn, computing its hash.  The hash of each file is compared
+                    // against the hash of the first file.  If all the hashes match, we'll print out
+                    // a happy congratulatory message.  If just one of the hashes doesn't match the
+                    // others, we say the whole batch fails.
+                    else
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: " + hee.Message);
-                        Usage();
-                        return 1;
+                        try
+                        {
+                            if (HashEngine.CompareHashes(hash, files))
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine("Congratulations!  All " + files.Length + " files match!");
+                            }
+                            else
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine("WARNING! One or more of these " + files.Length + " files do not match!");
+                            }
+                        }
+                        #region Catch Exceptions
+                        // Same as above:
+                        catch (HashEngineException hee)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("ERROR: " + hee.Message);
+                            Usage();
+                            return 1;
+                        }
+                        catch (IOException)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("ERROR: An unknown I/O error has occured.");
+                            Usage();
+                            return 1;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("ERROR: " + ex.ToString());
+                            Usage();
+                            return 1;
+                        }
+                        #endregion
                     }
-                    catch (IOException)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: An unknown I/O error has occured.");
-                        Usage();
-                        return 1;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("ERROR: " + ex.ToString());
-                        Usage();
-                        return 1;
-                    }
-                    #endregion
+                }
+                // If no files were specified after the switches were exhausted, complain:
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("ERROR: No files specified, nothing to do");
+                    Usage();
+                    return 1;
                 }
             }
             return 0;
         }
 
-        // Print out our usage statement. The primary purpose of this is to help the user to learn
-        // how to use the program.
+        /// <summary>
+        /// Print out our usage statement. The primary purpose of this is to help the user to learn
+        /// how to use the program.
+        /// </summary>
         static void Usage()
         {
             Console.WriteLine();
             Console.WriteLine(version);
-            Console.WriteLine("Copyright 2007, Jeffrey T. Darlington.  All rights reserved.");
+            Console.WriteLine("Copyright 2008, Jeffrey T. Darlington.  All rights reserved.");
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|");
-            Console.WriteLine("       -tiger] filename1 [filename2 ...]");
+            Console.WriteLine("       -tiger] [-base64] filename1 [filename2 ...]");
             Console.WriteLine();
-            Console.WriteLine("WinHasher first looks at the first argument to see if it is a switch that");
-            Console.WriteLine("indicates which hash to use.  If found, it will use that hash algorithm;");
-            Console.WriteLine("if a switch is not found or is otherwise invalid, it will default to MD5.");
-            Console.WriteLine("It will then treat the rest of the inputs as paths to files.  If the file");
-            Console.WriteLine("path contains spaces, make sure to enclose the entire path in quotes.");
-            Console.WriteLine("If only one file is specified, its hash will be returned.  If more");
-            Console.WriteLine("than one file is specified, the hash of each file will be computed");
-            Console.WriteLine("and then compared.  If all the hashes of all the files match, you will");
-            Console.WriteLine("receive a happy notification as such.  If one or more of the hashes do");
-            Console.WriteLine("not match the others, a warning will be displayed.");
+            Console.WriteLine("WinHasher is a command-line cryptographic hash generator for files.  It");
+            Console.WriteLine("runs in one of two modes:  single file hashing and multi-file comparison.");
+            Console.WriteLine();
+            Console.WriteLine("In single file mode, WinHasher computes the cryptographic hash of the");
+            Console.WriteLine("given file and prints it to the screen.  With no command-line switches,");
+            Console.WriteLine("it computes the MD5 hash and displays it in hexadecimal format.  Various");
+            Console.WriteLine("switches allow you to change to other hashing algorithms, such as the");
+            Console.WriteLine("SHA family, RIPEMD-160, Whirlpool, and Tiger.  The \"-base64\" switch");
+            Console.WriteLine("causes WinHasher to output hashes in MIME Base64 (RFC 2045) format rather");
+            Console.WriteLine("than hexadecimal.");
+            Console.WriteLine();
+            Console.WriteLine("In multi-file comparison mode, WinHasher computes the specified hash for");
+            Console.WriteLine("each file given and compares the results.  If the hash of every file");
+            Console.WriteLine("matches, then all files in the batch are declared to be the same.  If");
+            Console.WriteLine("one or more hashes do not match the others, a warning will be displayed");
+            Console.WriteLine("indicating as such.  In this way, you can determine whether two or more");
+            Console.WriteLine("files share the same contents despite file name, path, and modification");
+            Console.WriteLine("time differences.");
         }
     }
 }
