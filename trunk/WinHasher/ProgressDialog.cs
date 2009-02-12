@@ -21,7 +21,10 @@
  * UPDATED June 18, 2008 (1.3):  Added necessary flags and members to introduce Base64 output as
  * an option along with hexadecimal.
  * 
- * This program is Copyright 2008, Jeffrey T. Darlington.
+ * UPDATED February 12, 2009 (1.4):  Added necessary flags and members to introduce abstracted
+ * output type methods in HashEngine.
+ * 
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -108,10 +111,9 @@ namespace com.gpfcomics.WinHasher
         private string singleHash;
 
         /// <summary>
-        /// A boolean flag indicating whether the output should be in Base64 format (true) or
-        /// hexadecimal (false).  The default is false, or output in hexadecimal.
+        /// The output encoding for the resulting hash
         /// </summary>
-        private bool base64 = false;
+        private OutputType outputType = OutputType.Hex;
 
         #endregion
 
@@ -160,16 +162,55 @@ namespace com.gpfcomics.WinHasher
         }
 
         /// <summary>
-        /// A boolean flag indicating whether the output should be in Base64 format (true) or
-        /// hexadecimal (false).  The default is false, or output in hexadecimal.
+        /// The output encoding for the resulting hash. The default is hexadecimal.
+        /// </summary>
+        public OutputType OutputType
+        {
+            get { return outputType; }
+            set { outputType = value; }
+        }
+
+        /// <summary>
+        /// DEPRECIATED: Use OutputType instead. A boolean flag indicating whether the output
+        /// should be in Base64 format (true) or hexadecimal (false).  The default is false, or
+        /// output in hexadecimal.
         /// </summary>
         public bool Base64
         {
-            get { return base64; }
-            set { base64 = value; }
+            get { return outputType == OutputType.Base64; }
+            set
+            {
+                if (value) outputType = OutputType.Base64;
+                else outputType = OutputType.Hex;
+            }
         }
 
         #endregion
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string list and the
+        /// specified hashing algorithm
+        /// </summary>
+        /// <param name="fileList">An array of file path strings to compare</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
+        /// <param name="centerInScreen">True to center in the middle of the screen, false to
+        /// center around the parent window</param>
+        /// <param name="outputType">An enum specifying what format the output string should be
+        /// in (hexadecimal, Base64, etc.)</param>
+        public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen,
+            OutputType outputType)
+        {
+            InitializeComponent();
+            progressBar1.Value = 0;
+            this.files = fileList;
+            this.hashAlgorithm = hashAlgorithm;
+            resultStatus = ResultStatus.NotStarted;
+            filesMatch = false;
+            if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
+            else StartPosition = FormStartPosition.CenterParent;
+            singleMode = false;
+            this.outputType = outputType;
+        }
 
         /// <summary>
         /// Constructs a progress dialog box with the given file path string list and the
@@ -192,7 +233,8 @@ namespace com.gpfcomics.WinHasher
             if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
             else StartPosition = FormStartPosition.CenterParent;
             singleMode = false;
-            this.base64 = base64;
+            if (base64) outputType = OutputType.Base64;
+            else outputType = OutputType.Hex;
         }
 
         /// <summary>
@@ -204,7 +246,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen)
-            : this(fileList, hashAlgorithm, centerInScreen, false)
+            : this(fileList, hashAlgorithm, centerInScreen, OutputType.Hex)
         { }
 
 
@@ -216,8 +258,34 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm)
             :
-            this(fileList, hashAlgorithm, false, false)
+            this(fileList, hashAlgorithm, false, OutputType.Hex)
         {
+        }
+
+        /// <summary>
+        /// Constructs a progress dialog box with the given file path string and the
+        /// specified hashing algorithm
+        /// </summary>
+        /// <param name="filename">A string containing the path to the file to be hashed</param>
+        /// <param name="hashAlgorithm">The hashing algorithm to use</param>
+        /// <param name="centerInScreen">True to center in the middle of the screen, false to
+        /// center around the parent window</param>
+        /// <param name="outputType">An enum specifying what format the output string should be
+        /// in (hexadecimal, Base64, etc.)</param>
+        public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen,
+            OutputType outputType)
+        {
+            InitializeComponent();
+            progressBar1.Value = 0;
+            files = new string[1];
+            files[0] = filename;
+            this.hashAlgorithm = hashAlgorithm;
+            resultStatus = ResultStatus.NotStarted;
+            filesMatch = false;
+            if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
+            else StartPosition = FormStartPosition.CenterParent;
+            singleMode = true;
+            this.outputType = outputType;
         }
 
         /// <summary>
@@ -242,7 +310,8 @@ namespace com.gpfcomics.WinHasher
             if (centerInScreen) StartPosition = FormStartPosition.CenterScreen;
             else StartPosition = FormStartPosition.CenterParent;
             singleMode = true;
-            this.base64 = base64;
+            if (base64) outputType = OutputType.Base64;
+            else outputType = OutputType.Hex;
         }
 
         /// <summary>
@@ -254,7 +323,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
-            : this(filename, hashAlgorithm, centerInScreen, false)
+            : this(filename, hashAlgorithm, centerInScreen, OutputType.Hex)
         {
         }
 
@@ -266,7 +335,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm)
             :
-            this(filename, hashAlgorithm, false, false)
+            this(filename, hashAlgorithm, false, OutputType.Hex)
         {
         }
 
@@ -457,7 +526,7 @@ namespace com.gpfcomics.WinHasher
                 // What we do depends on what mode we're in.  In single-file mode, start hashing
                 // the specified file:
                 if (singleMode)
-                    e.Result = HashEngine.HashFile(hashAlgorithm, files[0], bgWorker, e, base64);
+                    e.Result = HashEngine.HashFile(hashAlgorithm, files[0], bgWorker, e, outputType);
                 // Otherwise, start comparing the hashes of the files in the list:
                 else
                     e.Result = HashEngine.CompareHashes(hashAlgorithm, files, bgWorker, e);

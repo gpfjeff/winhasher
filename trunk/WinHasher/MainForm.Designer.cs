@@ -383,7 +383,9 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox.FormattingEnabled = true;
             this.outputFormatComboBox.Items.AddRange(new object[] {
             "Hexadecimal",
-            "Base64"});
+            "Hex (Caps)",
+            "Base64",
+            "Bubble Babble"});
             this.outputFormatComboBox.Location = new System.Drawing.Point(90, 269);
             this.outputFormatComboBox.Name = "outputFormatComboBox";
             this.outputFormatComboBox.Size = new System.Drawing.Size(116, 21);

@@ -30,7 +30,10 @@
  * switches and the Base64 switch can be entered in either order, but all switches must come
  * before file arguments.  GUI functionality is unaffected.
  * 
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * UPDATED February 12, 2009 (1.4):  Added all-caps hex and Bubble Babble command line options.
+ * Default hash is now SHA-1.
+ * 
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -78,11 +81,11 @@ namespace com.gpfcomics.WinHasher
                 // arguments.  We can't work with the argument array itself because we may
                 // need to strip off the first one if it's a hash switch.
                 string[] files = null;
-                // Default to doing MD5 unless otherwise instructed:
-                Hashes hash = Hashes.MD5;
-                string hashString = "MD5";
-                // By default, output hex instead of Base64:
-                bool base64 = false;
+                // Default to doing SHA-1 unless otherwise instructed:
+                Hashes hash = Hashes.SHA1;
+                string hashString = "SHA-1";
+                // By default, output hex:
+                OutputType outputType = OutputType.Hex;
                 // All our command switches come first, so step through them:
                 while (args[0].StartsWith("-"))
                 {
@@ -120,7 +123,15 @@ namespace com.gpfcomics.WinHasher
                             break;
                         // But this switch enables Base64 hashing:
                         case "-base64":
-                            base64 = true;
+                            outputType = OutputType.Base64;
+                            break;
+                        // And this puts us in all-caps hex mode:
+                        case "-hexcaps":
+                            outputType = OutputType.CapHex;
+                            break;
+                        // And this puts us in Bubble Babble mode:
+                        case "-bubbab":
+                            outputType = OutputType.BubbleBabble;
                             break;
                         // If we didn't get a valid hash switch, complain:
                         default:
@@ -152,7 +163,8 @@ namespace com.gpfcomics.WinHasher
                             if (File.Exists(files[0]))
                             {
                                 // Create a new progress dialog.  This does the actual work:
-                                ProgressDialog pd = new ProgressDialog(files[0], hash, true, base64);
+                                ProgressDialog pd = new ProgressDialog(files[0], hash, true,
+                                    outputType);
                                 pd.ShowDialog();
                                 // If we got back a successful result, show the hash.  Otherwise,
                                 // the error message should already be shown so do nothing.

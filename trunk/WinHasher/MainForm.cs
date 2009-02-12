@@ -26,7 +26,11 @@
  * to get the hash.  Also added the output drop-down to allow choosing between hexadecimal (which
  * is the most common output format) and Base64 (which I personally tend to use more often).
  * 
- * This program is Copyright 2008, Jeffrey T. Darlington.
+ * UPDATE February 12, 2009 (1.4):  Added changes to support abstractions of output type in
+ * HashEngine so we can expand beyond just hexadecimal and Base64.  Added all-caps hex and
+ * Bubble Babble output formats.  Added warning discouraging the use of MD5 once per session.
+ * 
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -83,10 +87,15 @@ namespace com.gpfcomics.WinHasher
         private string lastDirectory;
 
         /// <summary>
-        /// Whether or not to display output in Base64 (true); by default (false), show
-        /// hexadecimal instead
+        /// The ouput encoding for resulting hashes
         /// </summary>
-        private bool outputBase64 = false;
+        private OutputType outputType = OutputType.Hex;
+
+        /// <summary>
+        /// We want to show a warning the first time MD5 is chosen from the hash drop-down
+        /// list.  If this flag is true, the pop-up will appear.  If false, it won't.
+        /// </summary>
+        private bool showMD5Warning = true;
 
         #endregion
 
@@ -107,9 +116,10 @@ namespace com.gpfcomics.WinHasher
             hashComboBox.Items.Add("RIPEMD-160");
             hashComboBox.Items.Add("Whirlpool");
             hashComboBox.Items.Add("Tiger");
-            // Default to MD5:
-            hashComboBox.SelectedIndex = 0;
-            hash = Hashes.MD5;
+            // We used to default to MD5, but that's been severely broken.  Default to SHA-1
+            // instead.
+            hashComboBox.SelectedIndex = 1;
+            hash = Hashes.SHA1;
             // Populate the encoding drop-down:
             foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
             {
@@ -288,7 +298,7 @@ namespace com.gpfcomics.WinHasher
                     // Create the progress dialog and show it.  This kicks off the
                     // actual hashing process.
                     ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text.Trim(), hash, 
-                        false, outputBase64);
+                        false, outputType);
                     pd.ShowDialog();
                     // What we do next depends on the result:
                     switch (pd.Result)
@@ -514,7 +524,7 @@ namespace com.gpfcomics.WinHasher
                 try
                 {
                     outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
-                        (Encoding)encodingComboBox.SelectedItem, outputBase64);
+                        (Encoding)encodingComboBox.SelectedItem, outputType);
                 }
                 // This should be more specific:
                 catch (Exception ex)
@@ -542,6 +552,18 @@ namespace com.gpfcomics.WinHasher
             {
                 case "MD5":
                     hash = Hashes.MD5;
+                    // MD5 is broken.  I mean *REALLY* broken.  Warn the user once per session
+                    // that they shouldn't be using it:
+                    if (showMD5Warning)
+                    {
+                        MessageBox.Show("Please note that the MD5 algorithm is no longer considered" +
+                            " secure by most security experts. Therefore, its use should be " +
+                            " strongly discouraged. WinHasher will continue to support MD5, but" +
+                            " will display this warning the first time it is selected. If at all" +
+                            " possible, you should consider using a stronger algorithm.", "Warning",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        showMD5Warning = false;
+                    }
                     break;
                 case "SHA-1":
                     hash = Hashes.SHA1;
@@ -564,12 +586,12 @@ namespace com.gpfcomics.WinHasher
                 case "Tiger":
                     hash = Hashes.Tiger;
                     break;
-                // This should never happen, but default to MD5 if we get something
+                // This should never happen, but default to SHA-1 if we get something
                 // invalid:
                 default:
-                    MessageBox.Show("Error: Invalid hash. Defaulting to MD5", "Error",
+                    MessageBox.Show("Error: Invalid hash. Defaulting to SHA-1", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    hash = Hashes.MD5;
+                    hash = Hashes.SHA1;
                     break;
             }
         }
@@ -621,13 +643,28 @@ namespace com.gpfcomics.WinHasher
 
         /// <summary>
         /// When the selected index on the output format list box changes, set the flag to
-        /// determine whether to output hexadeciaml or Base64 output
+        /// determine the output format of the resulting hash
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void outputFormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            outputBase64 = (string)outputFormatComboBox.SelectedItem == "Base64";
+            switch ((string)outputFormatComboBox.SelectedItem)
+            {
+                case "Base64":
+                    outputType = OutputType.Base64;
+                    break;
+                case "Bubble Babble":
+                    outputType = OutputType.BubbleBabble;
+                    break;
+                case "Hex (Caps)":
+                    outputType = OutputType.CapHex;
+                    break;
+                case "Hexadecimal":
+                default:
+                    outputType = OutputType.Hex;
+                    break;
+            }
         }
 
         #endregion

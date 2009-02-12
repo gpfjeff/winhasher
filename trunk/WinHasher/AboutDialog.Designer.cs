@@ -55,7 +55,7 @@ namespace com.gpfcomics.WinHasher
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(340, 23);
             this.label1.TabIndex = 1;
-            this.label1.Text = "© Copyright 2008, Jeffrey T. Darlington.";
+            this.label1.Text = "© Copyright 2009, Jeffrey T. Darlington.";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.toolTip1.SetToolTip(this.label1, "The person to blame\r\nfor this mess.");
             // 

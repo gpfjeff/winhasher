@@ -16,8 +16,11 @@
  * options.  See the usage method for details on using this program.
  * 
  * UPDATE June 19, 2008 (1.3):  Added -base64 switch and Base64 output option.
+ *
+ * UPDATE February 12, 2009 (1.4):  Added -hexcaps switch and all-caps hexadcimal output, as well
+ * as -bubbab and Bubble Babble.
  * 
- * This program is Copyright 2008, Jeffrey T. Darlington.
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -64,8 +67,8 @@ namespace com.gpfcomics.WinHasher.hashconsole
                 string[] files = null;
                 // Default to doing MD5 unless otherwise instructed:
                 Hashes hash = Hashes.MD5;
-                // Default to hexadecimal output rather than Base64:
-                bool base64 = false;
+                // Default to hexadecimal output:
+                OutputType outputType = OutputType.Hex;
                 // All command line arguments come first, so step through those:
                 while (args[0].StartsWith("-"))
                 {
@@ -98,7 +101,15 @@ namespace com.gpfcomics.WinHasher.hashconsole
                             break;
                         // But this one puts us in Base64 mode:
                         case "-base64":
-                            base64 = true;
+                            outputType = OutputType.Base64;
+                            break;
+                        // And this outputs hex with capital letters:
+                        case "-hexcaps":
+                            outputType = OutputType.CapHex;
+                            break;
+                        // And this outputs Bubble Babble:
+                        case "-bubbab":
+                            outputType = OutputType.BubbleBabble;
                             break;
                         // If we didn't get a valid switch, complain:
                         default:
@@ -126,9 +137,16 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         // it a try:
                         try
                         {
+                            // Print out a warning if they chose MD5:
+                            if (hash == Hashes.MD5)
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine("WARNING: MD5 is no longer considered a secure hashing algorithm.  You");
+                                Console.WriteLine("may want to consider using a stronger algorithm whenever possible.");
+                            }
                             // This should be simple enough:
                             Console.WriteLine();
-                            Console.WriteLine(HashEngine.HashFile(hash, files[0], base64));
+                            Console.WriteLine(HashEngine.HashFile(hash, files[0], outputType));
                         }
                         #region Catch Exceptions
                         // Our hash engine can throw its own exceptions, which usually are just other
@@ -225,23 +243,24 @@ namespace com.gpfcomics.WinHasher.hashconsole
         {
             Console.WriteLine();
             Console.WriteLine(version);
-            Console.WriteLine("Copyright 2008, Jeffrey T. Darlington.  All rights reserved.");
+            Console.WriteLine("Copyright 2009, Jeffrey T. Darlington.  All rights reserved.");
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|");
-            Console.WriteLine("       -tiger] [-base64] filename1 [filename2 ...]");
+            Console.WriteLine("       -tiger] [-base64|-hexcaps|-bubbab] filename1 [filename2 ...]");
             Console.WriteLine();
             Console.WriteLine("WinHasher is a command-line cryptographic hash generator for files.  It");
             Console.WriteLine("runs in one of two modes:  single file hashing and multi-file comparison.");
             Console.WriteLine();
             Console.WriteLine("In single file mode, WinHasher computes the cryptographic hash of the");
             Console.WriteLine("given file and prints it to the screen.  With no command-line switches,");
-            Console.WriteLine("it computes the MD5 hash and displays it in hexadecimal format.  Various");
-            Console.WriteLine("switches allow you to change to other hashing algorithms, such as the");
-            Console.WriteLine("SHA family, RIPEMD-160, Whirlpool, and Tiger.  The \"-base64\" switch");
+            Console.WriteLine("it computes the SHA-1 hash and displays it in hexadecimal format.  Various");
+            Console.WriteLine("switches allow you to change to other hashing algorithms, such as MD5,");
+            Console.WriteLine("the SHA family, RIPEMD-160, Whirlpool, and Tiger.  The \"-base64\" switch");
             Console.WriteLine("causes WinHasher to output hashes in MIME Base64 (RFC 2045) format rather");
-            Console.WriteLine("than hexadecimal.");
+            Console.WriteLine("than hexadecimal, \"-hexcaps\" outputs hexadecimal with all capital letters,");
+            Console.WriteLine("and \"-bubbab\" uses Bubble Babble encoding.");
             Console.WriteLine();
             Console.WriteLine("In multi-file comparison mode, WinHasher computes the specified hash for");
             Console.WriteLine("each file given and compares the results.  If the hash of every file");
