@@ -17,7 +17,10 @@
  *  
  * UPDATE June 19, 2008 (1.3):  Added -base64 switch and Base64 output option.
  * 
- * This program is Copyright 2008, Jeffrey T. Darlington.
+ * UPDATE February 12, 2009 (1.4):  Added -hexcaps switch and all-caps hexadcimal output, as well
+ * as -bubbab and Bubble Babble.
+ * 
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -59,11 +62,13 @@ namespace com.gpfcomics.WinHasher.md5console
                 return;
             }
             // Default to hexadecimal output:
-            bool base64 = false;
+            OutputType outputType = OutputType.Hex;
             // Look to see if we got the Base64 flag and, if so, turn it on:
             while (args.Length > 0 && args[0].StartsWith("-"))
             {
-                if (args[0].ToLower() == "-base64") base64 = true;
+                if (args[0].ToLower() == "-base64") outputType = OutputType.Base64;
+                else if (args[0].ToLower() == "-hexcaps") outputType = OutputType.CapHex;
+                else if (args[0].ToLower() == "-bubbab") outputType = OutputType.BubbleBabble;
                 string[] args2 = new string[args.Length - 1];
                 Array.Copy(args, 1, args2, 0, args.Length - 1);
                 args = args2;
@@ -87,7 +92,7 @@ namespace com.gpfcomics.WinHasher.md5console
                 {
                     // This should be simple enough:
                     Console.WriteLine();
-                    Console.WriteLine(HashEngine.MD5HashFile(args[0], base64));
+                    Console.WriteLine(HashEngine.MD5HashFile(args[0], outputType));
                 }
                 #region Catch Exceptions
                 // Our hash engine can throw its own exceptions, which usually are just other
@@ -165,18 +170,20 @@ namespace com.gpfcomics.WinHasher.md5console
         {
             Console.WriteLine();
             Console.WriteLine(version);
-            Console.WriteLine("Copyright 2008, Jeffrey T. Darlington.  All rights reserved.");
+            Console.WriteLine("Copyright 2009, Jeffrey T. Darlington.  All rights reserved.");
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
-            Console.WriteLine("Usage: md5 [-base64] filename1 [filename2 ...]");
+            Console.WriteLine("Usage: md5 [-base64|-hexcaps|-bubbab] filename1 [filename2 ...]");
             Console.WriteLine();
             Console.WriteLine("WinHasher MD5 is a command-line MD5 cryptographic hash generator for files.");
             Console.WriteLine("It runs in one of two modes:  single file hashing and multi-file comparison.");
             Console.WriteLine();
             Console.WriteLine("In single file mode, WinHasher computes the MD5 hash of the given file and");
             Console.WriteLine("prints it to the screen.  The \"-base64\" switch causes WinHasher to output");
-            Console.WriteLine("hashes in MIME Base64 (RFC 2045) format rather than hexadecimal.");
+            Console.WriteLine("hashes in MIME Base64 (RFC 2045) format rather than hexadecimal, \"-hexcaps\"");
+            Console.WriteLine("outputs hexadecimal with all capital letters, and \"-bubbab\" uses Bubble");
+            Console.WriteLine("Babble encoding.");
             Console.WriteLine();
             Console.WriteLine("In multi-file comparison mode, WinHasher computes the MD5 hash for each file");
             Console.WriteLine("given and compares the results.  If the hash of every file matches, then all");
@@ -184,6 +191,11 @@ namespace com.gpfcomics.WinHasher.md5console
             Console.WriteLine("match the others, a warning will be displayed indicating as such.  In this");
             Console.WriteLine("way, you can determine whether two or more files share the same contents");
             Console.WriteLine("despite file name, path, and modification time differences.");
+            Console.WriteLine();
+            //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
+            Console.WriteLine("WARNING: MD5 is no longer considered secure by serious cryptographers and");
+            Console.WriteLine("should be avoided.  If at all possible, you should consider using a stronger");
+            Console.WriteLine("hashing algorithm.");
         }
     }
 }
