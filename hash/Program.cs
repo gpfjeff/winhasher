@@ -65,8 +65,8 @@ namespace com.gpfcomics.WinHasher.hashconsole
                 // arguments.  We can't work with the argument array itself because we may
                 // need to strip off the first one if it's a hash switch.
                 string[] files = null;
-                // Default to doing MD5 unless otherwise instructed:
-                Hashes hash = Hashes.MD5;
+                // Default to doing SHA-1 unless otherwise instructed:
+                Hashes hash = Hashes.SHA1;
                 // Default to hexadecimal output:
                 OutputType outputType = OutputType.Hex;
                 // All command line arguments come first, so step through those:
@@ -137,6 +137,36 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         // it a try:
                         try
                         {
+                            // Display which hash we're running:
+                            string hashString = "SHA-1";
+                            switch (hash)
+                            {
+                                case Hashes.MD5:
+                                    hashString = "MD5";
+                                    break;
+                                case Hashes.RIPEMD160:
+                                    hashString = "RIPEMD-160";
+                                    break;
+                                case Hashes.SHA256:
+                                    hashString = "SHA-256";
+                                    break;
+                                case Hashes.SHA384:
+                                    hashString = "SHA-384";
+                                    break;
+                                case Hashes.SHA512:
+                                    hashString = "SHA-512";
+                                    break;
+                                case Hashes.Tiger:
+                                    hashString = "Tiger";
+                                    break;
+                                case Hashes.Whirlpool:
+                                    hashString = "Whirlpool";
+                                    break;
+                                default:
+                                    hashString = "SHA-1";
+                                    break;
+                            }
+
                             // Print out a warning if they chose MD5:
                             if (hash == Hashes.MD5)
                             {
@@ -146,7 +176,7 @@ namespace com.gpfcomics.WinHasher.hashconsole
                             }
                             // This should be simple enough:
                             Console.WriteLine();
-                            Console.WriteLine(HashEngine.HashFile(hash, files[0], outputType));
+                            Console.WriteLine(hashString + ": " + HashEngine.HashFile(hash, files[0], outputType));
                         }
                         #region Catch Exceptions
                         // Our hash engine can throw its own exceptions, which usually are just other
