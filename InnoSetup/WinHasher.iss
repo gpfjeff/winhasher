@@ -70,6 +70,7 @@ Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}
 [UninstallRun]
 Filename: {app}\PathTweaker.exe; Parameters: "-remove ""{app}"""; WorkingDir: {app}; Flags: runhidden; Components: Console_applications
 [Code]
+// InitializeSetup:  Check to see if .NET 2.0 is installed and abort if it isn't.
 function InitializeSetup(): Boolean;
 var
    DotNetRegKey: String;
@@ -107,4 +108,33 @@ begin
       //MsgBox('Found .NET Framework 2.0 or higher', mbInformation, MB_OK);
       Result := True;
    end;
+end;
+// DeinitializeUninstall:  Offer to remove our registry keys upon uninstall if the user
+// doesn't want to keep them.
+procedure DeinitializeUninstall();
+var
+	WinHasherRegKey: String;
+	GPFComicsRegKey: String;
+begin
+	// Define both the GPF Comics key and the WinHasher key.  We'll definitely delete the
+	// WinHasher key if present and also the GPF Comics key if no other subkeys exists.
+	GPFComicsRegKey := 'SOFTWARE\GPF Comics';
+	WinHasherRegKey := GPFComicsRegKey + '\WinHasher';
+	// If the WinHasher key exists...
+	if RegKeyExists(HKCU, WinHasherRegKey) then begin
+		// Confirm with the user that we'll delete their settings:
+		if MsgBox('Would you like to remove your saved preferences from the registry?  If you plan to reinstall WinHasher, you should probably say no.', mbConfirmation, MB_YESNO) = IDYES then begin
+			// They said OK, so try to delete it:
+			if (RegDeleteKeyIncludingSubkeys(HKCU, WinHasherRegKey)) then begin
+				// If that worked, also delete the GPF Comics key if it's empty:
+				RegDeleteKeyIfEmpty(HKCU, GPFComicsRegKey);
+			end
+			// The delete didn't work.  We should probably warn the user that we tried and
+			// failed.  Note that we don't really care to inform them if (a) the keys don't
+			// exist (why bother?) and (b) if they said no to removing them.
+			else begin
+				MsgBox('Your preferences could not be deleted for some reason.  Sorry...', mbInformation, MB_OK);
+			end;
+		end;
+	end;
 end;
