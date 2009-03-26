@@ -7,7 +7,7 @@ blockquote { background: #EEEEEE; }
 </head>
 <body><h1>WinHasher Windows App Help</h1>
 <p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
-Last Updated February 13, 2009</p>
+Last Updated March 26, 2009</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -32,6 +32,7 @@ Last Updated February 13, 2009</p>
 		<li><a href="#comparetab">The Compare Files Tab</a></li>
 		<li><a href="#hashtext">The Hash Text Tab</a></li>
 		<li><a href="#dragndrop">Drag-and-Drop in WinHasher</a></li>
+		<li><a href="#savesettings">Remembering Your Preferences</a></li>
 		<li><a href="#sendto">The "SendTo" Shortcuts</a></li>
 	</ul>
 </ul>
@@ -103,7 +104,7 @@ Last Updated February 13, 2009</p>
 
 <a name="nonwin"><h3>WinHasher Without the Win: Non-Windows Platforms</h3></a>
 
-<p>One of the beauties about using the .NET Framework to develop WinHasher is that it's technically not restricted to Microsoft Windows. Anyone can (in theory) develop their own .NET framework based on Microsoft's specifications to run on any platform, and thus run any .NET application built for that framework. <a href="http://www.mono-project.com/">Mono</a> is one such project which runs .NET client and server applications on Linux, Solaris, Mac OS X, Windows, and Unix. However, at the time of this writing, Mono mostly supports .NET 1.1 and only partially supports .NET 2.0. <a href="http://www.mono-project.com/Moma">MoMA</a> reports that WinHasher should work with Mono 1.2.5 (or higher, I assume). However, I do not plan to officially offer support for non-Windows use of WinHasher. Personally, I think there are much better tools already available for other OSes, and you'd be better off using those instead. Still, if you're a glutton for punishment, feel free to give it a try.</p>
+<p>One of the beauties about using the .NET Framework to develop WinHasher is that it's technically not restricted to Microsoft Windows. Anyone can (in theory) develop their own .NET framework based on Microsoft's specifications to run on any platform, and thus run any .NET application built for that framework. <a href="http://www.mono-project.com/">Mono</a> is one such project which runs .NET client and server applications on Linux, Solaris, Mac OS X, Windows, and Unix. However, at the time of this writing, Mono mostly supports .NET 1.1 and only partially supports .NET 2.0. <a href="http://www.mono-project.com/Moma">MoMA</a> reports that WinHasher should work with Mono 2.2 (or higher, I assume). However, I do not plan to officially offer support for non-Windows use of WinHasher. Personally, I think there are much better tools already available for other OSes, and you'd be better off using those instead. Still, if you're a glutton for punishment, feel free to give it a try.</p>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
@@ -119,6 +120,7 @@ Last Updated February 13, 2009</p>
 <p>At the bottom of the WinHasher window is a series of common controls that apply to all functional tabs. The most important of these controls is the <strong>Hash drop-down list</strong>. This drop-down allows you to select which cryptographic hash to perform in the next operation. There are <a href="#hashes">a number of hashes available</a> in WinHasher; which hash you use is up to you. Each one has its strengths and weaknesses. However, if you are planning to validate a downloaded file, you'll want to select the same hash as the one used by the file's site online. If generating hashes for your own purposes, try to take into account the various caveats when choosing an algorithm to use.</p>
 <p>Beneath the hash drop-down is the <strong>Output Format drop-down list</strong>. By default, WinHasher outputs hashes in lower-case hexadecimal format, which is the most popular way of displaying hashes. However, <a href="#output">several other options are available</a>. If you prefer the letters of your hex format to be upper-case (A-F) rather than lower case (a-f), choose "Hex (Caps)". Other options include Base64 and Bubble Babble. Your choice of output format is a personal preference, of course, and which you use is entirely up to you. As with hash algorithms, use the same output format as the original when validating downloaded files, and your personal preference for your own uses.</p>
 <p>To the right of to the Hash drop-down is the <strong>About button</strong>. This button displays another window that shows the version number, copyright and license information, and (if this file is present) a button to launch this help file. Below the About button and to the right of the Output Format drop-down is the <strong>Close button</strong>, which oddly enough closes WinHasher. WinHasher can also be closed by the standard Close button in the title bar or by the standard Windows Alt+F4 hotkey combination.</p>
+<p>At the very bottom of the form is a checkbox labled <strong>Show verbose tooltip help</strong>. It should be checked by default. When this checkbox is checked, WinHasher will display verbose comments in pop-up tooltip windows to help you figure out what each control does. This is can be extremely helpful for first-time users learning how the program works... or incredibly annoying for experienced users who know what they're doing. Clearing this checkbox can ease your sanity by turning the tooltips off if you find them getting in your way too much.</p>
 
 <a name="singlefile"><h3>The Hash Single File Tab</h3></a>
 
@@ -144,6 +146,19 @@ Last Updated February 13, 2009</p>
 <p>If you drop a single file on the <a href="#singlefile">Hash Single File tab</a>, that file's location will be populated in the File to Hash text box and the hash specified in the <a href="#commongui">Hash drop-down</a> will be automatically computed. To use a different hashing algorithm, change the hash in the Hash drop-down and click the Compute Hash button. If you drop multiple files into this tab, it will produce an error, as this tab only works on one file at a time.</p>
 <p>If you drop one or more files onto the <a href="#comparetab">Compare Files tab</a>, the files' paths will be added to the Files to Compare list box. Duplicate paths are silently dropped. Files that are already in the list are preserved, so you can drag and drop files from various locations and slowly build up your list without clearing it. Removing files operates as described above. Once the list is ready, you can click the Compare Hashes button to compare the files.</p>
 <p>Drag and drop is not currently enabled for the <a href="#hashtext">Hash Text tab</a>. Copy and paste text into the text box to hash large portions of text.</p>
+
+<a name="savesettings"><h3>Remembering Your Preferences</h3></a>
+
+<p>Starting with version 1.4, WinHasher (on Windows, at least) saves a small bit of preference information to the Windows registry. It will remember the following settings:</p>
+<ul>
+<li>The last tab used;</li>
+<li>The last hashing algorithm used;</li>
+<li>The output format used;</li>
+<li>The last text encoding (on the Hash Text tab) used;</li>
+<li>The last folder or directory used for browsing files;</li>
+<li>And the show tooltips setting.</li>
+</ul>
+<p>If you use the installer to install WinHasher, you can also use the uninstall feature to delete these preferences from the registry when the program is uninstalled. You may also elect to leave these preferences in place if you plan to reinstall WinHasher later.</p>
 
 <a name="sendto"><h3>The "SendTo" Shortcuts</h3></a>
 
