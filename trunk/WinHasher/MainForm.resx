@@ -117,6 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="hashSingleTextBox.ToolTip" xml:space="preserve">
+    <value>This text box contains the resulting hash computed
+on the file whose path is in the text box above,
+using the hashing algorithm specified below.  You
+can copy this value and paste it anywhere you
+like, such as to a text file, HTML page, or other
+document.</value>
+  </data>
   <data name="singleTabPage.ToolTip" xml:space="preserve">
     <value>This tab can be used to compute the hash of
 an individual file.  This can be useful for validating
@@ -128,16 +139,12 @@ the Hash text box.  To change the hashing
 algorithm, select a different hash from the drop-
 down box at the bottom of the form.</value>
   </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="hashSingleTextBox.ToolTip" xml:space="preserve">
-    <value>This text box contains the resulting hash computed
-on the file whose path is in the text box above,
-using the hashing algorithm specified below.  You
-can copy this value and paste it anywhere you
-like, such as to a text file, HTML page, or other
-document.</value>
+  <data name="compareFilesListBox.ToolTip" xml:space="preserve">
+    <value>This is the list of currently selected files to compare.
+To add more files to this list, click the Add button and
+select as many files as you would like.  You can also
+drag files from somewhere else and drop them onto
+this tab to add them to the list.</value>
   </data>
   <data name="compareTabPage.ToolTip" xml:space="preserve">
     <value>This tab can be used to compare two or more files
@@ -152,13 +159,6 @@ button.  This comparison is an all-or-nothing check;
 if any does not match any of the others, the entire
 batch is said to fail.</value>
   </data>
-  <data name="compareFilesListBox.ToolTip" xml:space="preserve">
-    <value>This is the list of currently selected files to compare.
-To add more files to this list, click the Add button and
-select as many files as you would like.  You can also
-drag files from somewhere else and drop them onto
-this tab to add them to the list.</value>
-  </data>
   <data name="textTabPage.ToolTip" xml:space="preserve">
     <value>This tab can be used to compute the hash of
 an a simple text string.  Enter the text in the
@@ -172,21 +172,20 @@ the output.</value>
     <value>This drop-down list contains the available hashing
 algorithms on this system.  Select a hashing
 algorithm from the list to change which one to
-use.  The default is MD5, although it is not
-recommended for extensive use as MD5 has been
-proven to have collisions.  The higher SHA
-algorithms are considered more secure.</value>
+use.  The default is SHA-1; MD5 used to be the
+default but is not recommended for extensive
+use as it has been proven to have collisions.</value>
   </data>
   <data name="outputFormatComboBox.ToolTip" xml:space="preserve">
     <value>This drop-down list allows you to change the
 hash output format. Most hashes are
 displayed in hexadecimal, but Base64 has
- the advantage of being slightly more compact
+the advantage of being slightly more compact
 while Bubble Babble makes "words" that are
-easier to pronounce vocally than raw hex.
-The default is hexadecimal using lower-case
-letters.  To get hex output with upper-case
-letters, choose "Hex (Caps)".</value>
+easier to pronounce vocally.  The default is
+hexadecimal using lower-case letters.  To
+get hex output with upper-case letters,
+choose "Hex (Caps)".</value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>44</value>
