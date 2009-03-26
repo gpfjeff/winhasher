@@ -1,0 +1,175 @@
+<html><head><title>WinHasher Windows App Help</title>
+<style type="text/css">
+.alert { color: red; font-weight: bold; background: #FFFFBB; }
+code, pre { color: maroon; }
+blockquote { background: #EEEEEE; }
+</style>
+</head>
+<body><h1>WinHasher Windows App Help</h1>
+<p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
+Last Updated March 26, 2009</p>
+
+<a name="toc"><h2>Table of Contents</h2></a>
+<ul>
+	<li><a href="#into">Introduction</a></li>
+	<ul>
+		<li><a href="#coreconcepts">Core Concepts</a></li>
+		<li><a href="#whywinhasher">Why WinHasher?</a></li>
+		<li><a href="#hashes">Currently Supported Hashes</a></li>
+		<li><a href="#output">Currently Supported Output Formats</a></li>
+	</ul>
+	<li><a href="#install">Installing WinHasher</a></li>
+	<ul>
+		<li><a href="#sysreqs">System Requirements</a></li>
+		<li><a href="#installer">Running the Installer</a></li>
+		<li><a href="#nonwin">WinHasher Without the Win: Non-Windows Platforms</a></li>
+	</ul>
+	<li><a href="#using">Using WinHasher</a></li>
+	<ul>
+		<li><a href="#launch">Launching WinHasher</a></li>
+		<li><a href="#commongui">Common Controls</a></li>
+		<li><a href="#singlefile">The Hash Single File Tab</a></li>
+		<li><a href="#comparetab">The Compare Files Tab</a></li>
+		<li><a href="#hashtext">The Hash Text Tab</a></li>
+		<li><a href="#dragndrop">Drag-and-Drop in WinHasher</a></li>
+		<li><a href="#savesettings">Remembering Your Preferences</a></li>
+		<li><a href="#sendto">The "SendTo" Shortcuts</a></li>
+	</ul>
+</ul>
+
+<a name="intro"><h2>Introduction</h2></a>
+
+<a name="coreconcepts"><h3>Core Concepts</h3></a>
+
+<p>From <a href="http://www.wikipedia.org/">Wikipedia:</a></p>
+<blockquote><p>In cryptography, a <em>cryptographic hash function</em> is a transformation that takes an input and returns a fixed-size string, which is called the hash value. Hash functions with this property are used for a variety of computational purposes, including cryptography. The hash value is a concise representation of the longer message or document from which it was computed. The message digest is a sort of "digital fingerprint" of the larger document. Cryptographic hash functions are used to do message integrity checks and digital signatures in various information security applications, such as authentication and message integrity.</p>
+<p>A hash function takes a long string (or "message") of any length as input and produces a fixed length string as output, sometimes termed a <em>message digest</em> or a <em>digital fingerprint.</em> A hash function (also called a "digest" or a "checksum") is a kind of "signature" for a stream of data that represents the contents. One analogy that explains the role of the hash function would be the "tamper-evident" seals used on a software package.</p>
+<p>In various standards and applications, the two most-commonly used hash functions are MD5 and SHA-1.</p></blockquote>
+<p>For more information, <a href="http://en.wikipedia.org/wiki/Cryptographic_hash_function">look up "cryptographic hash function" on Wikipedia</a>.</p>
+<p>As described in the synopsis above, one of the primary uses of cryptographic hashes is to verify and validate computer software or digital files. It is common practice among many developers, especially in the <a href="http://www.opensource.org/">Open Source</a> community, to provide a hash of a file next to its download link. Once the user has downloaded the file, they can generate a hash using the same hashing algorithm on their own machine and compare this computed hash to the hash listed on the originating site. If the two hashes match, the user can then safely assume that (1) the downloaded file arrived intact and uncorrupted and (2) it has not been tampered with since the original hash displayed on the site was posted.</p>
+<p>However, security experts will wisely caution that this does <strong><em>NOT</em></strong> guarantee that downloaded file is completely safe. A hacker or malicious system administrator could have easily modified the file after the developer posted it, recomputed the hash, and placed the modified file and hash in the original's place. It also does not guarantee that the file is free from viruses, trojans, or other malware that have infected the file before the hash was computed. Therefore, cryptographic hashes should be just one in a series of checks a user should perform before deciding that a file downloaded from the Internet is safe to use.</p>
+
+<a name="whywinhasher"><h3>Why WinHasher?</h3></a>
+
+<p>Cryptographic hashing is readily available on many computer operating systems. It often comes built-in to the OS or as a (relatively) standard optional package. Mac OS, Linux, Free/OpenBSD, and many other OSes include <a href="http://www.openssl.org/">OpenSSL</a> as either a pre-installed or easily installable optional component. OpenSSL includes several command-line components for generating cryptographic hashes and there are number of graphical user interface (GUI) applications that allow point-and-click access to its capabilities.</p>
+<p>Not so with Microsoft Windows. Windows does not include any built-in utilities for cryptographic hashes, and installing and using OpenSSL on Windows is not a trivial matter. The typical Windows user of today is much less familiar with the Windows Console (i.e. command line) let alone compiling software from source. And while cryptographic hashes are pretty much standard in programming libraries such as the Microsoft .NET Framework, the user is required to write and compile their own applications to use them.</p>
+<p>This "hashing divide" has annoyed me for some time. While I consider myself to be an operating system agnostic and find myself equally home on both Windows and Linux, there are many times I've downloaded Windows-only software but didn't have the capability to verify the file's hash. Either I've been unable to install and run OpenSSL on a given machine, or I haven't had the time or access to a Linux box to copy the file over, generate the hash, and verify it before install. So I wanted to create a quick, simple, easy-to-use Windows app so I could get the hash of a file without waiting or moving it around. I also thought it would be a nice idea to be able to quickly compare the hashes of multiple files without having to generate each one and manually check every hexadecimal digit, so I added that functionality too. After writing the program, I thought it might be useful to others, so I decided to share.</p>
+
+<a name="hashes"><h3>Currently Supported Hashes</h3></a>
+
+<p>WinHasher supports the following cryptographic hashes, which are made available by default through the Microsoft .NET Framework either as pure managed classes or interfaces to the unmanaged Microsoft CryptoAPI:</p>
+<ul>
+	<li><strong>MD5:</strong> A very common 128-bit hashing algorithm that is an Internet standard (<a href="http://tools.ietf.org/html/rfc1321">RFC 1321</a>). This is usually expressed as a 32-character hexadecimal number and was designed by Ronald Rivest in 1991 to replace an earlier hash function, MD4. In 1996 and 2004, flaws were discovered in MD5 that now make it questionable for serious security purposes. In 2009, even more devastating evidence was presented when researchers demonstrated that fake SSL certificate authorities could be generated by using signatures from legitimate CAs signing certificates using MD5. <span class="alert">Therefore, we strongly discourage the use of MD5 for any purpose where security is paramount.</span> Still, MD5 continues to be widely used, so its support is generally expected. WinHasher will display a warning once per session whenever MD5 is first selected.</li>
+	<li><strong>SHA-1:</strong> Considered the successor to MD5, SHA-1 produces a 160-bit digest. It was first published in 1995 as a "correction" to the previously released and withdrawn SHA-0 algorithm. While it is generally considered more secure than MD5, several attacks against it have been published and its future use is generally discouraged. However, like MD5, its use online continues to be prevalent.</li>
+	<li><strong>SHA-256:</strong> Part of the SHA-2 family of successor algorithms to SHA-1 first published in 2001, SHA-256 generates a 256-bit digest. It is computed with 32-bit words and uses a block size of 512 bits. No known weaknesses have been found as of this writing.</li>
+	<li><strong>SHA-384:</strong> This algorithm is a truncated version of SHA-512, computed with a different initial value. It produces a 384-bit digest and has no known weaknesses.</li>
+	<li><strong>SHA-512:</strong> Like SHA-256, this algorithm is a SHA-2 successor to SHA-1. It produces a 512-bit digest, using 64-bit words and a block size of 1024 bits. It has no known weaknesses.</li>
+	<li><strong>RIPEMD-160:</strong> This 160-bit digest algorithm was developed in Europe and first published in 1996. It was designed in the open academic community and is not known to be constrained by any patents. It is not as widely used as MD5 or the SHA family, which may have caused it to be less scrutinized. A collision was found in the original 128-bit RIPEMD algorithm in 2004, so its use should be discouraged. However, no known collision exists in RIPEMD-160.</li>
+</ul>
+<p>In addition, the following hashing algorithms have been added, either from freely available sources or completely written from scratch by myself:</p>
+<ul>
+	<li><strong>Whirlpool:</strong> This 512-bit digest algorithm was designed by Vincent Rijmen and Paulo S. L. M. Barreto. Note that this is the 2003 second revision of Whirlpool, not the original "Whirlpool-0" of 2000 or the 2001 first revision "Whirlpool-T". For hashes of data shorter than 64 bits (8 bytes) this hash function has some of the same fundamental problems of hashes like MD5 or SHA-1. Longer hashes should be relatively safe, however. The Whirlpool code used by WinHasher is adapted from the <a href="http://www.bouncycastle.org/csharp/">Legion of the Bouncy Castle Crypto API</a>, which in turn was ported from the <a href="http://paginas.terra.com.br/informatica/paulobarreto/WhirlpoolPage.html">original Java source</a> developed by Rijmen and Barreto.</li>
+	<li><strong>Tiger:</strong> This 192-bit digest algorithm was designed by Ross Anderson and Eli Biham in 1995 for efficiency on 64-bit platforms. Note that this is the original implementation of Tiger that uses padding similar to MD4, not "Tiger2" which is closer to MD5 or SHA-1. There are no known attacks against the full number of rounds of Tiger, although collisions have been detected in several reduced-round versions. The Tiger code used by WinHasher is adapted from the <a href="http://www.bouncycastle.org/csharp/">Legion of the Bouncy Castle Crypto API</a>, which in turn was ported from the <a href="http://www.cs.technion.ac.il/~biham/Reports/Tiger">reference implementations</a> developed by Anderson and Biham.</li>
+</ul>
+<p>It is my eventual goal to include other cryptographic hashes into this application, either by including code from freely available sources or by writing the algorithms myself.</p>
+
+<p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
+
+<a name="output"><h3>Currently Supported Output Formats</h3></a>
+
+<p>The output of cryptographic hashes are raw binary data. However, it is usually represented by one of several output formats that encode raw binary data with easily identifiable text. WinHasher currently supports the following output formats:<p>
+
+<ul>
+	<li><strong>Hexadecimal</strong>, with either lower-case or upper-case letters. Lower-case hexadecimal is the default output for WinHasher, but upper-case hex can be selected by choosing "Hex (Caps)".</li>
+	<li><strong>Base64</strong> (<a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a>): A few people (myself included) prefer to work with Base64-encoded hashes instead of hex. Base64 is a bit more compact than hexadecimal, with 64 characters per digit instead of 16. Base64 is also less well known than hexadecimal; even casual computer users have seen hexadecimal before and may recognize it, while Base64 is usually a bit more obscure and often hidden when used.</li>
+	<li><strong><a href="http://en.wikipedia.org/wiki/Bubble_Babble">Bubble Babble</a></strong>: This is a method of representing a message digest as a string of "real" words, to make the fingerprint easier to remember. The "words" are not necessarily real words, but they look more like words than a string of hex characters. Bubble Babble fingerprinting is used by the SSH2 suite to display easy-to-remember key fingerprints. The key (a DSA or RSA key) is converted into a textual form, digested using SHA-1, and run through Bubble Babble to create the key fingerprint. It can also be used when sharing digests with others as the "words" are easier to remember than seemingly random hex or Base64 characters.</li>
+</ul>
+
+<p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
+
+<a name="install"><h2>Installing WinHasher</h2></a>
+
+<a name="sysreqs"><h3>System Requirements</h3></a>
+
+<p>The primary system requirement for WinHasher is the Microsoft .NET 2.0 Framework. This is a special series of common libraries that specially-built applications can call upon to provide standard Windows functionality. (Hard-core developers will recognize this is a gross oversimplification, but that should suffice for most people.) As such, WinHasher will not work unless .NET 2.0 is installed. .NET itself has its own system requirements that must be met in order for it to be usable, but if your system meets these requirements running WinHasher will be no problem.</p>
+<p>To download the Microsoft .NET 2.0 Framework or obtain more information about it, click <a href="http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx">here</a>. It should also be available through Windows Update or Microsoft Update on most versions of Windows newer that Windows 98SE. Note that .NET 3.0 or higher is <strong><em>NOT</em></strong> an "upgrade" from 2.0; it is a separate framework, designed to be installed alongside 2.0. So if you have .NET 1.1, 3.0, or any other version of the framework installed, you <em>still</em> must install .NET 2.0 for WinHasher to work.</p>
+<p>Beyond .NET's own requirements, WinHasher doesn't require much. However, since cryptographic hashes are very CPU intensive to produce, it should be pointed out that WinHasher will perform better with more RAM and CPU horsepower available. Therefore, the faster your CPU is and the greater amount of free RAM available, the faster WinHasher will work. This is especially true for multi-file comparisons of very large files.</p>
+
+<a name="installer"><h3>Running the Installer</h3></a>
+
+<p>Installing WinHasher should be a breeze, thanks to <a href="http://www.jrsoftware.org/isinfo.php">InnoSetup</a>. Simply download and run the installer program, just like you would for virtually any Windows application. However, the setup program include a number of options that can get confusing, so let's talk a little about each one.</p>
+<p>After choosing the install location, you will be presented with a series installable "components." There are three main components: the WinHasher Windows application, the WinHasher console (command-line) application, and the HTML help files. Since this help file pertains to the Windows application, we will ignore the console application option for now; suffice it to say that if you don't work with the console much, you probably won't need the console version of WinHasher. Installing the HTML help installs this file and the necessary shortcuts to access it.</p>
+<p>Under the Windows application component, there are a series of subcomponents. The first is the option to create a desktop icon. This option will put a shortcut to WinHasher directly on your Windows desktop. If you install WinHasher from an administrator account, this will place the icon on the desktop for every user on that machine; otherwise, it will only install the icon for you alone.</p>
+<p>After the desktop icon option, you will see a series of shortcuts that can be placed in the "'SendTo' menu". This corresponds to the "Send To" option in the context menu in Windows Explorer. You can chose to install all the shortcuts, or just the shortcuts for hashes that you intend to use. Note, however, that even if you install WinHasher as an administrator, these shortcuts will only be installed for your login. For more information on these Send To shortcuts, see <a href="#sendto">the relevant section below</a>.</p>
+
+<a name="nonwin"><h3>WinHasher Without the Win: Non-Windows Platforms</h3></a>
+
+<p>One of the beauties about using the .NET Framework to develop WinHasher is that it's technically not restricted to Microsoft Windows. Anyone can (in theory) develop their own .NET framework based on Microsoft's specifications to run on any platform, and thus run any .NET application built for that framework. <a href="http://www.mono-project.com/">Mono</a> is one such project which runs .NET client and server applications on Linux, Solaris, Mac OS X, Windows, and Unix. However, at the time of this writing, Mono mostly supports .NET 1.1 and only partially supports .NET 2.0. <a href="http://www.mono-project.com/Moma">MoMA</a> reports that WinHasher should work with Mono 2.2 (or higher, I assume). However, I do not plan to officially offer support for non-Windows use of WinHasher. Personally, I think there are much better tools already available for other OSes, and you'd be better off using those instead. Still, if you're a glutton for punishment, feel free to give it a try.</p>
+
+<p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
+
+<a name="using"><h2>Using WinHasher</h2></a>
+
+<a name="launch"><h3>Launching WinHasher</h3></a>
+
+<p>How you launch WinHasher depends on what options you installed. You can always launch WinHasher by going to the Start menu and navigating to the WinHasher group. Then just select the WinHasher menu item and it will start right up. If you chose to install a WinHasher icon on your desktop, you can also double-click that icon to launch it.</p>
+<p>When WinHasher opens, it creates a small window with three tabs and a series of common controls. The tabs represent the three main functions of WinHasher, while the common controls apply to the program as a whole.</p>
+
+<a name="commongui"><h3>Common Controls</h3></a>
+
+<p>At the bottom of the WinHasher window is a series of common controls that apply to all functional tabs. The most important of these controls is the <strong>Hash drop-down list</strong>. This drop-down allows you to select which cryptographic hash to perform in the next operation. There are <a href="#hashes">a number of hashes available</a> in WinHasher; which hash you use is up to you. Each one has its strengths and weaknesses. However, if you are planning to validate a downloaded file, you'll want to select the same hash as the one used by the file's site online. If generating hashes for your own purposes, try to take into account the various caveats when choosing an algorithm to use.</p>
+<p>Beneath the hash drop-down is the <strong>Output Format drop-down list</strong>. By default, WinHasher outputs hashes in lower-case hexadecimal format, which is the most popular way of displaying hashes. However, <a href="#output">several other options are available</a>. If you prefer the letters of your hex format to be upper-case (A-F) rather than lower case (a-f), choose "Hex (Caps)". Other options include Base64 and Bubble Babble. Your choice of output format is a personal preference, of course, and which you use is entirely up to you. As with hash algorithms, use the same output format as the original when validating downloaded files, and your personal preference for your own uses.</p>
+<p>To the right of to the Hash drop-down is the <strong>About button</strong>. This button displays another window that shows the version number, copyright and license information, and (if this file is present) a button to launch this help file. Below the About button and to the right of the Output Format drop-down is the <strong>Close button</strong>, which oddly enough closes WinHasher. WinHasher can also be closed by the standard Close button in the title bar or by the standard Windows Alt+F4 hotkey combination.</p>
+<p>At the very bottom of the form is a checkbox labled <strong>Show verbose tooltip help</strong>. It should be checked by default. When this checkbox is checked, WinHasher will display verbose comments in pop-up tooltip windows to help you figure out what each control does. This is can be extremely helpful for first-time users learning how the program works... or incredibly annoying for experienced users who know what they're doing. Clearing this checkbox can ease your sanity by turning the tooltips off if you find them getting in your way too much.</p>
+
+<a name="singlefile"><h3>The Hash Single File Tab</h3></a>
+
+<p>The <strong>Hash Single File tab</strong> allows you to compute the cryptographic hash of a single file. To select a file, either type the full path to its location in the <strong>File to Hash text box</strong>, or click the <strong>Browse button</strong> to open a file dialog and select the file from there. If you browse to find a file, its location will be populated into the File to Hash box once the browse window closes. Once a file is selected, the <strong>Compute Hash button</strong> becomes enabled. Select a hash from the <a href="#commongui">Hash drop-down</a> and click this button, and the computed hash will appear in the <strong>Hash text box</strong>. To hash a different file, repeat the same process for each file that you want to hash. If for some reason an error occurs, the File to Hash box will clear and the Compute Hash button will become disabled.</p>
+<p>In general, computing the hash of a single file is a quick operation. However, note that the larger the file is, the longer it will take to compute its hash. The size of the file should not cause any problems; WinHasher streams the file once it opens it, so it can be of any arbitrary length. However, if there's a lot of data to hash, it will take longer to get the result.</p>
+<p>While performing the hash, WinHasher displays a small <strong>progress dialog box</strong> showing how far along the hash is. There is a <strong>Cancel button</strong> on this dialog; click this button will abort the hashing process. The dialog will disappear when the hash is complete.</p>
+
+<a name="comparetab"><h3>The Compare Files Tab</h3></a>
+
+<p>The <strong>Compare Files tab</strong> allows you to compute the hashes of several files at once and automatically compare the hashes to see if the files are the same. Note that files are considered "the same" only if their binary contents compute to the same hash. Thus, the file's name, location, and time stamp are unimportant; only its contents are compared. The individual hashes for each file are not displayed. Instead, a summary dialog appears, indicating whether the files match or not. Note that this is an all or nothing comparison: If every file in the list computes to the same hash, then they are all said to match; if at least one file has a hash different from the rest, then <em>all</em> the files fail. For this comparison, which hash you choose is largely unimportant, but a general rule of thumb is that the more bits that are available in the hash, the less likely it will be that you'll hit upon a collision (i.e. an artificial false-positive match).</p>
+<p>To start comparing files, click the <strong>Add button</strong> in the bottom left corner of the tab. A file dialog will appear where you can select one or more files. Note that you can select as many files as you want in this dialog. When you click the <strong>Open button</strong>, the file dialog goes away and the selected files are added to the <strong>Files to Compare list box</strong>. To add more files, click Add again, select more files, and click Open. Note that a file with a given name and path can only be added to the list once; if a duplicate file is added, it is silently dropped. (Files with the same name but different paths are not considered duplicates.) If you want to remove one or more files, click the file's name in the Files to Compare list box. You can use the standard Shift+Click or Control+Click combinations to select multiple files at once. When at least one file is selected, the <strong>Remove button</strong> becomes enabled. (The Remove button becomes disabled when no files are selected in the list.) Click the Remove button to remove the files from the list. Repeat this process of adding and removing files until you have the complete list of files you want to compare. As a shortcut, you can clear the entire list with one click of the <strong>Clear List button</strong>.</p>
+<p>Once your list is complete, select the hash to use with the <a href="#commongui">Hash drop-down</a>. The <strong>Compare Hashes button</strong> should become enabled if two or more files are in the list box. (If the list is empty or there's only one file, this button will become disabled.) Click this button to generate and compare the hashes. Note that this operation could take a long time, and the wait will grow longer depending on the number and size of the files being compared. A <strong>progress dialog box</strong> will appear, indicating how many files have been successfully compared so far. It also contains a <strong>Cancel button</strong> to allow you to abort the comparison. Once the comparison is complete, a resul dialog box will appear with the result. Remember, this is an all-or-nothing comparison; either they all match, or they all don't.</p>
+
+<a name="hashtext"><h3>The Hash Text Tab</h3></a>
+
+<p>The <strong>Hash Text tab</strong> allows you to enter aribrary text into a text box and compute the hash of it. This feature was added primarily because one of my favorite <a href="http://www.mozilla.com/firefox/">Firefox</a> extensions that performed the same function ceased development and I had to abandon it. I used that extension frequently to produce "strong" passwords from simpler text, and without it I was pretty much stuck. I threw this functionality into WinHasher because the framework was already in place and other people might find it useful.</p>
+<p>At the top of this tab is the <strong>Text to Hash text box</strong>. Surprisingly enough, this is where you want to put the text that you want to hash. Beneath it is the <strong>Encoding drop-down list</strong>. This lets you specify what text encoding was used for the entered text. Many different text encodings exist; this drop-down should be populated with all available encodings on your system, with the system default initially selected. Once the text has been entered and the encoding selected, click the <strong>Hash button</strong> to generate the hash of the text, which will appear in the text box below.</p>
+<p>I may be mistaken, but it could be that the choice of encoding may be unnecessary. I think .NET converts all text to Unicode when used in the <code>System.String</code> object. However, changing the encoding could be useful in the situation described above: generating "strong" passwords by hashing simpler plaintext phrases. One might, for example, change the encoding to something totally different than the original text; say if the input was Unicode, switch to IBM EBCDIC (Japanese)) to produce something unexpected. For this reason, I've left the encoding choice in on the off-chance someone other than me might find this useful.</p>
+
+<a name="dragndrop"><h3>Drag-and-Drop in WinHasher</h3></a>
+
+<p>WinHasher supports dragging and dropping of files. Instead of going through the various buttons in the interface, you can drag files from Windows Explorer into WinHasher. The action to be performed depends on which tab is active at the time, so make sure to select the tab of the operation you want before you drop your files.</p>
+<p>If you drop a single file on the <a href="#singlefile">Hash Single File tab</a>, that file's location will be populated in the File to Hash text box and the hash specified in the <a href="#commongui">Hash drop-down</a> will be automatically computed. To use a different hashing algorithm, change the hash in the Hash drop-down and click the Compute Hash button. If you drop multiple files into this tab, it will produce an error, as this tab only works on one file at a time.</p>
+<p>If you drop one or more files onto the <a href="#comparetab">Compare Files tab</a>, the files' paths will be added to the Files to Compare list box. Duplicate paths are silently dropped. Files that are already in the list are preserved, so you can drag and drop files from various locations and slowly build up your list without clearing it. Removing files operates as described above. Once the list is ready, you can click the Compare Hashes button to compare the files.</p>
+<p>Drag and drop is not currently enabled for the <a href="#hashtext">Hash Text tab</a>. Copy and paste text into the text box to hash large portions of text.</p>
+
+<a name="savesettings"><h3>Remembering Your Preferences</h3></a>
+
+<p>Starting with version 1.4, WinHasher (on Windows, at least) saves a small bit of preference information to the Windows registry. It will remember the following settings:</p>
+<ul>
+<li>The last tab used;</li>
+<li>The last hashing algorithm used;</li>
+<li>The output format used;</li>
+<li>The last text encoding (on the Hash Text tab) used;</li>
+<li>The last folder or directory used for browsing files;</li>
+<li>And the show tooltips setting.</li>
+</ul>
+<p>If you use the installer to install WinHasher, you can also use the uninstall feature to delete these preferences from the registry when the program is uninstalled. You may also elect to leave these preferences in place if you plan to reinstall WinHasher later.</p>
+
+<a name="sendto"><h3>The "SendTo" Shortcuts</h3></a>
+
+<p>When you install WinHasher, you are given the option to add WinHasher shortcuts in the "Send To" portion of the Windows Explorer context menu. This menu appears when you (usually) right-click a file in Explorer and gives you the option to open, copy, cut, rename, see the properties of, etc. the selected file or files. (Of course, if you've swapped your mouse buttons, left-click to bring up the context menu.) With the WinHasher shortcuts in your Send To menu, computing the hash of a file or comparing multiple files is as simple as a click away.</p>
+<p>To compute the hash of a single file, select that file in Windows Explorer and right-click to bring up the context menu. Select Send To, then the WinHasher hash to compute. What hashes are available depends on which shortcuts you created during the install. Note that each shortcut will use a single hashing algorithm (for example, "WinHasher MD5" will only perform MD5 hashes). Once the shortcut is selected, WinHasher will silently load the file and compute the hash. The progress dialog will let you know the process is running; the main application window will not open. When the hash is ready, the progress dialog will disappear and a dialog box will appear, displaying the computed hash. When the dialog is dismissed, WinHasher will silently close.</p>
+<p>To compare multiple files, select each file to compare using the standard Windows Explorer Shift+Click and Control+Click actions. Once all the files are selected, right-click to bring up the context menu, select Send To, and then the WinHasher shortcut of the preferred hash. The hash of each file will be silently computed and compared and the progress dialog will let you know how far along the process is. A single dialog will eventually appear showing the results. When the dialog is cleared, WinHasher will exit.</p>
+<p>Note: By default, the "Send To" shortcuts generate command lines to generate hashes in hexadecimal format. To enable Base64 output, you can edit the "Send To" shortcut properties to include the <code>-base64</code> command line switch. This is considered an advanced topic and is left as an exercise for the user, but it's not really that hard to do.</p>
+
+<p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
+
+<a name=""><h2></h2></a>
+
+<p>This document is &#169; Copyright 2009, Jeffrey T. Darlington. It and the software it describes are released under the <a href="gpl.html">GNU General Public License, Version 2</a>.</p>
+</body></html>
