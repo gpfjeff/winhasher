@@ -58,6 +58,7 @@ namespace com.gpfcomics.WinHasher
             this.aboutButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
+            this.tooltipsCheckbox = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
@@ -393,6 +394,21 @@ namespace com.gpfcomics.WinHasher
             this.toolTip1.SetToolTip(this.outputFormatComboBox, resources.GetString("outputFormatComboBox.ToolTip"));
             this.outputFormatComboBox.SelectedIndexChanged += new System.EventHandler(this.outputFormatComboBox_SelectedIndexChanged);
             // 
+            // tooltipsCheckbox
+            // 
+            this.tooltipsCheckbox.AutoSize = true;
+            this.tooltipsCheckbox.Checked = true;
+            this.tooltipsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.tooltipsCheckbox.Location = new System.Drawing.Point(72, 298);
+            this.tooltipsCheckbox.Name = "tooltipsCheckbox";
+            this.tooltipsCheckbox.Size = new System.Drawing.Size(148, 17);
+            this.tooltipsCheckbox.TabIndex = 7;
+            this.tooltipsCheckbox.Text = "Show verbose tooltip help";
+            this.toolTip1.SetToolTip(this.tooltipsCheckbox, "Use this checkbox to toggle these\r\nannoying tooltips on or off.  (C\'mon,\r\nwe know" +
+                    " you love them, right?\r\nRight?  Um... please?)");
+            this.tooltipsCheckbox.UseVisualStyleBackColor = true;
+            this.tooltipsCheckbox.CheckedChanged += new System.EventHandler(this.tooltipsCheckbox_CheckedChanged);
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -407,7 +423,8 @@ namespace com.gpfcomics.WinHasher
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.closeButton;
-            this.ClientSize = new System.Drawing.Size(292, 304);
+            this.ClientSize = new System.Drawing.Size(292, 319);
+            this.Controls.Add(this.tooltipsCheckbox);
             this.Controls.Add(this.outputFormatComboBox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.aboutButton);
@@ -419,6 +436,7 @@ namespace com.gpfcomics.WinHasher
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "WinHasher";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.modeTabControl.ResumeLayout(false);
             this.singleTabPage.ResumeLayout(false);
             this.singleTabPage.PerformLayout();
@@ -462,6 +480,7 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.TextBox inputTextBox;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox outputFormatComboBox;
+        private System.Windows.Forms.CheckBox tooltipsCheckbox;
     }
 }
 

@@ -10,8 +10,11 @@
  * The About dialog for WinHasher.  Nothing fancy here.  It just takes a version string, a URL
  * to link to the official site, and a string containing the license the program is released
  * under (GPL v2).
- *  
- * This program is Copyright 2007, Jeffrey T. Darlington.
+ * 
+ * UPDATE March 26, 2009:  Added Boolean flag to constructor to allow us turn on or off the
+ * tooltips, which some people might find annoying.
+ * 
+ * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -45,7 +48,8 @@ namespace com.gpfcomics.WinHasher
         private string helpFile;
 
         // Our constructor, which basically just copies our inputs into the appropriate GUI elements:
-        public AboutDialog(string version, string url, string license, string helpFile)
+        public AboutDialog(string version, string url, string license, string helpFile,
+            bool showToolTips)
         {
             InitializeComponent();
             versionLabel.Text = version;
@@ -57,6 +61,8 @@ namespace com.gpfcomics.WinHasher
             // disable the Help button.
             this.helpFile = helpFile;
             if (!File.Exists(helpFile)) helpButton.Enabled = false;
+            if (showToolTips) toolTip1.Active = true;
+            else toolTip1.Active = false;
         }
 
         // When the link button is clicked, take us to the URL using the default browser:

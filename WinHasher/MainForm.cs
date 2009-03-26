@@ -30,6 +30,11 @@
  * HashEngine so we can expand beyond just hexadecimal and Base64.  Added all-caps hex and
  * Bubble Babble output formats.  Added warning discouraging the use of MD5 once per session.
  * 
+ * UPDATE March 26, 2009 (1.4):  Corrected modeTabControl_SelectedIndexChanged() to make the
+ * Hash button on the Hash Text tab the default Accept Button when that tab is selected.  Added
+ * functionality to save the last set of preferences to the registory so they can be restored
+ * when the program is reopened.  Added checkbox to turn tooltips on or off.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -55,6 +60,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using Microsoft.Win32;
 using com.gpfcomics.WinHasher.Core;
 
 namespace com.gpfcomics.WinHasher
@@ -116,10 +122,6 @@ namespace com.gpfcomics.WinHasher
             hashComboBox.Items.Add("RIPEMD-160");
             hashComboBox.Items.Add("Whirlpool");
             hashComboBox.Items.Add("Tiger");
-            // We used to default to MD5, but that's been severely broken.  Default to SHA-1
-            // instead.
-            hashComboBox.SelectedIndex = 1;
-            hash = Hashes.SHA1;
             // Populate the encoding drop-down:
             foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
             {
@@ -127,13 +129,58 @@ namespace com.gpfcomics.WinHasher
             }
             // Set it to show the display name in the dropdown:
             encodingComboBox.DisplayMember = "EncodingName";
-            // And select the system default encoding by default:
-            encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
-            // Force the output drop-down to the first item, or hex output:
-            outputFormatComboBox.SelectedIndex = 0;
-            // Set our the last directory to My Documents:
-            try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
-            catch { lastDirectory = Environment.CurrentDirectory; }
+
+            // Attempt to load our settings from the registry:
+            try
+            {
+                // Try to open the HKCU\Software\GPF Comics\WinHasher key:
+                RegistryKey winHasherSettings =
+                    Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
+                    false).OpenSubKey("WinHasher", false);
+                // Try to set the hash combo box:
+                hashComboBox.SelectedIndex = (int)winHasherSettings.GetValue("SelectedHash", 1);
+                hashComboBox_SelectedIndexChanged(null, null);
+                // Try to set the encoding combo box:
+                encodingComboBox.SelectedIndex = (int)winHasherSettings.GetValue("TextEncoding",
+                    encodingComboBox.Items.IndexOf(Encoding.Default));
+                // Try to set the output format combo box:
+                outputFormatComboBox.SelectedIndex = (int)winHasherSettings.GetValue("OutputFormat", 0);
+                outputFormatComboBox_SelectedIndexChanged(null, null);
+                // Try to set the last directory:
+                string ldtemp = "";
+                try { ldtemp = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
+                catch { ldtemp = Environment.CurrentDirectory; }
+                lastDirectory = (string)winHasherSettings.GetValue("LastDirectory", ldtemp);
+                // Try to restore the last used tab:
+                modeTabControl.SelectedIndex = (int)winHasherSettings.GetValue("LastTab", 0);
+                modeTabControl_SelectedIndexChanged(null, null);
+                // Try to restore the tooltips toggle:
+                tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
+                    == 1 ? true : false;
+                // Close the registry key:
+                winHasherSettings.Close();
+            }
+            // If any of the registry reading code above fails, restore everything to the
+            // default settings:
+            catch
+            {
+                // We used to default to MD5, but that's been severely broken.  Default to SHA-1
+                // instead.
+                hashComboBox.SelectedIndex = 1;
+                hash = Hashes.SHA1;
+                // Select the system default encoding by default:
+                encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
+                // Force the output drop-down to the first item, or hex output:
+                outputFormatComboBox.SelectedIndex = 0;
+                // Set our the last directory to My Documents:
+                try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
+                catch { lastDirectory = Environment.CurrentDirectory; }
+                // Default to the Hash Single File tab:
+                modeTabControl.SelectedIndex = 0;
+                // Default to tooltips being on:
+                tooltipsCheckbox.Checked = true;
+            }
+
             // Set up the file boxes for drag & drop:
             fileSingleTextBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
             fileSingleTextBox.DragDrop += new DragEventHandler(fileSingleTextBox_DragDrop);
@@ -141,7 +188,11 @@ namespace com.gpfcomics.WinHasher
             compareFilesListBox.DragDrop += new DragEventHandler(compareFilesListBox_DragDrop);
             // Set our title bar to include the version number:
             Text = versionShort;
+            // Turn on or off the tooltips depending on whether the checkbox has been
+            // checked:
             toolTip1.IsBalloon = true;
+            if (tooltipsCheckbox.Checked) toolTip1.Active = true;
+            else toolTip1.Active = false;
         }
 
         #region Button Events
@@ -153,6 +204,10 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void closeButton_Click(object sender, EventArgs e)
         {
+            // By default, this doesn't fire the FormClosing event, so we'll need to call
+            // that explicitly:
+            MainForm_FormClosing(null, null);
+            // Now get rid of the form:
             Dispose();
         }
 
@@ -170,7 +225,7 @@ namespace com.gpfcomics.WinHasher
             helpFile += Properties.Resources.HelpFile;
             // Now build and show the about dialog:
             AboutDialog ad = new AboutDialog(version, Properties.Resources.URL,
-                Properties.Resources.License, helpFile);
+                Properties.Resources.License, helpFile, tooltipsCheckbox.Checked);
             ad.ShowDialog();
         }
 
@@ -605,15 +660,11 @@ namespace com.gpfcomics.WinHasher
         private void modeTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             // For the single hash page, make it the Compute Hash button:
-            if (modeTabControl.SelectedIndex == 0)
-            {
-                AcceptButton = hashSingleButton;
-            }
+            if (modeTabControl.SelectedIndex == 0) AcceptButton = hashSingleButton;
             // For the compare tab, make it the Compare Hashes button:
-            else
-            {
-                AcceptButton = compareButton;
-            }
+            else if (modeTabControl.SelectedIndex == 1) AcceptButton = compareButton;
+            // For the hash text tab, make it the Hash Text button:
+            else AcceptButton = hashTextButton;
         }
 
         /// <summary>
@@ -665,6 +716,82 @@ namespace com.gpfcomics.WinHasher
                     outputType = OutputType.Hex;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Fired on the FormClosing event, this method attempts to store the last used UI
+        /// settings to the Windows registry.  If this fails in any way, nothing will be
+        /// stored and the defaults will be restored when the program is next opened.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Let's give it the old college try:
+            try
+            {
+                // Try to open HKCU\Software.  This *should* always exist:
+                RegistryKey HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", true);
+                if (HKCU_Software != null)
+                {
+                    // Try to open HKCU\Software\GPF Comics.  If this key doesn't exist we'll
+                    // try to create it:
+                    RegistryKey GPFComics = HKCU_Software.OpenSubKey("GPF Comics", true);
+                    if (GPFComics == null) GPFComics = HKCU_Software.CreateSubKey("GPF Comics");
+                    if (GPFComics != null)
+                    {
+                        // Try to open HKCU\Software\GPF Comics\WinHasher.  If this key doesn't
+                        // exist we'll try to create it:
+                        RegistryKey winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
+                        if (winHasherSettings == null) winHasherSettings =
+                            GPFComics.CreateSubKey("WinHasher");
+                        if (winHasherSettings != null)
+                        {
+                            // By now we should be in our own little private paradise.  Start
+                            // saving our settings.  For the drop-downs and tabs, we'll just
+                            // safe the index value.  For the last directory, we'll save the
+                            // path string.  There might be a security question around saving
+                            // this path, of course, but we'll go with it as is.
+                            winHasherSettings.SetValue("SelectedHash",
+                                hashComboBox.SelectedIndex, RegistryValueKind.DWord);
+                            winHasherSettings.SetValue("TextEncoding",
+                                encodingComboBox.SelectedIndex, RegistryValueKind.DWord);
+                            winHasherSettings.SetValue("OutputFormat",
+                                outputFormatComboBox.SelectedIndex, RegistryValueKind.DWord);
+                            winHasherSettings.SetValue("LastDirectory",
+                                lastDirectory, RegistryValueKind.String);
+                            winHasherSettings.SetValue("LastTab", modeTabControl.SelectedIndex,
+                                RegistryValueKind.DWord);
+                            winHasherSettings.SetValue("Version",
+                                Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                                RegistryValueKind.String);
+                            winHasherSettings.SetValue("ShowToolTips",
+                                (tooltipsCheckbox.Checked ? 1 : 0),
+                                RegistryValueKind.DWord);
+                            // We're done, so close up shop:
+                            winHasherSettings.Close();
+                        }
+                        GPFComics.Close();
+                    }
+                    HKCU_Software.Close();
+                }
+            }
+            // If we failed for any reason, don't bother with anything else.  The defaults
+            // will be restored the next time the program is opened.
+            catch { }
+        }
+
+        /// <summary>
+        /// What to do when the ToolTips checkbox is toggled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tooltipsCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            // Fortunately, the ToolTip.Active property turns tooltips on and off, so
+            // this is relatively easy:
+            if (tooltipsCheckbox.Checked) toolTip1.Active = true;
+            else toolTip1.Active = false;
         }
 
         #endregion
@@ -856,5 +983,6 @@ namespace com.gpfcomics.WinHasher
 
         #endregion
 
+        
     }
 }
