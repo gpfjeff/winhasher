@@ -366,13 +366,6 @@ namespace com.gpfcomics.WinHasher
                         MessageBoxIcon.Error);
                     resultStatus = ResultStatus.Error;
                 }
-                // Likewise, if there's no way to compare them, don't do anything:
-                else if (hashAlgorithm == null)
-                {
-                    MessageBox.Show("No hash algorithm was specified.", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    resultStatus = ResultStatus.Error;
-                }
                 // Now let's get to work:
                 else
                 {

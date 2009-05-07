@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WinHasher")]
-[assembly: AssemblyDescription("This .NET application computes the cryptographic hash of one or more files.  Single file hashes can be used to verify downloads or ensure a file has not been tampered with.  The hashes of multiple files can be compared to see if the contents of those files are identical.")]
+[assembly: AssemblyTitle("WinHasher Core Library")]
+[assembly: AssemblyDescription("This library contains common functions for all WinHasher products.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPF Comics")]
-[assembly: AssemblyProduct("WinHasher")]
-[assembly: AssemblyCopyright("© Copyright 2009, Jeffrey T. Darlington")]
+[assembly: AssemblyProduct("WinHasherCore")]
+[assembly: AssemblyCopyright("© Copyright $WCDATE=%Y$, Jeffrey T. Darlington")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("42a8095e-6f96-4cf5-9f32-342add02e93d")]
+[assembly: Guid("f66ea3bb-0b6a-41c4-b67c-cb62486e716b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -29,5 +29,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.4.0.0")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
+// You can specify all the values or you can default the Revision and Build Numbers 
+// by using the '*' as shown below:
+[assembly: AssemblyVersion("1.4.0.$WCREV$")]
+[assembly: AssemblyFileVersion("1.4.0.$WCREV$")]
