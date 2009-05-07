@@ -48,11 +48,12 @@ namespace com.gpfcomics.WinHasher
         private string helpFile;
 
         // Our constructor, which basically just copies our inputs into the appropriate GUI elements:
-        public AboutDialog(string version, string url, string license, string helpFile,
-            bool showToolTips)
+        public AboutDialog(string version, string copyright, string url, string license,
+            string helpFile, bool showToolTips)
         {
             InitializeComponent();
             versionLabel.Text = version;
+            copyrightLabel.Text = copyright;
             gplTextBox.Text = license;
             linkLabel.Text = url;
             URL = url;

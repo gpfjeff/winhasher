@@ -63,7 +63,6 @@ namespace com.gpfcomics.WinHasher.sha1console
                 return;
             }
             // Default to hexadecimal output:
-            bool base64 = false;
             OutputType outputType = OutputType.Hex;
             // Look to see if we got the Base64 flag and, if so, turn it on:
             while (args.Length > 0 && args[0].StartsWith("-"))
@@ -170,9 +169,17 @@ namespace com.gpfcomics.WinHasher.sha1console
         // how to use the program.
         static void Usage()
         {
+            // Get our copyright information.  It seems a bit silly to do it this way,
+            // but this seems to be the only way to do it that I can find.  We'll pull this
+            // from the assembly so we only need to change it in one place, and it can be
+            // automatically fetched from SVN.
+            string copyright = null;
+            object[] obj = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+            if (obj != null && obj.Length > 0)
+                copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
             Console.WriteLine();
             Console.WriteLine(version);
-            Console.WriteLine("Copyright 2009, Jeffrey T. Darlington.  All rights reserved.");
+            if (copyright != null) Console.WriteLine(copyright);
             Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345

@@ -83,6 +83,11 @@ namespace com.gpfcomics.WinHasher
             Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
 
         /// <summary>
+        /// Our copyright information, fetched from the assembly info:
+        /// </summary>
+        private static string copyright = "";
+
+        /// <summary>
         /// The currently selected hash algorithm
         /// </summary>
         private Hashes hash;
@@ -112,6 +117,13 @@ namespace com.gpfcomics.WinHasher
         {
             // Let .NET do its initialization stuff:
             InitializeComponent();
+            // Get our copyright information.  It seems a bit silly to do it this way,
+            // but this seems to be the only way to do it that I can find.  We'll pull this
+            // from the assembly so we only need to change it in one place, and it can be
+            // automatically fetched from SVN.
+            object[] obj = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+            if (obj != null && obj.Length > 0)
+                copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
             // Build the hash combobox.  There's probably a better way to do this, but I couldn't
             // get it to enumerate over the Hashes enumeration.  So we'll do it manually.
             hashComboBox.Items.Add("MD5");
@@ -224,7 +236,7 @@ namespace com.gpfcomics.WinHasher
             if (!helpFile.EndsWith("\\")) helpFile += "\\";
             helpFile += Properties.Resources.HelpFile;
             // Now build and show the about dialog:
-            AboutDialog ad = new AboutDialog(version, Properties.Resources.URL,
+            AboutDialog ad = new AboutDialog(version, copyright, Properties.Resources.URL,
                 Properties.Resources.License, helpFile, tooltipsCheckbox.Checked);
             ad.ShowDialog();
         }

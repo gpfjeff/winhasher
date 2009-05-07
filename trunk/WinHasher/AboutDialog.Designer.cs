@@ -30,7 +30,7 @@ namespace com.gpfcomics.WinHasher
         {
             this.components = new System.ComponentModel.Container();
             this.versionLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.copyrightLabel = new System.Windows.Forms.Label();
             this.linkLabel = new System.Windows.Forms.LinkLabel();
             this.gplTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -49,15 +49,15 @@ namespace com.gpfcomics.WinHasher
             this.versionLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.toolTip1.SetToolTip(this.versionLabel, "The full version number for\r\nthis version of WinHasher");
             // 
-            // label1
+            // copyrightLabel
             // 
-            this.label1.Location = new System.Drawing.Point(12, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(340, 23);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "© Copyright 2009, Jeffrey T. Darlington.";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.toolTip1.SetToolTip(this.label1, "The person to blame\r\nfor this mess.");
+            this.copyrightLabel.Location = new System.Drawing.Point(12, 32);
+            this.copyrightLabel.Name = "copyrightLabel";
+            this.copyrightLabel.Size = new System.Drawing.Size(340, 23);
+            this.copyrightLabel.TabIndex = 1;
+            this.copyrightLabel.Text = "© Copyright ####, Jeffrey T. Darlington.";
+            this.copyrightLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.toolTip1.SetToolTip(this.copyrightLabel, "The person to blame\r\nfor this mess.");
             // 
             // linkLabel
             // 
@@ -128,7 +128,7 @@ namespace com.gpfcomics.WinHasher
             this.Controls.Add(this.label2);
             this.Controls.Add(this.gplTextBox);
             this.Controls.Add(this.linkLabel);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.copyrightLabel);
             this.Controls.Add(this.versionLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -145,7 +145,7 @@ namespace com.gpfcomics.WinHasher
         #endregion
 
         private System.Windows.Forms.Label versionLabel;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label copyrightLabel;
         private System.Windows.Forms.LinkLabel linkLabel;
         private System.Windows.Forms.TextBox gplTextBox;
         private System.Windows.Forms.Label label2;
