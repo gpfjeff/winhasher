@@ -7,7 +7,7 @@ blockquote { background: #EEEEEE; }
 </head>
 <body><h1>WinHasher Windows App Help</h1>
 <p>Official WinHasher Site: <a href="http://www.gpf-comics.com/dl/winhasher/">http://www.gpf-comics.com/dl/winhasher/</a><br />
-Last Updated March 26, 2009</p>
+Last Updated June 8, 2009</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -17,12 +17,14 @@ Last Updated March 26, 2009</p>
 		<li><a href="#whywinhasher">Why WinHasher?</a></li>
 		<li><a href="#hashes">Currently Supported Hashes</a></li>
 		<li><a href="#output">Currently Supported Output Formats</a></li>
+		<li><a href="#disclaimer">Disclaimers</a></li>
 	</ul>
 	<li><a href="#install">Installing WinHasher</a></li>
 	<ul>
 		<li><a href="#sysreqs">System Requirements</a></li>
 		<li><a href="#installer">Running the Installer</a></li>
 		<li><a href="#nonwin">WinHasher Without the Win: Non-Windows Platforms</a></li>
+		<li><a href="#portable">Portable WinHasher</a></li>
 	</ul>
 	<li><a href="#using">Using WinHasher</a></li>
 	<ul>
@@ -85,6 +87,12 @@ Last Updated March 26, 2009</p>
 	<li><strong><a href="http://en.wikipedia.org/wiki/Bubble_Babble">Bubble Babble</a></strong>: This is a method of representing a message digest as a string of "real" words, to make the fingerprint easier to remember. The "words" are not necessarily real words, but they look more like words than a string of hex characters. Bubble Babble fingerprinting is used by the SSH2 suite to display easy-to-remember key fingerprints. The key (a DSA or RSA key) is converted into a textual form, digested using SHA-1, and run through Bubble Babble to create the key fingerprint. It can also be used when sharing digests with others as the "words" are easier to remember than seemingly random hex or Base64 characters.</li>
 </ul>
 
+<a name="disclaimer"><h3>Disclaimers</h3></a>
+
+<p>Please read the <a href="gpl.html">WinHasher license</a> for complete licensing information. WinHasher is released under the GNU General Public License version 2, which outlines information concerning its use, redistribution, and warranties. Please read this license fully before using this application.</p>
+<p>It should be noted that cryptographic hashes and digests do <em><strong>NOT</strong></em> guarantee authenticity or ownership of digital files. Hashes and digests should <em><strong>NOT</strong></em> be confused with digital signatures, which verify both file integrity and the authenticity of the file's creator. Hashes and digests <em><strong>ONLY</strong></em> guarantee that the file has not been altered or corrupted in transit, and it is trivial for a hacker to alter both a file and the displayed hash if a remote site is hacked. If both integrity and authenticity are required, please use an application such as <a href="http://www.pgp.com/">PGP</a> or <a href="http://www.gnupg.org/">GnuPG</a> to create and/or verify digital signatures.</p>
+<p>After releasing WinHasher, it came to my attention that there already exists a separate WinHasher application that performs a similar function. This application is unrelated to the other application by the same name and was independently developed. I make no claims of trademark on the name "WinHasher" and from my understanding, neither has the other application's developer. Since my application came second, I will happily defer and rename my WinHasher if the other developer asserts ownership of the name. However, since names can mean a great deal in today's world of search engines, I will continue to use the name unless explicitly asked to change it by the other application's developer. You can find the other WinHasher by <a href="http://www.google.com/search?q=WinHasher">searching for "WinHasher" at Google</a> and going to any of the shareware/freeware download sites listed. My WinHasher is currently only available at <a href="http://www.gpf-comics.com/dl/winhasher/">GPF-Comics.Com</a>.</p>
+
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
 <a name="install"><h2>Installing WinHasher</h2></a>
@@ -105,6 +113,15 @@ Last Updated March 26, 2009</p>
 <a name="nonwin"><h3>WinHasher Without the Win: Non-Windows Platforms</h3></a>
 
 <p>One of the beauties about using the .NET Framework to develop WinHasher is that it's technically not restricted to Microsoft Windows. Anyone can (in theory) develop their own .NET framework based on Microsoft's specifications to run on any platform, and thus run any .NET application built for that framework. <a href="http://www.mono-project.com/">Mono</a> is one such project which runs .NET client and server applications on Linux, Solaris, Mac OS X, Windows, and Unix. However, at the time of this writing, Mono mostly supports .NET 1.1 and only partially supports .NET 2.0. <a href="http://www.mono-project.com/Moma">MoMA</a> reports that WinHasher should work with Mono 2.2 (or higher, I assume). However, I do not plan to officially offer support for non-Windows use of WinHasher. Personally, I think there are much better tools already available for other OSes, and you'd be better off using those instead. Still, if you're a glutton for punishment, feel free to give it a try.</p>
+
+<a name="portable"><h3>Portable WinHasher</h3></a>
+
+<p>Currently, WinHasher requires installation on the target machine. However, all the installer really does is set up WinHasher in a predictable (yet user-customizable) location and optionally creates "Send to" shortcuts and adds the install path to the Windows PATH. In theory, WinHasher <em>should</em> be able to be used in a "portable" fashion which does not require installation. In order to use WinHasher as a portable app, you will need to install it on one machine and copy the <code>WinHasherCore.dll</code> library and any of the executables you wish to carry. The DLL <em>must</em> be in the same location as the executables, as it contains the core hashing engine for all the programs. You can then run the WinHasher executables anywhere you wish.</p>
+<p>There are, however a few caveats to point out with using WinHasher in a portable manner:</p>
+<p><ul>
+<li>The context menu "Send to" shortcuts will <em>not</em> be available as these are created by the installer. You can, however, drag-and-drop files onto the GUI app or specify the file(s) to hash on the GUI app or console app command lines.</li>
+<li>Beginning with version 1.4, WinHasher stores your last used settings in the Windows registry. These settings are benign, but remain after the program closes. The uninstaller offers to delete these registry keys when the application is uninstalled, but the uninstaller is not available if the installer is not used. Thus, if you use WinHasher as a portable app, you will have to manually delete these registry keys if you want to maintain a completely zero-impact portable status. These registry keys may be found in <code>HKCU\Software\GPF Comics\WinHasher</code>. Note that the registry keys are <em>only</em> created by the GUI application in GUI mode and <em>not</em> by the console apps.</li>
+</ul></p>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
