@@ -35,6 +35,12 @@
  * functionality to save the last set of preferences to the registory so they can be restored
  * when the program is reopened.  Added checkbox to turn tooltips on or off.
  * 
+ * UPDATE July 8, 2009 (1.5):  Added Compare To field and comparison result lable to Hash Single
+ * File tab.  Now the user can copy a pre-computed hash from somewhere else (such as a Web site)
+ * and paste it into the Compare To field.  WinHasher will compare the two hashes and display
+ * whether or not the two values match.  This is similar to the new functionality of the
+ * ResultDialog added when the program is called in command-line mode.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -804,6 +810,44 @@ namespace com.gpfcomics.WinHasher
             // this is relatively easy:
             if (tooltipsCheckbox.Checked) toolTip1.Active = true;
             else toolTip1.Active = false;
+        }
+
+        /// <summary>
+        /// What to do when the Compare To text box on the Hash Single File tab changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void compareToTextBox_TextChanged(object sender, EventArgs e)
+        {
+            // If the Compare To field is empty (the default) we don't want to show a false
+            // error.  In this case, just hide the lable.
+            if (String.IsNullOrEmpty(compareToTextBox.Text) ||
+                String.IsNullOrEmpty(hashSingleTextBox.Text))
+            {
+                compareResultLabel.Visible = false;
+                compareResultLabel.Text = "";
+                compareResultLabel.ForeColor = SystemColors.ControlText;
+                compareResultLabel.BackColor = SystemColors.Control;
+            }
+            // If the two strings match, then the generated hash matches the pre-existing
+            // hash and the user can safely say the file is unaltered and intact:
+            else if (String.Compare(hashSingleTextBox.Text, compareToTextBox.Text) == 0)
+            {
+                compareResultLabel.Visible = true;
+                compareResultLabel.Text = "Hashes match";
+                compareResultLabel.ForeColor = Color.White;
+                compareResultLabel.BackColor = Color.Green;
+            }
+            // Otherwise, the strings don't match, the hashes don't match, and the file is
+            // not what it claims to be:
+            else
+            {
+                compareResultLabel.Visible = true;
+                compareResultLabel.Text = "Hashes do not match";
+                compareResultLabel.ForeColor = Color.Yellow;
+                compareResultLabel.BackColor = Color.Red;
+            }
+
         }
 
         #endregion

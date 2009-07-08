@@ -61,6 +61,16 @@
  * depreciated.  Also added Bubble Babble output type, ported from Perl's Digest::BubbleBabble
  * by Benjamin Trott from CPAN.
  * 
+ * UPDATE July 8, 2009 (1.5):  Changed internal variable bytesSoFar in primary HashFile() method
+ * from an 32-bit int to a 64-bit long.  I noticed that files greater than 2GB in size (specifically
+ * 2,147,483,647 bytes, or System.Int32.MaxValue) would cause the hashing engine to crash when
+ * the progress through the file exceeded the 2GB barrier.  This was because this variable would
+ * overflow and exceed its boundaries. totalBytesSoFar, the variable holding the sum of file
+ * lengths in a multi-file comparison, was already a long, but for some reason I didn't think to
+ * do this for single files.  Of course, this means that a total of 9EB (exabytes) can be compared,
+ * either as a single file or as a sum of compared files, but for now that's better than blowing
+ * up around 2GB.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -202,14 +212,14 @@ namespace com.gpfcomics.WinHasher.Core
                 // We'll need a buffer to read in our data:
                 byte[] buffer = new byte[bufferSize];
                 // And we'll need to know how many bytes we've read so far in this file:
-                int bytesSoFar = 0;
+                long bytesSoFar = 0;
                 // Keep going until there's nothing left to read:
                 while (true)
                 {
                     // Read in the next batch of bytes into the buffer:
                     int bytesRead = fs.Read(buffer, 0, bufferSize);
                     // Increment our so-far count:
-                    bytesSoFar += bytesRead;
+                    bytesSoFar += (long)bytesRead;
                     // If we didn't read anything this pass, break out of the loop:
                     if (bytesRead == 0) break;
                     // Otherwise, look at how many bytes we've ready this pass.  If that number
@@ -218,7 +228,7 @@ namespace com.gpfcomics.WinHasher.Core
                     // the file, we should be done.  If that's the case, pass the buffer into
                     // the hash and transform the final block.  This finalizes the hash so we
                     // can get the final value.
-                    if (bytesRead < bufferSize || (long)bytesSoFar == fs.Length)
+                    if (bytesRead < bufferSize || bytesSoFar == fs.Length)
                         hasher.TransformFinalBlock(buffer, 0, bytesRead);
                     // If neither of the above conditions were met, assume we've got more to read
                     // in the next pass.  Feed what's currently in the buffer to the hash and
@@ -232,7 +242,7 @@ namespace com.gpfcomics.WinHasher.Core
                     // the total byte length is the length of the file, so we'll just get the
                     // progress through this single file.
                     if (bgWorker != null)
-                        bgWorker.ReportProgress((int)(((double)((long)bytesSoFar + totalBytesSoFar) /
+                        bgWorker.ReportProgress((int)(((double)(bytesSoFar + totalBytesSoFar) /
                             (double)totalByteLength) * 100.0));
                 }
                 // If we broke out of the loop, grab the final hash value and unlock and close
