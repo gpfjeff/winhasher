@@ -33,6 +33,10 @@
  * UPDATED February 12, 2009 (1.4):  Added all-caps hex and Bubble Babble command line options.
  * Default hash is now SHA-1.
  * 
+ * UPDATED July 8, 2009 (1.5):  Switched command-line mode single-file hash to using the new
+ * ResultDialog class rather than MessageBox to give the user easier access to the hash value
+ * and to allow them to compare the hash with a pre-computed value more easily.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -169,8 +173,10 @@ namespace com.gpfcomics.WinHasher
                                 // If we got back a successful result, show the hash.  Otherwise,
                                 // the error message should already be shown so do nothing.
                                 if (pd.Result == ProgressDialog.ResultStatus.Success && pd.Hash != null)
-                                    MessageBox.Show(hashString + ": " + pd.Hash, hashString + " Hash",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                {
+                                    ResultDialog rd = new ResultDialog(pd.Hash, hash, outputType);
+                                    rd.ShowDialog();
+                                }
                             }
                             // The file didn't exist:
                             else

@@ -60,6 +60,9 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
             this.tooltipsCheckbox = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.compareToTextBox = new System.Windows.Forms.TextBox();
+            this.compareResultLabel = new System.Windows.Forms.Label();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -81,6 +84,9 @@ namespace com.gpfcomics.WinHasher
             // singleTabPage
             // 
             this.singleTabPage.AllowDrop = true;
+            this.singleTabPage.Controls.Add(this.compareResultLabel);
+            this.singleTabPage.Controls.Add(this.compareToTextBox);
+            this.singleTabPage.Controls.Add(this.label8);
             this.singleTabPage.Controls.Add(this.label3);
             this.singleTabPage.Controls.Add(this.hashSingleTextBox);
             this.singleTabPage.Controls.Add(this.hashSingleButton);
@@ -101,7 +107,7 @@ namespace com.gpfcomics.WinHasher
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 78);
+            this.label3.Location = new System.Drawing.Point(6, 71);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
             this.label3.TabIndex = 5;
@@ -109,11 +115,11 @@ namespace com.gpfcomics.WinHasher
             // 
             // hashSingleTextBox
             // 
-            this.hashSingleTextBox.Location = new System.Drawing.Point(6, 94);
+            this.hashSingleTextBox.Location = new System.Drawing.Point(6, 87);
             this.hashSingleTextBox.Multiline = true;
             this.hashSingleTextBox.Name = "hashSingleTextBox";
             this.hashSingleTextBox.ReadOnly = true;
-            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 102);
+            this.hashSingleTextBox.Size = new System.Drawing.Size(264, 43);
             this.hashSingleTextBox.TabIndex = 4;
             this.toolTip1.SetToolTip(this.hashSingleTextBox, resources.GetString("hashSingleTextBox.ToolTip"));
             // 
@@ -418,6 +424,35 @@ namespace com.gpfcomics.WinHasher
             this.label7.TabIndex = 5;
             this.label7.Text = "Output format:";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 133);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(64, 13);
+            this.label8.TabIndex = 6;
+            this.label8.Text = "Compare to:";
+            // 
+            // compareToTextBox
+            // 
+            this.compareToTextBox.Location = new System.Drawing.Point(6, 149);
+            this.compareToTextBox.Multiline = true;
+            this.compareToTextBox.Name = "compareToTextBox";
+            this.compareToTextBox.Size = new System.Drawing.Size(264, 43);
+            this.compareToTextBox.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.compareToTextBox, resources.GetString("compareToTextBox.ToolTip"));
+            this.compareToTextBox.TextChanged += new System.EventHandler(this.compareToTextBox_TextChanged);
+            // 
+            // compareResultLabel
+            // 
+            this.compareResultLabel.Location = new System.Drawing.Point(83, 71);
+            this.compareResultLabel.Name = "compareResultLabel";
+            this.compareResultLabel.Size = new System.Drawing.Size(187, 13);
+            this.compareResultLabel.TabIndex = 8;
+            this.compareResultLabel.Text = "Hashes do not match";
+            this.compareResultLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.compareResultLabel.Visible = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -481,6 +516,9 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox outputFormatComboBox;
         private System.Windows.Forms.CheckBox tooltipsCheckbox;
+        private System.Windows.Forms.TextBox compareToTextBox;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label compareResultLabel;
     }
 }
 
