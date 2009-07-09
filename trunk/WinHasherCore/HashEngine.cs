@@ -61,15 +61,17 @@
  * depreciated.  Also added Bubble Babble output type, ported from Perl's Digest::BubbleBabble
  * by Benjamin Trott from CPAN.
  * 
- * UPDATE July 8, 2009 (1.5):  Changed internal variable bytesSoFar in primary HashFile() method
+ * UPDATE July 8-9, 2009 (1.5):  Changed internal variable bytesSoFar in primary HashFile() method
  * from an 32-bit int to a 64-bit long.  I noticed that files greater than 2GB in size (specifically
  * 2,147,483,647 bytes, or System.Int32.MaxValue) would cause the hashing engine to crash when
  * the progress through the file exceeded the 2GB barrier.  This was because this variable would
  * overflow and exceed its boundaries. totalBytesSoFar, the variable holding the sum of file
  * lengths in a multi-file comparison, was already a long, but for some reason I didn't think to
- * do this for single files.  Of course, this means that a total of 9EB (exabytes) can be compared,
+ * do this for single files.  Of course, this means that a total of 8EB (exabytes) can be compared,
  * either as a single file or as a sum of compared files, but for now that's better than blowing
- * up around 2GB.
+ * up around 2GB.  Also added error checks to make sure these byte lengths (both total for multi-
+ * file hashes or any given single file) does not exceed the 8EB barrier.  If it does, we'll
+ * throw a HashEngineException that the calling code must catch.
  * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -141,6 +143,8 @@ namespace com.gpfcomics.WinHasher.Core
 
         #region Public Methods
 
+        #region Single File Hash Methods
+
         /// <summary>
         /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
         /// the file and return that hash as a string of hexadecimal characters.
@@ -192,8 +196,14 @@ namespace com.gpfcomics.WinHasher.Core
                 // Also note that we need to open and close the FileStream manually; I originally
                 // passed this into the HashAlgorithm.ComputeHash() call, but then it wouldn't
                 // release the file when it was done.  Also note that we lock the file during
-                // the read to prevent other processes from changing it.
+                // the read to prevent other processes from changing it.  If for any reason
+                // the file length is less than zero, that means we've overflowed the 64-bit
+                // integer length and the file is too large to hash.
                 fs = File.Open(filename, FileMode.Open, FileAccess.Read);
+                if (fs.Length < 0L)
+                    throw new HashEngineException("The total amount of data to hash is " +
+                        "too large. The size of the file being hashed cannot " +
+                        "exceed 8.05EB (exabytes).");
                 fs.Lock(0, fs.Length);
                 // For multi-file comparisons, we want to know the total number of bytes in all the
                 // files that need to be hashed.  That is passed in here as the total byte length.
@@ -584,6 +594,10 @@ namespace com.gpfcomics.WinHasher.Core
             return HashFile(Hashes.SHA1, filename, null, null, -1, -1, OutputType.Hex);
         }
 
+        #endregion
+
+        #region Compare File Hash Methods
+
         /// <summary>
         /// Compares the hashes of all the files in the file list and determine whether or not
         /// they all match.  Note that this is an all-or-nothing deal; if just one hash does
@@ -632,6 +646,16 @@ namespace com.gpfcomics.WinHasher.Core
                 {
                     FileInfo fi = new FileInfo(file);
                     totalByteLength += fi.Length;
+                    // If at any point the total byte length is less than zero, that means we've
+                    // overflowed the 64-bit integer on the length.  We can't handle this
+                    // situation, so throw an error.  This is pretty unlikely to happen, as
+                    // this means the total byte length is in excess of 8.05EB (exabytes),
+                    // but in today's world of ever growing media types, who knows what the
+                    // future will bring?
+                    if (totalByteLength < 0L)
+                        throw new HashEngineException("The total amount of data to hash is " +
+                            "too large. The sum of the size of all files being hashed cannot " +
+                            "exceed 8.05EB (exabytes).");
                 }
             }
             // We don't care about the total if we're not reporting progress:
@@ -708,6 +732,10 @@ namespace com.gpfcomics.WinHasher.Core
             return CompareHashes(Hashes.SHA1, fileList);
         }
 
+        #endregion
+
+        #region Hash Text Methods
+
         /// <summary>
         /// Given a hash algorithm, a text string, and a text encoding (presumably in which the
         /// string was encoded), compute the specified hash
@@ -774,6 +802,8 @@ namespace com.gpfcomics.WinHasher.Core
         {
             return HashText(hash, text, encoding, OutputType.Hex);
         }
+
+        #endregion
 
         #endregion
 
