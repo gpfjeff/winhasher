@@ -1,0 +1,41 @@
+﻿/* JTD: The following text has been added has been added to force TortoiseSVN's
+   SubWCRev command to update the AssemblyInfo.cs templates with the appropriate
+   revision number.  Undoubtedly, this only works when the tempalte itself is
+   modified, although we want it to occur when any code changes.  So just before
+   doing a release build, make sure to change the random string below to some-
+   thing new to force SubWCRev to add the new info.
+   
+   cB9S38TyG6SmIlwSExPBBAvnb9BCi9eUgQcZJ9BKQSI8pBI2l1abYdW7mbaVUJK */
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("WinHasher SHA1 (Console Version)")]
+[assembly: AssemblyDescription("This console application computes the SHA1 hash of one or more files.")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("GPF Comics")]
+[assembly: AssemblyProduct("sha1")]
+[assembly: AssemblyCopyright("© Copyright $WCDATE=%Y$, Jeffrey T. Darlington.")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("5247bb10-de8c-4cea-9ffb-e29161a14b35")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+[assembly: AssemblyVersion("1.5.0.$WCREV$")]
+[assembly: AssemblyFileVersion("1.5.0.$WCREV$")]
