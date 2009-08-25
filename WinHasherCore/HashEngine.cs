@@ -73,6 +73,9 @@
  * file hashes or any given single file) does not exceed the 8EB barrier.  If it does, we'll
  * throw a HashEngineException that the calling code must catch.
  * 
+ * UPDATE August 20, 2009 (1.6):  Added overloads that include new ConsoleStatusUpdater object so
+ * we can so the progress of long hashes performed on the command line.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -154,6 +157,8 @@ namespace com.gpfcomics.WinHasher.Core
         /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
         /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
         /// if necessary</param>
+        /// <param name="consoleStatus">A <see cref="ConsoleStatusUpdater"/> that, if not null,
+        /// will allow us to update the percent complete to the console rather than to the GUI.</param>
         /// <param name="totalByteLength">The total length in bytes of all items being hashed.
         /// This is primarily for multi-file hash comparison, where this value would be the the sum
         /// of all the lengths of all the files being hashed.  This is used to compute the progress
@@ -169,7 +174,8 @@ namespace com.gpfcomics.WinHasher.Core
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
-            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar, OutputType outputType)
+            DoWorkEventArgs dwe, ConsoleStatusUpdater consoleStatus, long totalByteLength,
+            long totalBytesSoFar, OutputType outputType)
         {
             // Lots of things can go wrong here, so ignore Yoda's advice and give it a try:
             try
@@ -223,6 +229,12 @@ namespace com.gpfcomics.WinHasher.Core
                 byte[] buffer = new byte[bufferSize];
                 // And we'll need to know how many bytes we've read so far in this file:
                 long bytesSoFar = 0;
+                // We'll use these to keep track of our current percentage completion.  "percent"
+                // will be recalculated on each pass, while "last_percent" will store the value
+                // of the last reported percentage.  The difference between the two will be
+                // explained in the relevant code below.
+                int last_percent = 0;
+                int percent = 0;
                 // Keep going until there's nothing left to read:
                 while (true)
                 {
@@ -245,15 +257,25 @@ namespace com.gpfcomics.WinHasher.Core
                     // keep going.
                     else
                         hasher.TransformBlock(buffer, 0, bytesRead, buffer, 0);
-                    // Report our progress to the background worker if one is present.  Note that
-                    // we're also including the total values.  Thus, for a multi-file comparison,
-                    // this should give us the progress through the entire batch, every byte of
-                    // every file.  For a single file hash, the "bytes so far" value is zero and
-                    // the total byte length is the length of the file, so we'll just get the
+                    // Report our progress to the whoever is listening.  This could be a background
+                    // worker (for the GUI) or a special console reporting class (for console apps).
+                    // Note that we're also including the total values.  Thus, for a multi-file
+                    // comparison, this should give us the progress through the entire batch, every
+                    // byte of every file.  For a single file hash, the "bytes so far" value is zero
+                    // and the total byte length is the length of the file, so we'll just get the
                     // progress through this single file.
-                    if (bgWorker != null)
-                        bgWorker.ReportProgress((int)(((double)(bytesSoFar + totalBytesSoFar) /
-                            (double)totalByteLength) * 100.0));
+                    percent = (int)(((double)(bytesSoFar + totalBytesSoFar) /
+                            (double)totalByteLength) * 100.0);
+                    // Only report the percentage if it's different from what we last reported.
+                    // The reason for this is that it reduces flicker in the console version.
+                    if (percent > last_percent)
+                    {
+                        // Report the status to the background worker or console updater, which-
+                        // ever is present.  Then take not of the update for the next pass.
+                        if (bgWorker != null) bgWorker.ReportProgress(percent);
+                        if (consoleStatus != null) consoleStatus.SetPercentDone(percent);
+                        last_percent = percent;
+                    }
                 }
                 // If we broke out of the loop, grab the final hash value and unlock and close
                 // the file:
@@ -352,6 +374,36 @@ namespace com.gpfcomics.WinHasher.Core
                     catch { }
                 }
             }
+        }
+
+        /// <summary>
+        /// Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="bgWorker">A BackgroundWorker to report any progress to</param>
+        /// <param name="dwe">A DoWorkEventArgs object to allow us to cancel the work in progerss
+        /// if necessary</param>
+        /// <param name="totalByteLength">The total length in bytes of all items being hashed.
+        /// This is primarily for multi-file hash comparison, where this value would be the the sum
+        /// of all the lengths of all the files being hashed.  This is used to compute the progress
+        /// passed to the progress dialog box.  If set to anything less than or equal to zero, it
+        /// derives this value from the specified file's length.</param>
+        /// <param name="totalBytesSoFar">The total number of bytes already hashed in a multi-file
+        /// hash comparison.  This should be the sum of the lengths of all the files hashed before
+        /// this file.  This should be zero for the first file in a comparison or for a single file
+        /// hash.  If set to anything less than zero, this value is reset to zero.</param>
+        /// <param name="outputType">An enum specifying what format the output string should be
+        /// in (hexadecimal, Base64, etc.)</param>
+        /// <returns>A string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar, OutputType outputType)
+        {
+            return HashFile(hash, filename, bgWorker, dwe, null, totalByteLength,
+                totalBytesSoFar, outputType);
         }
 
         /// <summary>
@@ -493,6 +545,26 @@ namespace com.gpfcomics.WinHasher.Core
         /// </summary>
         /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
         /// <param name="filename">The path to the file to compute the hash for</param>
+        /// <param name="outputType">An enum specifying what format the output string should be
+        /// in (hexadecimal, Base64, etc.)</param>
+        /// <param name="consoleStatus">A <see cref="ConsoleStatusUpdater"/> that, if not null,
+        /// will allow us to update the percent complete to the console rather than to the GUI.</param>
+        /// <returns>A string representing the computed hash</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static string HashFile(Hashes hash, string filename, OutputType outputType,
+            ConsoleStatusUpdater consoleStatus)
+        {
+            return HashFile(hash, filename, null, null, consoleStatus, -1, -1, outputType);
+        }
+
+
+        /// <summary>
+        /// The core hashing method.  Given a hash algorithm and a file name, compute the hash of
+        /// the file and return that hash as a string of hexadecimal characters.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="filename">The path to the file to compute the hash for</param>
         /// <param name="base64">True to return a Base64 encoded string, false for hexadeciaml</param>
         /// <returns>A string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
@@ -610,11 +682,13 @@ namespace com.gpfcomics.WinHasher.Core
         /// <param name="bgWorker">A BackgroundWorker task to notify of our progress</param>
         /// <param name="dwe">A DoWorkEventArgs object to let us know if the user has cancelled
         /// the comparison</param>
+        /// <param name="consoleStatus">A <see cref="ConsoleStatusUpdater"/> that, if not null,
+        /// will allow us to update the percent complete to the console rather than to the GUI.</param>
         /// <returns>A boolean flag representing whether or not all the hashes matched or not</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
         public static bool CompareHashes(Hashes hash, string[] fileList, BackgroundWorker bgWorker,
-            DoWorkEventArgs dwe)
+            DoWorkEventArgs dwe, ConsoleStatusUpdater consoleStatus)
         {
             // On the off chance we're using a BackgroundWorker and the user cancels the
             // process, formalize the cancel and return false:
@@ -637,7 +711,7 @@ namespace com.gpfcomics.WinHasher.Core
             long totalBytesSoFar = 0;
             // Only bother calculating the total number of bytes if we'll be reporting it back
             // to a GUI background worker:
-            if (bgWorker != null)
+            if (bgWorker != null || consoleStatus != null)
             {
                 // Step through the files, get their lengths, and add them to the total.  I'd
                 // rather not step through the file list more than once, but we need this total
@@ -666,20 +740,20 @@ namespace com.gpfcomics.WinHasher.Core
                 // If this is the first file in the list, compute its hash and store it.  Note
                 // that we just call the HashFile() method above to do the dirty work.
                 if (firstHash.CompareTo(String.Empty) == 0)
-                    firstHash = HashFile(hash, file, bgWorker, dwe, totalByteLength,
-                        totalBytesSoFar).ToUpper();
+                    firstHash = HashFile(hash, file, bgWorker, dwe, consoleStatus,
+                        totalByteLength, totalBytesSoFar, OutputType.Base64);
                 // Otherwise, compare the current file's hash to the first file's hash.  If
                 // the hashes do not match, fail the entire batch.  Note that this kind of
                 // short-ciruits, so if we're comparing a bunch of files but the first two
                 // don't match, we won't bother with the rest.
                 else
-                    if (firstHash.CompareTo(HashFile(hash, file, bgWorker, dwe,
-                        totalByteLength, totalBytesSoFar).ToUpper()) != 0)
+                    if (firstHash.CompareTo(HashFile(hash, file, bgWorker, dwe, consoleStatus,
+                        totalByteLength, totalBytesSoFar, OutputType.Base64)) != 0)
                         return false;
                 // If we didn't return there, add the length of the file we just processed to the
                 // total number of bytes hashed, so we can add that to the progress in the next
                 // pass:
-                if (bgWorker != null)
+                if (bgWorker != null || consoleStatus != null)
                 {
                     FileInfo fi = new FileInfo(file);
                     totalBytesSoFar += fi.Length;
@@ -689,6 +763,47 @@ namespace com.gpfcomics.WinHasher.Core
             return true;
         }
 
+        /// <summary>
+        /// Compares the hashes of all the files in the file list and determine whether or not
+        /// they all match.  Note that this is an all-or-nothing deal; if just one hash does
+        /// not match, the entire batch failes.  If no files or only one are passed in, the
+        /// method also fails, as there's nothing to compare.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="fileList">A string array representing the path to each file to
+        /// process</param>
+        /// <param name="bgWorker">A BackgroundWorker task to notify of our progress</param>
+        /// <param name="dwe">A DoWorkEventArgs object to let us know if the user has cancelled
+        /// the comparison</param>
+        /// <returns>A boolean flag representing whether or not all the hashes matched or not</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static bool CompareHashes(Hashes hash, string[] fileList, BackgroundWorker bgWorker,
+            DoWorkEventArgs dwe)
+        {
+            return CompareHashes(hash, fileList, bgWorker, dwe, null);
+        }
+
+        /// <summary>
+        /// Compares the hashes of all the files in the file list and determine whether or not
+        /// they all match.  Note that this is an all-or-nothing deal; if just one hash does
+        /// not match, the entire batch failes.  If no files or only one are passed in, the
+        /// method also fails, as there's nothing to compare.
+        /// </summary>
+        /// <param name="hash">The Hashes enumeration representing the hash algorithm to use</param>
+        /// <param name="fileList">A string array representing the path to each file to
+        /// process</param>
+        /// <param name="consoleStatus">A <see cref="ConsoleStatusUpdater"/> that, if not null,
+        /// will allow us to update the percent complete to the console rather than to the GUI.</param>
+        /// <returns>A boolean flag representing whether or not all the hashes matched or not</returns>
+        /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
+        /// hash is computed</exception>
+        public static bool CompareHashes(Hashes hash, string[] fileList,
+            ConsoleStatusUpdater consoleStatus)
+        {
+            return CompareHashes(hash, fileList, null, null, consoleStatus);
+        }
+        
         /// <summary>
         /// Compares the hashes of all the files in the file list and determine whether or not
         /// they all match.  Note that this is an all-or-nothing deal; if just one hash does
