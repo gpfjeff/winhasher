@@ -20,6 +20,12 @@
  * UPDATE February 12, 2009 (1.4):  Added -hexcaps switch and all-caps hexadcimal output, as well
  * as -bubbab and Bubble Babble.
  * 
+ * 1.5:  No changes to the console apps in this version; version number bumped just to keep in
+ * step with the GUI app.
+ * 
+ * UPDATE August 20, 2009 (1.6):  Added usage of WinHasherCore.ConsoleStatusUpdater to update
+ * the console with the current percent complete.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -129,6 +135,35 @@ namespace com.gpfcomics.WinHasher.hashconsole
                 files = args;
                 if (files.Length > 0)
                 {
+                    // Display which hash we're running:
+                    string hashString = "SHA-1";
+                    switch (hash)
+                    {
+                        case Hashes.MD5:
+                            hashString = "MD5";
+                            break;
+                        case Hashes.RIPEMD160:
+                            hashString = "RIPEMD-160";
+                            break;
+                        case Hashes.SHA256:
+                            hashString = "SHA-256";
+                            break;
+                        case Hashes.SHA384:
+                            hashString = "SHA-384";
+                            break;
+                        case Hashes.SHA512:
+                            hashString = "SHA-512";
+                            break;
+                        case Hashes.Tiger:
+                            hashString = "Tiger";
+                            break;
+                        case Hashes.Whirlpool:
+                            hashString = "Whirlpool";
+                            break;
+                        default:
+                            hashString = "SHA-1";
+                            break;
+                    }
 
                     // If we got one file, compute the hash and print it back:
                     if (files.Length == 1)
@@ -137,35 +172,6 @@ namespace com.gpfcomics.WinHasher.hashconsole
                         // it a try:
                         try
                         {
-                            // Display which hash we're running:
-                            string hashString = "SHA-1";
-                            switch (hash)
-                            {
-                                case Hashes.MD5:
-                                    hashString = "MD5";
-                                    break;
-                                case Hashes.RIPEMD160:
-                                    hashString = "RIPEMD-160";
-                                    break;
-                                case Hashes.SHA256:
-                                    hashString = "SHA-256";
-                                    break;
-                                case Hashes.SHA384:
-                                    hashString = "SHA-384";
-                                    break;
-                                case Hashes.SHA512:
-                                    hashString = "SHA-512";
-                                    break;
-                                case Hashes.Tiger:
-                                    hashString = "Tiger";
-                                    break;
-                                case Hashes.Whirlpool:
-                                    hashString = "Whirlpool";
-                                    break;
-                                default:
-                                    hashString = "SHA-1";
-                                    break;
-                            }
 
                             // Print out a warning if they chose MD5:
                             if (hash == Hashes.MD5)
@@ -174,9 +180,19 @@ namespace com.gpfcomics.WinHasher.hashconsole
                                 Console.WriteLine("WARNING: MD5 is no longer considered a secure hashing algorithm.  You");
                                 Console.WriteLine("may want to consider using a stronger algorithm whenever possible.");
                             }
-                            // This should be simple enough:
+                            // Print out a message telling the user what we're about to do and
+                            // seed the percent complete status with a zero.  Note that we use
+                            // a Write() here instead of WriteLine() so we can update the
+                            // percent status as we move along.
                             Console.WriteLine();
-                            Console.WriteLine(hashString + ": " + HashEngine.HashFile(hash, files[0], outputType));
+                            Console.Write("Computing " + hashString + " of " + files[0] + "...   0%");
+                            // Compute the hash:
+                            string theHash = HashEngine.HashFile(hash, files[0], outputType,
+                                new ConsoleStatusUpdater());
+                            // Print out the result.  Note the extral WriteLine() to close
+                            // the status line above.
+                            Console.WriteLine();
+                            Console.WriteLine(hashString + ": " + theHash);
                         }
                         #region Catch Exceptions
                         // Our hash engine can throw its own exceptions, which usually are just other
@@ -216,14 +232,23 @@ namespace com.gpfcomics.WinHasher.hashconsole
                     {
                         try
                         {
-                            if (HashEngine.CompareHashes(hash, files))
+                            // Print out the initial status message like above:
+                            Console.WriteLine();
+                            Console.Write("Comparing " + hashString + " of " + files.Length +
+                                " files...   0%");
+                            // Compute the hashes and compare the result.  Note that the
+                            // displayed status might be less than 100% if the comparisons
+                            // fail.
+                            bool isMatch = HashEngine.CompareHashes(hash, files, 
+                                new ConsoleStatusUpdater());
+                            // Print the result:
+                            Console.WriteLine();
+                            if (isMatch)
                             {
-                                Console.WriteLine();
                                 Console.WriteLine("Congratulations!  All " + files.Length + " files match!");
                             }
                             else
                             {
-                                Console.WriteLine();
                                 Console.WriteLine("WARNING! One or more of these " + files.Length + " files do not match!");
                             }
                         }

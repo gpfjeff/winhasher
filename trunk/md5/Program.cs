@@ -20,6 +20,12 @@
  * UPDATE February 12, 2009 (1.4):  Added -hexcaps switch and all-caps hexadcimal output, as well
  * as -bubbab and Bubble Babble.
  * 
+ * 1.5:  No changes to the console apps in this version; version number bumped just to keep in
+ * step with the GUI app.
+ * 
+ * UPDATE August 20, 2009 (1.6):  Added usage of WinHasherCore.ConsoleStatusUpdater to update
+ * the console with the current percent complete.
+ * 
  * This program is Copyright 2009, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
@@ -90,9 +96,20 @@ namespace com.gpfcomics.WinHasher.md5console
                 // it a try:
                 try
                 {
-                    // This should be simple enough:
+                    // Print out a message telling the user what we're about to do and
+                    // seed the percent complete status with a zero.  Note that we use
+                    // a Write() here instead of WriteLine() so we can update the
+                    // percent status as we move along.
                     Console.WriteLine();
-                    Console.WriteLine(HashEngine.MD5HashFile(args[0], outputType));
+                    Console.Write("Computing MD5 of " + args[0] + "...   0%");
+                    // Compute the hash:
+                    string theHash = HashEngine.HashFile(Hashes.MD5, args[0], outputType,
+                        new ConsoleStatusUpdater());
+                    // Print out the result.  Note the extral WriteLine() to close
+                    // the status line above.
+                    Console.WriteLine();
+                    Console.WriteLine("MD5: " + theHash);
+
                 }
                 #region Catch Exceptions
                 // Our hash engine can throw its own exceptions, which usually are just other
@@ -129,7 +146,17 @@ namespace com.gpfcomics.WinHasher.md5console
             {
                 try
                 {
-                    if (HashEngine.CompareMD5Hashes(args))
+                    // Print out the initial status message like above:
+                    Console.WriteLine();
+                    Console.Write("Comparing MD5 of " + args.Length + " files...   0%");
+                    // Compute the hashes and compare the result.  Note that the
+                    // displayed status might be less than 100% if the comparisons
+                    // fail.
+                    bool isMatch = HashEngine.CompareHashes(Hashes.MD5, args,
+                        new ConsoleStatusUpdater());
+                    // Print the result:
+                    Console.WriteLine();
+                    if (isMatch)
                     {
                         Console.WriteLine();
                         Console.WriteLine("Congratulations!  All " + args.Length + " files match!");
