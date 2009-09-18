@@ -32,6 +32,9 @@ namespace com.gpfcomics.WinHasher
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.modeTabControl = new System.Windows.Forms.TabControl();
             this.singleTabPage = new System.Windows.Forms.TabPage();
+            this.compareResultLabel = new System.Windows.Forms.Label();
+            this.compareToTextBox = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.hashSingleTextBox = new System.Windows.Forms.TextBox();
             this.hashSingleButton = new System.Windows.Forms.Button();
@@ -60,9 +63,6 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
             this.tooltipsCheckbox = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.compareToTextBox = new System.Windows.Forms.TextBox();
-            this.compareResultLabel = new System.Windows.Forms.Label();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -103,6 +103,35 @@ namespace com.gpfcomics.WinHasher
             this.singleTabPage.UseVisualStyleBackColor = true;
             this.singleTabPage.DragDrop += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragDrop);
             this.singleTabPage.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileSingleTextBox_DragEnter);
+            // 
+            // compareResultLabel
+            // 
+            this.compareResultLabel.Location = new System.Drawing.Point(83, 71);
+            this.compareResultLabel.Name = "compareResultLabel";
+            this.compareResultLabel.Size = new System.Drawing.Size(187, 13);
+            this.compareResultLabel.TabIndex = 8;
+            this.compareResultLabel.Text = "Hashes do not match";
+            this.compareResultLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.compareResultLabel.Visible = false;
+            // 
+            // compareToTextBox
+            // 
+            this.compareToTextBox.Location = new System.Drawing.Point(6, 149);
+            this.compareToTextBox.Multiline = true;
+            this.compareToTextBox.Name = "compareToTextBox";
+            this.compareToTextBox.Size = new System.Drawing.Size(264, 43);
+            this.compareToTextBox.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.compareToTextBox, resources.GetString("compareToTextBox.ToolTip"));
+            this.compareToTextBox.TextChanged += new System.EventHandler(this.compareToTextBox_TextChanged);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 133);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(64, 13);
+            this.label8.TabIndex = 6;
+            this.label8.Text = "Compare to:";
             // 
             // label3
             // 
@@ -424,35 +453,6 @@ namespace com.gpfcomics.WinHasher
             this.label7.TabIndex = 5;
             this.label7.Text = "Output format:";
             // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 133);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(64, 13);
-            this.label8.TabIndex = 6;
-            this.label8.Text = "Compare to:";
-            // 
-            // compareToTextBox
-            // 
-            this.compareToTextBox.Location = new System.Drawing.Point(6, 149);
-            this.compareToTextBox.Multiline = true;
-            this.compareToTextBox.Name = "compareToTextBox";
-            this.compareToTextBox.Size = new System.Drawing.Size(264, 43);
-            this.compareToTextBox.TabIndex = 7;
-            this.toolTip1.SetToolTip(this.compareToTextBox, resources.GetString("compareToTextBox.ToolTip"));
-            this.compareToTextBox.TextChanged += new System.EventHandler(this.compareToTextBox_TextChanged);
-            // 
-            // compareResultLabel
-            // 
-            this.compareResultLabel.Location = new System.Drawing.Point(83, 71);
-            this.compareResultLabel.Name = "compareResultLabel";
-            this.compareResultLabel.Size = new System.Drawing.Size(187, 13);
-            this.compareResultLabel.TabIndex = 8;
-            this.compareResultLabel.Text = "Hashes do not match";
-            this.compareResultLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.compareResultLabel.Visible = false;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -468,6 +468,7 @@ namespace com.gpfcomics.WinHasher
             this.Controls.Add(this.label1);
             this.Controls.Add(this.modeTabControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "WinHasher";

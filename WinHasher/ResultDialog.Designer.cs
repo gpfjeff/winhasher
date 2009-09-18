@@ -28,6 +28,7 @@ namespace com.gpfcomics.WinHasher
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ResultDialog));
             this.btnOK = new System.Windows.Forms.Button();
             this.lblResult = new System.Windows.Forms.Label();
             this.txtResult = new System.Windows.Forms.TextBox();
@@ -104,6 +105,7 @@ namespace com.gpfcomics.WinHasher
             this.Controls.Add(this.lblResult);
             this.Controls.Add(this.btnOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ResultDialog";

@@ -34,6 +34,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleStatusUpdater.cs" />
     <Compile Include="HashEngine.cs" />
     <Compile Include="HashEngineException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

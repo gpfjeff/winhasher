@@ -5,7 +5,7 @@
    doing a release build, make sure to change the random string below to some-
    thing new to force SubWCRev to add the new info.
    
-   IC3n8hjOdq8bAce96eVdIhj4QQPX28YWi57GyTRz8LmAnujmN1oFAoeK9EYNW6C */
+   Lz7peoVyVuL97tG5UTl7xBeWfLYtllY9urc3cZUvsAFq5WVAYuFxaIJcpUK */
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
