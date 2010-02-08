@@ -24,7 +24,13 @@
  * unsuccessful message.  All three of these additions make the result much more robust and
  * easier to work with.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * UPDATE February 8, 2010 (1.6):  Added "case kludge" for single file hash results.  If the
+ * user selects an output type that typically does not have mixed case (currently everything
+ * except Base64), pasting a comparison value with the opposite case (i.e. upper-case when
+ * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
+ * when a specific case is expected.
+ * 
+ * This program is Copyright 2010, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -53,6 +59,11 @@ namespace com.gpfcomics.WinHasher
 {
     public partial class ResultDialog : Form
     {
+        /// <summary>
+        /// The <see cref="OutputType"/> of the result hash
+        /// </summary>
+        private OutputType outputType;
+
         /// <summary>
         /// The ResultDialog constructor
         /// </summary>
@@ -121,6 +132,8 @@ namespace com.gpfcomics.WinHasher
                     break;
             }
             lblResult.Text = labelText + ":";
+            // Hold onto the output type for comparison later:
+            this.outputType = outputType;
         }
 
         /// <summary>
@@ -153,21 +166,53 @@ namespace com.gpfcomics.WinHasher
                 lblCompareResult.ForeColor = SystemColors.ControlText;
                 lblCompareResult.BackColor = SystemColors.Control;
             }
-            // If the two strings match, then the generated hash matches the pre-existing
-            // hash and the user can safely say the file is unaltered and intact:
-            else if (String.Compare(txtResult.Text, txtCompare.Text) == 0)
-            {
-                lblCompareResult.Text = "The two hashes match.";
-                lblCompareResult.ForeColor = Color.White;
-                lblCompareResult.BackColor = Color.Green;
-            }
-            // Otherwise, the strings don't match, the hashes don't match, and the file is
-            // not what it claims to be:
             else
             {
-                lblCompareResult.Text = "The two hashes do not match.";
-                lblCompareResult.ForeColor = Color.Yellow;
-                lblCompareResult.BackColor = Color.Red;
+                // This is a convenience kludge.  Most websites that post hashes tend to use
+                // lower-case hexadecimal, which is why we've set that to our default everywhere.
+                // That said, there are sites out there that post hashes in upper-case, which
+                // makes it a pain to compare against if our default is lower-case.  Originally,
+                // the only way to change the behavior of the Send To shortcuts was to change
+                // the command line of the shortcut, which isn't something every user knows how
+                // to do.  So this kludge tweaks the comparison string (if set) to force the
+                // value to match the case we've specified.  In the default case (lower-case
+                // hex), that means forcing the hash to be lower-case, even if pasted in as
+                // upper-case.  The same goes for Bubble Babble, which is almost always lower-
+                // case, and the inverse is true for our "CapHex" setting (force it to be
+                // upper-case).  Note that we don't do anything for Base64, which by definition
+                // includes mixed-case characters.  Of course, this only makes sense if there's
+                // something in the field to compare against.
+                if (!String.IsNullOrEmpty(txtCompare.Text))
+                {
+                    switch (outputType)
+                    {
+                        case OutputType.Hex:
+                        case OutputType.BubbleBabble:
+                            txtCompare.Text = txtCompare.Text.ToLower();
+                            break;
+                        case OutputType.CapHex:
+                            txtCompare.Text = txtCompare.Text.ToUpper();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                // If the two strings match, then the generated hash matches the pre-existing
+                // hash and the user can safely say the file is unaltered and intact:
+                if (String.Compare(txtResult.Text, txtCompare.Text) == 0)
+                {
+                    lblCompareResult.Text = "The two hashes match.";
+                    lblCompareResult.ForeColor = Color.White;
+                    lblCompareResult.BackColor = Color.Green;
+                }
+                // Otherwise, the strings don't match, the hashes don't match, and the file is
+                // not what it claims to be:
+                else
+                {
+                    lblCompareResult.Text = "The two hashes do not match.";
+                    lblCompareResult.ForeColor = Color.Yellow;
+                    lblCompareResult.BackColor = Color.Red;
+                }
             }
         }
     }
