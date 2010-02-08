@@ -41,7 +41,13 @@
  * whether or not the two values match.  This is similar to the new functionality of the
  * ResultDialog added when the program is called in command-line mode.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * UPDATE February 8, 2010 (1.6):  Added "case kludge" for single file hash results.  If the
+ * user selects an output type that typically does not have mixed case (currently everything
+ * except Base64), pasting a comparison value with the opposite case (i.e. upper-case when
+ * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
+ * when a specific case is expected.
+ * 
+ * This program is Copyright 2010, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -829,25 +835,56 @@ namespace com.gpfcomics.WinHasher
                 compareResultLabel.ForeColor = SystemColors.ControlText;
                 compareResultLabel.BackColor = SystemColors.Control;
             }
-            // If the two strings match, then the generated hash matches the pre-existing
-            // hash and the user can safely say the file is unaltered and intact:
-            else if (String.Compare(hashSingleTextBox.Text, compareToTextBox.Text) == 0)
-            {
-                compareResultLabel.Visible = true;
-                compareResultLabel.Text = "Hashes match";
-                compareResultLabel.ForeColor = Color.White;
-                compareResultLabel.BackColor = Color.Green;
-            }
-            // Otherwise, the strings don't match, the hashes don't match, and the file is
-            // not what it claims to be:
             else
             {
-                compareResultLabel.Visible = true;
-                compareResultLabel.Text = "Hashes do not match";
-                compareResultLabel.ForeColor = Color.Yellow;
-                compareResultLabel.BackColor = Color.Red;
+                // This is a convenience kludge.  Most websites that post hashes tend to use
+                // lower-case hexadecimal, which is why we've set that to our default everywhere.
+                // That said, there are sites out there that post hashes in upper-case, which
+                // makes it a pain to compare against if our default is lower-case.  Originally,
+                // the only way to change the behavior of the Send To shortcuts was to change
+                // the command line of the shortcut, which isn't something every user knows how
+                // to do.  So this kludge tweaks the comparison string (if set) to force the
+                // value to match the case we've specified.  In the default case (lower-case
+                // hex), that means forcing the hash to be lower-case, even if pasted in as
+                // upper-case.  The same goes for Bubble Babble, which is almost always lower-
+                // case, and the inverse is true for our "CapHex" setting (force it to be
+                // upper-case).  Note that we don't do anything for Base64, which by definition
+                // includes mixed-case characters.  Of course, this only makes sense if there's
+                // something in the field to compare against.
+                if (!String.IsNullOrEmpty(compareToTextBox.Text))
+                {
+                    switch (outputType)
+                    {
+                        case OutputType.Hex:
+                        case OutputType.BubbleBabble:
+                            compareToTextBox.Text = compareToTextBox.Text.ToLower();
+                            break;
+                        case OutputType.CapHex:
+                            compareToTextBox.Text = compareToTextBox.Text.ToUpper();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                // If the two strings match, then the generated hash matches the pre-existing
+                // hash and the user can safely say the file is unaltered and intact:
+                if (String.Compare(hashSingleTextBox.Text, compareToTextBox.Text) == 0)
+                {
+                    compareResultLabel.Visible = true;
+                    compareResultLabel.Text = "Hashes match";
+                    compareResultLabel.ForeColor = Color.White;
+                    compareResultLabel.BackColor = Color.Green;
+                }
+                // Otherwise, the strings don't match, the hashes don't match, and the file is
+                // not what it claims to be:
+                else
+                {
+                    compareResultLabel.Visible = true;
+                    compareResultLabel.Text = "Hashes do not match";
+                    compareResultLabel.ForeColor = Color.Yellow;
+                    compareResultLabel.BackColor = Color.Red;
+                }
             }
-
         }
 
         #endregion
