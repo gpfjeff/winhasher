@@ -1,0 +1,14 @@
+#summary System requirements for running WinHasher
+#labels Phase-Support
+
+= System Requirements =
+
+ * [http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx Microsoft .NET 2.0 Framework]; only the runtime or redistributable package is required. .NET 2.0 requires:
+  * Windows 98, 98 SE, ME, 2000 SP3 or higher, XP SP2 or higher, Server 2003, or any flavor of Vista
+  * Windows Installer 2.0 for Windows 98/ME, 3.0 for all other OSes (3.1 recommended)
+  * Internet Explorer 5.01 or higher
+  * 280MB disc space for the x86 version, 610MB for the x64 version
+ * About 1MB of free disk space
+ * No hard memory or processor limits are know beyond the OS and .NET's requirements, but obviously the more the merrier
+
+Note: WinHasher may work on non-Windows platforms with a .NET 2.0 compatible framework like [http://www.mono-project.com/ Mono]. However, this is untested beyond running it through [http://www.mono-project.com/Moma MoMA] (which it passed). Use on a non-Windows platform is considered unsupported; there are far better hashing options available outside of Windows anyway, such as [http://www.openssl.org/ OpenSSL] or [http://www.jonelo.de/java/jacksum/index.html Jacksum].
