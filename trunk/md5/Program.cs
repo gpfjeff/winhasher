@@ -206,7 +206,7 @@ namespace com.gpfcomics.WinHasher.md5console
             Console.WriteLine();
             Console.WriteLine(version);
             if (copyright != null) Console.WriteLine(copyright);
-            Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
+            Console.WriteLine("http://code.google.com/p/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: md5 [-base64|-hexcaps|-bubbab] filename1 [filename2 ...]");

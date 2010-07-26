@@ -307,7 +307,7 @@ namespace com.gpfcomics.WinHasher.hashconsole
             Console.WriteLine();
             Console.WriteLine(version);
             if (copyright != null) Console.WriteLine(copyright);
-            Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
+            Console.WriteLine("http://code.google.com/p/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: hash [-md5|-sha1|-sha256|-sha384|-sha512|-ripemd160|-whirlpool|");
