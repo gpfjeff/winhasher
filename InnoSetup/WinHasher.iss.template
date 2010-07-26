@@ -21,8 +21,8 @@ Compression=lzma/ultra
 ChangesEnvironment=true
 AppPublisher=GPF Comics
 AppPublisherURL=http://www.gpf-comics.com/
-AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
-AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
+AppSupportURL=http://code.google.com/p/winhasher/
+AppUpdatesURL=http://code.google.com/p/winhasher/
 AppVersion=WinHasher 1.6
 UninstallDisplayName=WinHasher 1.6
 SetupIconFile=..\WinHasher\Icon1.ico
@@ -145,4 +145,4 @@ end;
 // doing a release build, make sure to change the random string below to some-
 // thing new to force SubWCRev to add the new info.
 //
-// Revision Tag: 302e38353333363330333731
+// Revision Tag: 302e33333934313635303339

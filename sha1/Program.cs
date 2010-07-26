@@ -207,7 +207,7 @@ namespace com.gpfcomics.WinHasher.sha1console
             Console.WriteLine();
             Console.WriteLine(version);
             if (copyright != null) Console.WriteLine(copyright);
-            Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
+            Console.WriteLine("http://code.google.com/p/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: sha1 [-base64|-hexcaps|-bubbab] filename1 [filename2 ...]");
