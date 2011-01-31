@@ -1,0 +1,7 @@
+#summary A brief list of what we're planning to add in the next version
+#labels Phase-Design
+
+Here's a brief run down of what we're planning to add in version 1.7 of WinHasher:
+
+  * Hashing files and directories and reading and writing the output to and from files. The basic idea is to make a drop-in GUI equivalent for UN*X style utilities like md5sum, shasum, etc. See [https://code.google.com/p/winhasher/issues/detail?id=1 this feature request] for additional details.
+  * A command-line flag to turn off reading and writing to the registry. This should make running WinHasher as a portable app cleaner.
