@@ -1,9 +1,9 @@
                                   WinHasher
-                                 Version 1.6
+                                 Version 1.7
                               Source ReadMe File
 
                             Jeffrey T. Darlington
-                                July 26, 2010
+                                June 28, 2011
                      http://code.google.com/p/winhasher/
 
 WinHasher is a free, Open Source cryptographic hash or digest generator written in C# using Microsoft's .NET 2.0 Framework. It can be used to verify file download integrity, compare two or more files for modifications, and to some degree generate strong, unique passwords. 
