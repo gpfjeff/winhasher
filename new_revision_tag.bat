@@ -14,12 +14,7 @@ goto endofperl
 #line 15
 # Random SVN Revision Tagger
 
-##############################################################################
-# Change this to be the path to your working copy.  Make sure to escape
-# backslashes ("\\") if working on Windows.  Also don't forget the final
-# slash on the end.  DO NOT COMMIT THESE CHANGES TO THE REPOSITORY!
-my $workingpath = ".\\";
-##############################################################################
+my $workingpath = "C:\\Users\\Jeff\\Documents\\Visual Studio 2010\\Projects\\WinHasher\\";
 
 my @templates = (
 		"WinHasherCore\\Properties\\AssemblyInfo.cs.template",
