@@ -47,9 +47,12 @@
  * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
  * when a specific case is expected.
  * 
- * This program is Copyright 2010, Jeffrey T. Darlington.
+ * UPDATE June 7, 2012 (1.6.1):  Fixes for Issue #4
+ * https://code.google.com/p/winhasher/issues/detail?id=4
+ * 
+ * This program is Copyright 2012, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://code.google.com/p/winhasher/
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2

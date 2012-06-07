@@ -26,9 +26,9 @@
  * UPDATE August 20, 2009 (1.6):  Added usage of WinHasherCore.ConsoleStatusUpdater to update
  * the console with the current percent complete.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * This program is Copyright 2012, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://code.google.com/p/winhasher/
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -207,7 +207,7 @@ namespace com.gpfcomics.WinHasher.sha1console
             Console.WriteLine();
             Console.WriteLine(version);
             if (copyright != null) Console.WriteLine(copyright);
-            Console.WriteLine("http://www.gpf-comics.com/dl/winhasher/");
+            Console.WriteLine("https://code.google.com/p/winhasher/");
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: sha1 [-base64|-hexcaps|-bubbab] filename1 [filename2 ...]");
