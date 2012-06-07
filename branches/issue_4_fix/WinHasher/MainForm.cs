@@ -279,6 +279,11 @@ namespace com.gpfcomics.WinHasher
                     hashSingleButton.Enabled = true;
                     // Clear out any existing hash in the hash text box:
                     hashSingleTextBox.Text = "";
+                    // Clear out comparison hash text and the result label.  We could
+                    // force the comparison to be rerun, but it would be safer to
+                    // clear out the comparison here instead.
+                    compareResultLabel.Visible = false;
+                    compareToTextBox.Text = "";
                 }
                 #region Catch Exceptions
                 // Most of these are thrown by the FileInfo constructor, although a couple
@@ -385,6 +390,9 @@ namespace com.gpfcomics.WinHasher
                         // Success:  Display the hash:
                         case ProgressDialog.ResultStatus.Success:
                             hashSingleTextBox.Text = pd.Hash;
+                            // If the comparison text box is not empty, rerun the comparison:
+                            if (!String.IsNullOrEmpty(compareToTextBox.Text))
+                                compareToTextBox_TextChanged(null, null);
                             break;
                         // Cancelled:  Let the user know they cancelled the hash:
                         case ProgressDialog.ResultStatus.Cancelled:
