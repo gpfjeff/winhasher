@@ -47,9 +47,12 @@
  * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
  * when a specific case is expected.
  * 
- * This program is Copyright 2010, Jeffrey T. Darlington.
+ * UPDATE June 7, 2012 (1.6.1):  Fixes for Issue #4
+ * https://code.google.com/p/winhasher/issues/detail?id=4
+ * 
+ * This program is Copyright 2012, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://code.google.com/p/winhasher/
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -279,6 +282,11 @@ namespace com.gpfcomics.WinHasher
                     hashSingleButton.Enabled = true;
                     // Clear out any existing hash in the hash text box:
                     hashSingleTextBox.Text = "";
+                    // Clear out comparison hash text and the result label.  We could
+                    // force the comparison to be rerun, but it would be safer to
+                    // clear out the comparison here instead.
+                    compareResultLabel.Visible = false;
+                    compareToTextBox.Text = "";
                 }
                 #region Catch Exceptions
                 // Most of these are thrown by the FileInfo constructor, although a couple
@@ -385,6 +393,9 @@ namespace com.gpfcomics.WinHasher
                         // Success:  Display the hash:
                         case ProgressDialog.ResultStatus.Success:
                             hashSingleTextBox.Text = pd.Hash;
+                            // If the comparison text box is not empty, rerun the comparison:
+                            if (!String.IsNullOrEmpty(compareToTextBox.Text))
+                                compareToTextBox_TextChanged(null, null);
                             break;
                         // Cancelled:  Let the user know they cancelled the hash:
                         case ProgressDialog.ResultStatus.Cancelled:
