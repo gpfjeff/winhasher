@@ -1,15 +1,15 @@
 [Setup]
 InternalCompressLevel=ultra
 OutputDir=.\bin
-OutputBaseFilename=WinHasher_1.7_Setup
-VersionInfoVersion=1.7.0.$WCREV$
+OutputBaseFilename=WinHasher_1.6.1_Setup
+VersionInfoVersion=1.6.1.$WCREV$
 VersionInfoCompany=GPF Comics
 VersionInfoDescription=This program will install WinHasher on your computer.  WinHasher is a cryptographic file hashing program using the Microsoft .NET 2.0 Framework.
-VersionInfoTextVersion=WinHasher Setup 1.7
+VersionInfoTextVersion=WinHasher Setup 1.6.1
 VersionInfoCopyright=Copyright $WCDATE=%Y$, Jeffrey T. Darlington.
 AppCopyright=Copyright $WCDATE=%Y$, Jeffrey T. Darlington.
 AppName=WinHasher
-AppVerName=WinHasher 1.7
+AppVerName=WinHasher 1.6.1
 LicenseFile=.\gpl.rtf
 PrivilegesRequired=poweruser
 MinVersion=4.1.1998,5.0.2195sp3
@@ -21,10 +21,10 @@ Compression=lzma/ultra
 ChangesEnvironment=true
 AppPublisher=GPF Comics
 AppPublisherURL=http://www.gpf-comics.com/
-AppSupportURL=http://code.google.com/p/winhasher/
-AppUpdatesURL=http://code.google.com/p/winhasher/
-AppVersion=WinHasher 1.7
-UninstallDisplayName=WinHasher 1.7
+AppSupportURL=https://code.google.com/p/winhasher/
+AppUpdatesURL=https://code.google.com/p/winhasher/
+AppVersion=WinHasher 1.6.1
+UninstallDisplayName=WinHasher 1.6.1
 SetupIconFile=..\WinHasher\Icon1.ico
 [Files]
 Source: ..\WinHasherCore\bin\Release\WinHasherCore.dll; DestDir: {app}; Components: Windows_application Console_applications
@@ -145,4 +145,4 @@ end;
 // doing a release build, make sure to change the random string below to some-
 // thing new to force SubWCRev to add the new info.
 //
-// Revision Tag: 302e35353536363430363235
+// asdfasdfasdfasdfa
