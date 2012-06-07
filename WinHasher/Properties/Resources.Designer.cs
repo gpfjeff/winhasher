@@ -91,7 +91,7 @@ namespace com.gpfcomics.WinHasher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://www.gpf-comics.com/dl/winhasher/.
+        ///   Looks up a localized string similar to https://code.google.com/p/winhasher/.
         /// </summary>
         internal static string URL {
             get {
