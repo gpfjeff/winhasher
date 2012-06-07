@@ -1,6 +1,6 @@
 [Setup]
 InternalCompressLevel=ultra
-OutputDir=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\bin
+OutputDir=.\bin
 OutputBaseFilename=WinHasher_1.6.1_Setup
 VersionInfoVersion=1.6.1.$WCREV$
 VersionInfoCompany=GPF Comics
@@ -10,7 +10,7 @@ VersionInfoCopyright=Copyright $WCDATE=%Y$, Jeffrey T. Darlington.
 AppCopyright=Copyright $WCDATE=%Y$, Jeffrey T. Darlington.
 AppName=WinHasher
 AppVerName=WinHasher 1.6.1
-LicenseFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\InnoSetup\gpl.rtf
+LicenseFile=.\gpl.rtf
 PrivilegesRequired=poweruser
 MinVersion=4.1.1998,5.0.2195sp3
 DefaultDirName={pf}\WinHasher
@@ -25,7 +25,7 @@ AppSupportURL=http://www.gpf-comics.com/dl/winhasher/
 AppUpdatesURL=http://www.gpf-comics.com/dl/winhasher/
 AppVersion=WinHasher 1.6.1
 UninstallDisplayName=WinHasher 1.6.1
-SetupIconFile=C:\Documents and Settings\Jeff\My Documents\Visual Studio 2005\Projects\WinHasher\WinHasher\Icon1.ico
+SetupIconFile=..\WinHasher\Icon1.ico
 [Files]
 Source: ..\WinHasherCore\bin\Release\WinHasherCore.dll; DestDir: {app}; Components: Windows_application Console_applications
 Source: ..\WinHasher\bin\Release\WinHasher.exe; DestDir: {app}; Components: Windows_application
