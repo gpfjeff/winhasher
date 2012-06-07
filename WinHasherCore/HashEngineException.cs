@@ -36,14 +36,27 @@ namespace com.gpfcomics.WinHasher.Core
 {
     public class HashEngineException : Exception
     {
-        public HashEngineException(string message) : base(message) { }
+        private string message;
+        
+        public HashEngineException(string message)
+        {
+            this.message = message;
+        }
 
-        public HashEngineException() :
-            base("An unknown exception occured in the hashing engine.") { }
+        public HashEngineException()
+        {
+            message = "An unknown exception occured in the hashing engine.";
+        }
+
+        public string Message
+        {
+            get { return message; }
+            set { message = value; }
+        }
 
         public override string ToString()
         {
-            return "Hash Engine Exception: " + Message;
+            return "Hash Engine Exception: " + message;
         }
     }
 }
