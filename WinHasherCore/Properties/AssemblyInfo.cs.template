@@ -5,7 +5,7 @@
    doing a release build, make sure to change the random string below to some-
    thing new to force SubWCRev to add the new info.
    
-   Revision Tag: Lz7peoVyVuL97tG5UTl7xBeWfLYtllY9urc3cZUvsAFq5WVAYuFxaIJcpUK */
+   Lz7peoVyVuL97tG5UTl7xBeWfLYtllY9urc3cZUvsAFq5WVAYuFxaIJcpUK */
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -39,5 +39,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.7.0.$WCREV$")]
-[assembly: AssemblyFileVersion("1.7.0.$WCREV$")]
+[assembly: AssemblyVersion("1.6.2.$WCREV$")]
+[assembly: AssemblyFileVersion("1.6.2.$WCREV$")]

@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="HelpFile" xml:space="preserve">
     <value>guihelp.html</value>
@@ -463,6 +463,6 @@ library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.</value>
   </data>
   <data name="URL" xml:space="preserve">
-    <value>http://www.gpf-comics.com/dl/winhasher/</value>
+    <value>https://code.google.com/p/winhasher/</value>
   </data>
 </root>
