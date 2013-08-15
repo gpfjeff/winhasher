@@ -6,7 +6,7 @@ Older versions of WinHahser can be found at the [http://code.google.com/p/winhas
 
 The following links point to the latest version of the WinHasher download files hosted on Google Drive. The GnuPG signature and SHA-1 hash for each file can also be found below. Jeff's current GnuPG signature can be found [https://www.gpf-comics.com/gnupg.php here].
 
-= Version 1.6.3 =
+= Version 1.6.2 =
 
 || *Download Type* || *GnuPG Signature* || *SHA-1 Hash* || *Size ||
 || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildTlVHWjBRSnAxaUE Windows Installer] || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildRUVKNVRiRWtNcTQ Signature] || 6620fae809b7fecb6dc18335065199d4a479cd88 || 389kb ||
