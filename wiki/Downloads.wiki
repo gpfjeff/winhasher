@@ -11,7 +11,7 @@ The following links point to the latest version of the WinHasher download files 
 || *Download Type* || *GnuPG Signature* || *SHA-1 Hash* || *Size ||
 || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildTlVHWjBRSnAxaUE Windows Installer] || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildRUVKNVRiRWtNcTQ Signature] || 6620fae809b7fecb6dc18335065199d4a479cd88 || 389kb ||
 || [https://drive.google.com/uc?export=download&id=0B55ltyq5FilddFFOaEktLVpFbWc Binaries w/o Installer] || [https://drive.google.com/uc?export=download&id=0B55ltyq5Fildcm9vX3BCT25NTHc Signature] || f5bc900380e3fb68f16f73e1dad4b867e3a34086 || 91kb ||
-|| [https://drive.google.com/uc?export=download&id=0B55ltyq5FildZjA3RXA1dzk5MlE Source Archive] || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildOFg1Q2RZQ0lCdEE Signature] || bb5cc337c0fc707a28869977c683e2a0f919af13 || 111kb ||
+|| [https://drive.google.com/uc?export=download&id=0B55ltyq5FildR2FrVHBqOW82bkk Source Archive] || [https://drive.google.com/uc?export=download&id=0B55ltyq5FildVXhvOVM1c2lwU2c Signature] || a8d7ff8f65415635900c418252f38191ae5da8b4 || 142kb ||
 
 <wiki:comment>
 How to make download links (from http://productforums.google.com/forum/#!topic/drive/5p_KUmaTfJE):
