@@ -463,6 +463,6 @@ library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.</value>
   </data>
   <data name="URL" xml:space="preserve">
-    <value>http://www.gpf-comics.com/dl/winhasher/</value>
+    <value>https://github.com/gpfjeff/winhasher</value>
   </data>
 </root>

@@ -76,9 +76,17 @@
  * UPDATE August 20, 2009 (1.6):  Added overloads that include new ConsoleStatusUpdater object so
  * we can so the progress of long hashes performed on the command line.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * UPDATE June 29, 2015:  Switching from Microsoft's crypto API code to Legion of the Bouncy
+ * Castle's so we can support a larger number of hashes, which will hopefully open us up to
+ * even more hashes (such as SHA-3) once the BC updates in the future.  Also added new Default
+ * Hash and Default Output Type properties and some public static methods for translating hashes
+ * and output types to display-ready strings and back again.  (These should eliminate a large number
+ * of duplicated switch cases where display values and enumerations gets swapped, and again helps
+ * with the future addition of new hashes.)
+ * 
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -98,6 +106,9 @@ using System.Text;
 using System.Security.Cryptography;
 using System.IO;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
 
 namespace com.gpfcomics.WinHasher.Core
 {
@@ -108,12 +119,17 @@ namespace com.gpfcomics.WinHasher.Core
     {
         MD5,
         SHA1,
+        SHA224,
         SHA256,
         SHA384,
         SHA512,
+        RIPEMD128,
         RIPEMD160,
+        RIPEMD256,
+        RIPEMD320,
         Whirlpool,
-        Tiger
+        Tiger,
+        GOST3411
     }
 
     /// <summary>
@@ -143,6 +159,28 @@ namespace com.gpfcomics.WinHasher.Core
         /// inefficient.
         /// </summary>
         private static int bufferSize = 1024;
+
+        /// <summary>
+        /// The default hash algorithm used by the HashEngine if no other hash has been specified.
+        /// </summary>
+        public static Hashes DefaultHash
+        {
+            get
+            {
+                return Hashes.SHA1;
+            }
+        }
+
+        /// <summary>
+        /// The default output type used by the HashEngine if no other output type has been specified.
+        /// </summary>
+        public static OutputType DefaultOutputType
+        {
+            get
+            {
+                return OutputType.Hex;
+            }
+        }
 
         #region Public Methods
 
@@ -193,7 +231,8 @@ namespace com.gpfcomics.WinHasher.Core
                     return null;
                 }
                 // Find out which hash algorithm to use:
-                HashAlgorithm hasher = GetHashAlgorithm(hash);
+                IDigest hasher = GetHashAlgorithm(hash);
+                hasher.Reset();
                 // Read in the contents of the file as bytes, then compute the hash.
                 // There's no need to worry about encodings and such, as the hash algorithms
                 // work on raw bytes.  I switched this from using File.ReadAllBytes() to
@@ -208,7 +247,7 @@ namespace com.gpfcomics.WinHasher.Core
                 fs = File.Open(filename, FileMode.Open, FileAccess.Read);
                 if (fs.Length < 0L)
                     throw new HashEngineException("The total amount of data to hash is " +
-                        "too large. The size of the file being hashed cannot " +
+                        "too large. The total amount of data hashed cannot " +
                         "exceed 8.05EB (exabytes).");
                 fs.Lock(0, fs.Length);
                 // For multi-file comparisons, we want to know the total number of bytes in all the
@@ -244,19 +283,14 @@ namespace com.gpfcomics.WinHasher.Core
                     bytesSoFar += (long)bytesRead;
                     // If we didn't read anything this pass, break out of the loop:
                     if (bytesRead == 0) break;
-                    // Otherwise, look at how many bytes we've ready this pass.  If that number
-                    // is less than the buffer size, then we should be at the end of the file.
-                    // Similarly, if the total number of bytes read is equal to the length of
-                    // the file, we should be done.  If that's the case, pass the buffer into
-                    // the hash and transform the final block.  This finalizes the hash so we
-                    // can get the final value.
-                    if (bytesRead < bufferSize || bytesSoFar == fs.Length)
-                        hasher.TransformFinalBlock(buffer, 0, bytesRead);
-                    // If neither of the above conditions were met, assume we've got more to read
-                    // in the next pass.  Feed what's currently in the buffer to the hash and
-                    // keep going.
-                    else
-                        hasher.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+                    // Update the hash with however many bytes are currently in the buffer.
+                    // In the previous versions where we used Microsoft's APIs, we had to
+                    // carefully choose between the normal update (transform) method and the
+                    // final one based on how many bytes were read.  With the Bouncy Castle
+                    // API, however, we don't need to worry about that here, so we only have
+                    // to worry about updating the hasher with what we've gone.  (We'll do
+                    // the finalizing step later.)
+                    hasher.BlockUpdate(buffer, 0, bytesRead);
                     // Report our progress to the whoever is listening.  This could be a background
                     // worker (for the GUI) or a special console reporting class (for console apps).
                     // Note that we're also including the total values.  Thus, for a multi-file
@@ -279,13 +313,21 @@ namespace com.gpfcomics.WinHasher.Core
                 }
                 // If we broke out of the loop, grab the final hash value and unlock and close
                 // the file:
-                byte[] theHash = hasher.Hash;
+                byte[] theHash = new byte[hasher.GetDigestSize()];
+                hasher.DoFinal(theHash, 0);
                 fs.Unlock(0, fs.Length);
                 fs.Close();
                 // Return the output string in the chosen format:
                 return EncodeBytes(theHash, outputType);
             }
             #region Catch Exceptions
+            // Unfortunately, I don't know what new and exciting exceptions are thrown by the
+            // Bouncy Castle code; the API isn't self-documenting, so none of the IDigest methods
+            // mention what exceptions they might throw.  Of course, I *always* catch the general
+            // Exception as a last resort, but this may need to be expanded if other exceptions
+            // are discovered later.  For now, we'll leave the exceptions thrown by the Microsoft
+            // classes in place for now.
+            //
             // The following exceptions can be thrown by File.ReadAllBytes():
             catch (PathTooLongException)
             {
@@ -463,7 +505,7 @@ namespace com.gpfcomics.WinHasher.Core
             DoWorkEventArgs dwe, long totalByteLength, long totalBytesSoFar)
         {
             return HashFile(hash, filename, bgWorker, dwe, totalByteLength, totalBytesSoFar,
-                OutputType.Hex);
+                DefaultOutputType);
         }
 
         /// <summary>
@@ -520,7 +562,7 @@ namespace com.gpfcomics.WinHasher.Core
         public static string HashFile(Hashes hash, string filename, BackgroundWorker bgWorker,
             DoWorkEventArgs dwe)
         {
-            return HashFile(hash, filename, bgWorker, dwe, -1, -1, OutputType.Hex);
+            return HashFile(hash, filename, bgWorker, dwe, -1, -1, DefaultOutputType);
         }
 
         /// <summary>
@@ -585,7 +627,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string HashFile(Hashes hash, string filename)
         {
-            return HashFile(hash, filename, null, null, -1, -1, OutputType.Hex);
+            return HashFile(hash, filename, null, null, -1, -1, DefaultOutputType);
         }
 
         /// <summary>
@@ -624,7 +666,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string MD5HashFile(string filename)
         {
-            return HashFile(Hashes.MD5, filename, null, null, -1, -1, OutputType.Hex);
+            return HashFile(Hashes.MD5, filename, null, null, -1, -1, DefaultOutputType);
         }
 
         /// <summary>
@@ -663,7 +705,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string SHA1HashFile(string filename)
         {
-            return HashFile(Hashes.SHA1, filename, null, null, -1, -1, OutputType.Hex);
+            return HashFile(Hashes.SHA1, filename, null, null, -1, -1, DefaultOutputType);
         }
 
         #endregion
@@ -870,12 +912,13 @@ namespace com.gpfcomics.WinHasher.Core
             try
             {
                 // Get the hash algorithm:
-                HashAlgorithm hasher = GetHashAlgorithm(hash);
+                IDigest hasher = GetHashAlgorithm(hash);
                 // Convert the input string to raw bytes given the encoding:
                 byte[] textBytes = encoding.GetBytes(text);
                 // Hash it and get the hash:
-                hasher.TransformFinalBlock(textBytes, 0, textBytes.Length);
-                byte[] theHash = hasher.Hash;
+                hasher.BlockUpdate(textBytes, 0, textBytes.Length);
+                byte[] theHash = new byte[hasher.GetDigestSize()];
+                hasher.DoFinal(theHash, 0);
                 // And build the output:
                 return EncodeBytes(theHash, outputType);
             }
@@ -915,7 +958,187 @@ namespace com.gpfcomics.WinHasher.Core
         /// hash is computed</exception>
         public static string HashText(Hashes hash, string text, Encoding encoding)
         {
-            return HashText(hash, text, encoding, OutputType.Hex);
+            return HashText(hash, text, encoding, DefaultOutputType);
+        }
+
+        #endregion
+
+        #region Static Convenience Methods
+
+        /// <summary>
+        /// Returns a display name <see cref="String"/> for the given Hashes enumeration
+        /// </summary>
+        /// <param name="hash">A Hashes enumeration item</param>
+        /// <returns>A <see cref="String"/> suitable for display</returns>
+        public static string GetHashName(Hashes hash)
+        {
+            // Pure and simple:  switch on the input Hashes enumeration.  The default
+            // should never be hit here, but if for some reason we hit it, we need to
+            // print something intelligent anyway.
+            switch (hash)
+            {
+                case Hashes.MD5:
+                    return "MD5";
+                case Hashes.SHA1:
+                    return "SHA-1";
+                case Hashes.SHA224:
+                    return "SHA-224";
+                case Hashes.SHA256:
+                    return "SHA-256";
+                case Hashes.SHA384:
+                    return "SHA-384";
+                case Hashes.SHA512:
+                    return "SHA-512";
+                case Hashes.RIPEMD128:
+                    return "RIPEMD128";
+                case Hashes.RIPEMD160:
+                    return "RIPEMD160";
+                case Hashes.RIPEMD256:
+                    return "RIPEMD256";
+                case Hashes.RIPEMD320:
+                    return "RIPEMD320";
+                case Hashes.Whirlpool:
+                    return "Whirlpool";
+                case Hashes.Tiger:
+                    return "Tiger";
+                case Hashes.GOST3411:
+                    return "GOST3411";
+                default:
+                    return "Invalid hash";
+            }
+        }
+
+        /// <summary>
+        /// Returns the Hashes enumeration item for the specified hash displays string.
+        /// The test on the string is case insensitive.
+        /// </summary>
+        /// <param name="hashName">A <see cref="String"/> containing the hash display name</param>
+        /// <returns>A Hashes enumeration represented by the input <see cref="String"/>. If the
+        /// input String does not represent a valid Hashes option, the default hash is returned.</returns>
+        public static Hashes GetHashFromName(string hashName)
+        {
+            // If we get a null or empty string, just return the default hash:
+            if (String.IsNullOrEmpty(hashName))
+                return DefaultHash;
+            // To normalize things, force all upper case and strip out any non-alphanumeric characters:
+            hashName = Regex.Replace(hashName.ToUpper(), @"\W+", "").Replace("_", "");
+            // Now switch based on the modified input:
+            switch (hashName)
+            {
+                case "MD5":
+                    return Hashes.MD5;
+                case "SHA1":
+                    return Hashes.SHA1;
+                case "SHA224":
+                    return Hashes.SHA224;
+                case "SHA256":
+                    return Hashes.SHA256;
+                case "SHA384":
+                    return Hashes.SHA384;
+                case "SHA512":
+                    return Hashes.SHA512;
+                case "RIPEMD128":
+                    return Hashes.RIPEMD128;
+                case "RIPEMD160":
+                    return Hashes.RIPEMD160;
+                case "RIPEMD256":
+                    return Hashes.RIPEMD256;
+                case "RIPEMD320":
+                    return Hashes.RIPEMD320;
+                case "WHIRLPOOL":
+                    return Hashes.Whirlpool;
+                case "TIGER":
+                    return Hashes.Tiger;
+                case "GOST3411":
+                    return Hashes.GOST3411;
+                // If we didn't get a match on anything, return the default hash:
+                default:
+                    return DefaultHash;
+            }
+        }
+
+        /// <summary>
+        /// Returns a display name <see cref="String"/> for the given OutputType enumeration
+        /// </summary>
+        /// <param name="hash">An OutputType enumeration item</param>
+        /// <returns>A <see cref="String"/> suitable for display</returns>
+        public static string GetOutputTypeName(OutputType outputType)
+        {
+            switch (outputType)
+            {
+                case OutputType.Base64:
+                    return "Base64";
+                case OutputType.BubbleBabble:
+                    return "Bubble Babble";
+                case OutputType.CapHex:
+                    return "Hex (Caps)";
+                case OutputType.Hex:
+                    return "Hexadecimal";
+                default:
+                    return GetOutputTypeName(DefaultOutputType);
+            }
+        }
+
+        /// <summary>
+        /// Returns the OutputType enumeration item for the specified output type display string.
+        /// The test on the string is case insensitive.
+        /// </summary>
+        /// <param name="hashName">A <see cref="String"/> containing the output type display name</param>
+        /// <returns>An OutputType enumeration represented by the input <see cref="String"/>. If the
+        /// input String does not represent a valid OutputType option, the default hash is returned.</returns>
+        public static OutputType GetOutputTypeFromName(string outputType)
+        {
+            // If we get a null or empty string, just return the default hash:
+            if (String.IsNullOrEmpty(outputType))
+                return OutputType.Hex;
+            // To normalize things, force all upper case and strip out any non-alphanumeric characters:
+            outputType = Regex.Replace(outputType.ToUpper(), @"\W+", "").Replace("_", "");
+            // Now switch based on the modified input:
+            switch (outputType)
+            {
+                case "BASE64":
+                    return OutputType.Base64;
+                case "BUBBLEBABBLE":
+                    return OutputType.BubbleBabble;
+                case "HEXCAPS":
+                    return OutputType.CapHex;
+                case "HEXADECIMAL":
+                    return OutputType.Hex;
+                default:
+                    return DefaultOutputType;
+            }
+        }
+
+        /// <summary>
+        /// Encode the specified byte array in the specified output type.
+        /// </summary>
+        /// <param name="theHash">The byte array to encode</param>
+        /// <param name="outputType">The output type</param>
+        /// <returns>A string containing the encoded data</returns>
+        public static string EncodeBytes(byte[] theHash, OutputType outputType)
+        {
+            // This has mainly been pulled out into its own function because I keep reusing
+            // the same code over and over again.  So there's no sense copying and pasting
+            // everywhere, and changing it in one place means it now gets changed everywhere.
+            switch (outputType)
+            {
+                // Encode with Base64:
+                case OutputType.Base64:
+                    return BytesToBase64String(theHash);
+                // Encode with Bubble Babble:
+                case OutputType.BubbleBabble:
+                    return BytesToBubbleBabbleString(theHash);
+                // Encode with hexadecimal, but with upper-case letters:
+                case OutputType.CapHex:
+                    return BytesToHexString(theHash).ToUpper();
+                // Encode with hexadecimal with lower-case letters:
+                case OutputType.Hex:
+                    return BytesToHexString(theHash);
+                // If for some bizarre reason we don't end up with one of the proper output
+                // type values, drop back to the default:
+                default:
+                    return EncodeBytes(theHash, DefaultOutputType);
+            }
         }
 
         #endregion
@@ -925,42 +1148,57 @@ namespace com.gpfcomics.WinHasher.Core
         #region Private Methods
 
         /// <summary>
-        /// Given an item from the Hashes enumeration, get the HashAlgorithm associated with it.
+        /// Given an item from the Hashes enumeration, get the <see cref="IDigest"/> associated with it.
         /// </summary>
         /// <param name="hash">A Hashes enumeration item</param>
-        /// <returns>The HashAlgorithm that matches the enumerated hash</returns>
-        private static HashAlgorithm GetHashAlgorithm(Hashes hash)
+        /// <returns>The <see cref="IDigest"/> that matches the enumerated hash</returns>
+        private static IDigest GetHashAlgorithm(Hashes hash)
         {
-            HashAlgorithm hasher = null;
+            IDigest hasher = null;
             switch (hash)
             {
                 case Hashes.MD5:
-                    hasher = new MD5CryptoServiceProvider();
+                    hasher = new MD5Digest();
                     break;
                 case Hashes.SHA1:
-                    hasher = new SHA1CryptoServiceProvider();
+                    hasher = new Sha1Digest();
+                    break;
+                case Hashes.SHA224:
+                    hasher = new Sha224Digest();
                     break;
                 case Hashes.SHA256:
-                    hasher = new SHA256Managed();
+                    hasher = new Sha256Digest();
                     break;
                 case Hashes.SHA384:
-                    hasher = new SHA384Managed();
+                    hasher = new Sha384Digest();
                     break;
                 case Hashes.SHA512:
-                    hasher = new SHA512Managed();
+                    hasher = new Sha512Digest();
+                    break;
+                case Hashes.RIPEMD128:
+                    hasher = new RipeMD128Digest();
                     break;
                 case Hashes.RIPEMD160:
-                    hasher = new RIPEMD160Managed();
+                    hasher = new RipeMD160Digest();
+                    break;
+                case Hashes.RIPEMD256:
+                    hasher = new RipeMD256Digest();
+                    break;
+                case Hashes.RIPEMD320:
+                    hasher = new RipeMD320Digest();
                     break;
                 case Hashes.Whirlpool:
-                    hasher = new WhirlpoolManaged();
+                    hasher = new WhirlpoolDigest();
                     break;
                 case Hashes.Tiger:
-                    hasher = new TigerManaged();
+                    hasher = new TigerDigest();
                     break;
-                // If we didn't get something we expected, default to MD5:
+                case Hashes.GOST3411:
+                    hasher = new Gost3411Digest();
+                    break;
+                // If we didn't get something we expected, return the default:
                 default:
-                    hasher = new MD5CryptoServiceProvider();
+                    hasher = GetHashAlgorithm(DefaultHash);
                     break;
             }
             return hasher;
@@ -1008,7 +1246,7 @@ namespace com.gpfcomics.WinHasher.Core
             // get it to work.  THIS, however, is a port of the Perl Digest::BubbleBabble
             // module from CPAN by Benjamin Trott, found here:
             // http://search.cpan.org/~btrott/Digest-BubbleBabble-0.01/BubbleBabble.pm
-            // and it works flawlessly.  The biggest change is use .NET's StringBuilder to
+            // and it works flawlessly.  The biggest change is using .NET's StringBuilder to
             // build the output string rather than just concatenating strings together as
             // Perl can do so easily.
             //
@@ -1055,36 +1293,6 @@ namespace com.gpfcomics.WinHasher.Core
             }
             sOutput.Append('x');
             return sOutput.ToString();
-        }
-
-        /// <summary>
-        /// Encode the specified byte array in the specified output type.
-        /// </summary>
-        /// <param name="theHash">The byte array to encode</param>
-        /// <param name="outputType">The output type</param>
-        /// <returns>A string containing the encoded data</returns>
-        private static string EncodeBytes(byte[] theHash, OutputType outputType)
-        {
-            // This has mainly been pulled out into its own function because I keep reusing
-            // the same code over and over again.  So there's no sense copying and pasting
-            // everywhere, and changing it in one place means it now gets changed everywhere.
-            switch (outputType)
-            {
-                // Encode with Base64:
-                case OutputType.Base64:
-                    return BytesToBase64String(theHash);
-                // Encode with Bubble Babble:
-                case OutputType.BubbleBabble:
-                    return BytesToBubbleBabbleString(theHash);
-                // Encode with hexadecimal, but with upper-case letters:
-                case OutputType.CapHex:
-                    return BytesToHexString(theHash).ToUpper();
-                // Encode with hexadecimal with lower-case letters.  Note that this is also
-                // the default behavior.
-                case OutputType.Hex:
-                default:
-                    return BytesToHexString(theHash);
-            }
         }
 
         #endregion

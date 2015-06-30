@@ -1,0 +1,11 @@
+hash/bin
+hash/obj
+md5/bin
+md5/obj
+sha1/bin
+sha1/obj
+WinHasher/bin
+WinHasher/obj
+WinHasherCore/bin
+WinHasherCore/obj
+WinHasher.v11.suo

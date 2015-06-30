@@ -48,11 +48,13 @@
  * when a specific case is expected.
  * 
  * UPDATE June 7, 2012 (1.6.1):  Fixes for Issue #4
- * https://code.google.com/p/winhasher/issues/detail?id=4
+ * https://github.com/gpfjeff/winhasher/issues/4
  * 
- * This program is Copyright 2012, Jeffrey T. Darlington.
+ * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.
+ * 
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     https://code.google.com/p/winhasher/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -105,7 +107,7 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The currently selected hash algorithm
         /// </summary>
-        private Hashes hash;
+        private Hashes hash = HashEngine.DefaultHash;
 
         /// <summary>
         /// The last selected directory
@@ -115,13 +117,14 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The ouput encoding for resulting hashes
         /// </summary>
-        private OutputType outputType = OutputType.Hex;
+        private OutputType outputType = HashEngine.DefaultOutputType;
 
         /// <summary>
-        /// We want to show a warning the first time MD5 is chosen from the hash drop-down
-        /// list.  If this flag is true, the pop-up will appear.  If false, it won't.
+        /// Whether or not we were launched in "portable" mode.  Portable mode will not write
+        /// its settings to the registry when the application closes, and will similarly not
+        /// try to read them upon launch.  This defaults to false.
         /// </summary>
-        private bool showMD5Warning = true;
+        private bool portable = false;
 
         #endregion
 
@@ -129,6 +132,14 @@ namespace com.gpfcomics.WinHasher
         /// Main constructor
         /// </summary>
         public MainForm()
+            : this(false)
+        { }
+
+        /// <summary>
+        /// Main constructor with portable-mode flag
+        /// </summary>
+        /// <param name="portable">Boolean flag indicating whether or not we should be running in portable mode</param>
+        public MainForm(bool portable)
         {
             // Let .NET do its initialization stuff:
             InitializeComponent();
@@ -139,16 +150,17 @@ namespace com.gpfcomics.WinHasher
             object[] obj = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
             if (obj != null && obj.Length > 0)
                 copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
-            // Build the hash combobox.  There's probably a better way to do this, but I couldn't
-            // get it to enumerate over the Hashes enumeration.  So we'll do it manually.
-            hashComboBox.Items.Add("MD5");
-            hashComboBox.Items.Add("SHA-1");
-            hashComboBox.Items.Add("SHA-256");
-            hashComboBox.Items.Add("SHA-384");
-            hashComboBox.Items.Add("SHA-512");
-            hashComboBox.Items.Add("RIPEMD-160");
-            hashComboBox.Items.Add("Whirlpool");
-            hashComboBox.Items.Add("Tiger");
+            // Build the hash and output type combo boxes:
+            hashComboBox.Items.Clear();
+            foreach (Hashes hashTemp in Enum.GetValues(typeof(Hashes)))
+            {
+                hashComboBox.Items.Add(HashEngine.GetHashName(hashTemp));
+            }
+            outputFormatComboBox.Items.Clear();
+            foreach (OutputType otTemp in Enum.GetValues(typeof(OutputType)))
+            {
+                outputFormatComboBox.Items.Add(HashEngine.GetOutputTypeName(otTemp));
+            }
             // Populate the encoding drop-down:
             foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
             {
@@ -156,56 +168,55 @@ namespace com.gpfcomics.WinHasher
             }
             // Set it to show the display name in the dropdown:
             encodingComboBox.DisplayMember = "EncodingName";
+            // Take note of whether or not we were called in "portable" mode:
+            this.portable = portable;
 
-            // Attempt to load our settings from the registry:
-            try
+            // If the user has elected to load the app in portable mode, populate the default settings:
+            if (portable)
             {
-                // Try to open the HKCU\Software\GPF Comics\WinHasher key:
-                RegistryKey winHasherSettings =
-                    Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
-                    false).OpenSubKey("WinHasher", false);
-                // Try to set the hash combo box:
-                hashComboBox.SelectedIndex = (int)winHasherSettings.GetValue("SelectedHash", 1);
-                hashComboBox_SelectedIndexChanged(null, null);
-                // Try to set the encoding combo box:
-                encodingComboBox.SelectedIndex = (int)winHasherSettings.GetValue("TextEncoding",
-                    encodingComboBox.Items.IndexOf(Encoding.Default));
-                // Try to set the output format combo box:
-                outputFormatComboBox.SelectedIndex = (int)winHasherSettings.GetValue("OutputFormat", 0);
-                outputFormatComboBox_SelectedIndexChanged(null, null);
-                // Try to set the last directory:
-                string ldtemp = "";
-                try { ldtemp = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
-                catch { ldtemp = Environment.CurrentDirectory; }
-                lastDirectory = (string)winHasherSettings.GetValue("LastDirectory", ldtemp);
-                // Try to restore the last used tab:
-                modeTabControl.SelectedIndex = (int)winHasherSettings.GetValue("LastTab", 0);
-                modeTabControl_SelectedIndexChanged(null, null);
-                // Try to restore the tooltips toggle:
-                tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
-                    == 1 ? true : false;
-                // Close the registry key:
-                winHasherSettings.Close();
+                PopulateDefaultSettings();
             }
-            // If any of the registry reading code above fails, restore everything to the
-            // default settings:
-            catch
+            // If we're not running in portable mode, try to read the settings from the registry and
+            // restore them, falling back to the defaults if something fails:
+            else
             {
-                // We used to default to MD5, but that's been severely broken.  Default to SHA-1
-                // instead.
-                hashComboBox.SelectedIndex = 1;
-                hash = Hashes.SHA1;
-                // Select the system default encoding by default:
-                encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
-                // Force the output drop-down to the first item, or hex output:
-                outputFormatComboBox.SelectedIndex = 0;
-                // Set our the last directory to My Documents:
-                try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
-                catch { lastDirectory = Environment.CurrentDirectory; }
-                // Default to the Hash Single File tab:
-                modeTabControl.SelectedIndex = 0;
-                // Default to tooltips being on:
-                tooltipsCheckbox.Checked = true;
+                try
+                {
+                    // Upgrade any existing settings if necessary:
+                    UpgradeSettings();
+                    // Try to open the HKCU\Software\GPF Comics\WinHasher key:
+                    RegistryKey winHasherSettings =
+                        Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
+                        false).OpenSubKey("WinHasher", false);
+                    // Try to set the hash combo box:
+                    hashComboBox.SelectedIndex = (int)winHasherSettings.GetValue("SelectedHash", 1);
+                    hashComboBox_SelectedIndexChanged(null, null);
+                    // Try to set the encoding combo box:
+                    encodingComboBox.SelectedIndex = (int)winHasherSettings.GetValue("TextEncoding",
+                        encodingComboBox.Items.IndexOf(Encoding.Default));
+                    // Try to set the output format combo box:
+                    outputFormatComboBox.SelectedIndex = (int)winHasherSettings.GetValue("OutputFormat", 0);
+                    outputFormatComboBox_SelectedIndexChanged(null, null);
+                    // Try to set the last directory:
+                    string ldtemp = "";
+                    try { ldtemp = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
+                    catch { ldtemp = Environment.CurrentDirectory; }
+                    lastDirectory = (string)winHasherSettings.GetValue("LastDirectory", ldtemp);
+                    // Try to restore the last used tab:
+                    modeTabControl.SelectedIndex = (int)winHasherSettings.GetValue("LastTab", 0);
+                    modeTabControl_SelectedIndexChanged(null, null);
+                    // Try to restore the tooltips toggle:
+                    tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
+                        == 1 ? true : false;
+                    // Close the registry key:
+                    winHasherSettings.Close();
+                }
+                // If any of the registry reading code above fails, restore everything to the
+                // default settings:
+                catch
+                {
+                    PopulateDefaultSettings();
+                }
             }
 
             // Set up the file boxes for drag & drop:
@@ -638,52 +649,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void hashComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch ((string)hashComboBox.SelectedItem)
-            {
-                case "MD5":
-                    hash = Hashes.MD5;
-                    // MD5 is broken.  I mean *REALLY* broken.  Warn the user once per session
-                    // that they shouldn't be using it:
-                    if (showMD5Warning)
-                    {
-                        MessageBox.Show("Please note that the MD5 algorithm is no longer considered" +
-                            " secure by most security experts. Therefore, its use should be " +
-                            " strongly discouraged. WinHasher will continue to support MD5, but" +
-                            " will display this warning the first time it is selected. If at all" +
-                            " possible, you should consider using a stronger algorithm.", "Warning",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        showMD5Warning = false;
-                    }
-                    break;
-                case "SHA-1":
-                    hash = Hashes.SHA1;
-                    break;
-                case "SHA-256":
-                    hash = Hashes.SHA256;
-                    break;
-                case "SHA-384":
-                    hash = Hashes.SHA384;
-                    break;
-                case "SHA-512":
-                    hash = Hashes.SHA512;
-                    break;
-                case "RIPEMD-160":
-                    hash = Hashes.RIPEMD160;
-                    break;
-                case "Whirlpool":
-                    hash = Hashes.Whirlpool;
-                    break;
-                case "Tiger":
-                    hash = Hashes.Tiger;
-                    break;
-                // This should never happen, but default to SHA-1 if we get something
-                // invalid:
-                default:
-                    MessageBox.Show("Error: Invalid hash. Defaulting to SHA-1", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    hash = Hashes.SHA1;
-                    break;
-            }
+            hash = HashEngine.GetHashFromName((string)hashComboBox.SelectedItem);
         }
 
         /// <summary>
@@ -735,22 +701,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void outputFormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch ((string)outputFormatComboBox.SelectedItem)
-            {
-                case "Base64":
-                    outputType = OutputType.Base64;
-                    break;
-                case "Bubble Babble":
-                    outputType = OutputType.BubbleBabble;
-                    break;
-                case "Hex (Caps)":
-                    outputType = OutputType.CapHex;
-                    break;
-                case "Hexadecimal":
-                default:
-                    outputType = OutputType.Hex;
-                    break;
-            }
+            outputType = HashEngine.GetOutputTypeFromName((string)outputFormatComboBox.SelectedItem);
         }
 
         /// <summary>
@@ -762,58 +713,63 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Let's give it the old college try:
-            try
+            // Only try to write our settings to the registry if we weren't opened in
+            // portable mode:
+            if (!portable)
             {
-                // Try to open HKCU\Software.  This *should* always exist:
-                RegistryKey HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", true);
-                if (HKCU_Software != null)
+                // Let's give it the old college try:
+                try
                 {
-                    // Try to open HKCU\Software\GPF Comics.  If this key doesn't exist we'll
-                    // try to create it:
-                    RegistryKey GPFComics = HKCU_Software.OpenSubKey("GPF Comics", true);
-                    if (GPFComics == null) GPFComics = HKCU_Software.CreateSubKey("GPF Comics");
-                    if (GPFComics != null)
+                    // Try to open HKCU\Software.  This *should* always exist:
+                    RegistryKey HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", true);
+                    if (HKCU_Software != null)
                     {
-                        // Try to open HKCU\Software\GPF Comics\WinHasher.  If this key doesn't
-                        // exist we'll try to create it:
-                        RegistryKey winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
-                        if (winHasherSettings == null) winHasherSettings =
-                            GPFComics.CreateSubKey("WinHasher");
-                        if (winHasherSettings != null)
+                        // Try to open HKCU\Software\GPF Comics.  If this key doesn't exist we'll
+                        // try to create it:
+                        RegistryKey GPFComics = HKCU_Software.OpenSubKey("GPF Comics", true);
+                        if (GPFComics == null) GPFComics = HKCU_Software.CreateSubKey("GPF Comics");
+                        if (GPFComics != null)
                         {
-                            // By now we should be in our own little private paradise.  Start
-                            // saving our settings.  For the drop-downs and tabs, we'll just
-                            // safe the index value.  For the last directory, we'll save the
-                            // path string.  There might be a security question around saving
-                            // this path, of course, but we'll go with it as is.
-                            winHasherSettings.SetValue("SelectedHash",
-                                hashComboBox.SelectedIndex, RegistryValueKind.DWord);
-                            winHasherSettings.SetValue("TextEncoding",
-                                encodingComboBox.SelectedIndex, RegistryValueKind.DWord);
-                            winHasherSettings.SetValue("OutputFormat",
-                                outputFormatComboBox.SelectedIndex, RegistryValueKind.DWord);
-                            winHasherSettings.SetValue("LastDirectory",
-                                lastDirectory, RegistryValueKind.String);
-                            winHasherSettings.SetValue("LastTab", modeTabControl.SelectedIndex,
-                                RegistryValueKind.DWord);
-                            winHasherSettings.SetValue("Version",
-                                Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                                RegistryValueKind.String);
-                            winHasherSettings.SetValue("ShowToolTips",
-                                (tooltipsCheckbox.Checked ? 1 : 0),
-                                RegistryValueKind.DWord);
-                            // We're done, so close up shop:
-                            winHasherSettings.Close();
+                            // Try to open HKCU\Software\GPF Comics\WinHasher.  If this key doesn't
+                            // exist we'll try to create it:
+                            RegistryKey winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
+                            if (winHasherSettings == null) winHasherSettings =
+                                GPFComics.CreateSubKey("WinHasher");
+                            if (winHasherSettings != null)
+                            {
+                                // By now we should be in our own little private paradise.  Start
+                                // saving our settings.  For the drop-downs and tabs, we'll just
+                                // safe the index value.  For the last directory, we'll save the
+                                // path string.  There might be a security question around saving
+                                // this path, of course, but we'll go with it as is.
+                                winHasherSettings.SetValue("SelectedHash",
+                                    hashComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("TextEncoding",
+                                    encodingComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("OutputFormat",
+                                    outputFormatComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("LastDirectory",
+                                    lastDirectory, RegistryValueKind.String);
+                                winHasherSettings.SetValue("LastTab", modeTabControl.SelectedIndex,
+                                    RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("Version",
+                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                                    RegistryValueKind.String);
+                                winHasherSettings.SetValue("ShowToolTips",
+                                    (tooltipsCheckbox.Checked ? 1 : 0),
+                                    RegistryValueKind.DWord);
+                                // We're done, so close up shop:
+                                winHasherSettings.Close();
+                            }
+                            GPFComics.Close();
                         }
-                        GPFComics.Close();
+                        HKCU_Software.Close();
                     }
-                    HKCU_Software.Close();
                 }
+                // If we failed for any reason, don't bother with anything else.  The defaults
+                // will be restored the next time the program is opened.
+                catch { }
             }
-            // If we failed for any reason, don't bother with anything else.  The defaults
-            // will be restored the next time the program is opened.
-            catch { }
         }
 
         /// <summary>
@@ -1085,8 +1041,135 @@ namespace com.gpfcomics.WinHasher
             #endregion
         }
 
-        #endregion
+        /// <summary>
+        /// Reset all settings to their defaults
+        /// </summary>
+        private void PopulateDefaultSettings()
+        {
+            // We used to default to MD5 then to SHA-1 explicitly.  Now we'll drive the default value
+            // of the hash drop-down by whatever the default we set in the HashEngine:
+            hash = HashEngine.DefaultHash;
+            hashComboBox.SelectedValue = HashEngine.GetHashName(hash);
+            // Select the system default encoding by default:
+            encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
+            // Force the output drop-down to the HashEngine default:
+            outputType = HashEngine.DefaultOutputType;
+            outputFormatComboBox.SelectedValue = HashEngine.GetOutputTypeName(outputType);
+            // Set our the last directory to My Documents:
+            try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
+            catch { lastDirectory = Environment.CurrentDirectory; }
+            // Default to the Hash Single File tab:
+            modeTabControl.SelectedIndex = 0;
+            // Default to tooltips being on:
+            tooltipsCheckbox.Checked = true;
+        }
 
+        /// <summary>
+        /// Upgrade old settings values in the Registry from previous versions of WinHasher if necessary.
+        /// </summary>
+        private void UpgradeSettings()
+        {
+            // Asbestos underpants:
+            try
+            {
+                // Below are version numbers where major changes have occurred to our settings.  We want
+                // to check versions prior to these versions and upgrade the settings accordingly.  To do
+                // that, however, we'll need to look at the value of the Version registry entry to see
+                // which version last updated the registry settings.  Note that we don *NOT* look at the
+                // current version of the running code, which won't help us in this case.
+                Version v1_7 = new Version("1.7.0.0");
+
+                // Get the version of the app that last wrote to the registry.  To do that, we'll need to
+                // open our registry values first.  Note that unlike the MainForm_FormClosing() method above,
+                // we won't try to create our registry keys if they don't exist; all of our tests will then
+                // silently fail.  By default, we'll set the "current" version to something ridiculously
+                // high so the other tests will fail if we can't read it from the registry.
+                Version current = new Version("9999.9999.9999.9999");
+                RegistryKey HKCU_Software, GPFComics, winHasherSettings = null;
+                HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", false);
+                if (HKCU_Software != null)
+                {
+                    GPFComics = HKCU_Software.OpenSubKey("GPF Comics", false);
+                    if (GPFComics != null)
+                    {
+                        winHasherSettings = GPFComics.OpenSubKey("WinHasher", false);
+                        if (winHasherSettings != null)
+                        {
+                            current = new Version((string)winHasherSettings.GetValue("Version", "9999.9999.9999.9999"));
+                        }
+                        winHasherSettings.Close();
+
+                        // For version 1.7, we added a number of new hash values, causing the order of those
+                        // hashes to change in the drop-down box.  For that, we'll need to tweak the user's
+                        // last used hash preference to keep the value they had before.
+                        if (current < v1_7)
+                        {
+                            winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
+                            if (winHasherSettings != null)
+                            {
+                                // Get the current value of the Selected Hash register setting.  This
+                                // will be the old value of the selected index of the hash drop-down box,
+                                // which we'll need to convert.  We'll give -1 as the default if we can't
+                                // read the value, which will be our cue to skip the conversion as a
+                                // failure.
+                                int currentHash = (int)winHasherSettings.GetValue("SelectedHash", -1);
+                                if (currentHash >= 0)
+                                {
+                                    /* The mapping from old index values to new (1.7) ones:
+                                        MD5         0   0
+                                        SHA-1       1   1
+                                        SHA-256     2   3
+                                        SHA-384     3   4
+                                        SHA-512     4   5
+                                        RIPEMD-160  5   7
+                                        Whirlpool   6  10
+                                        Tiger       7  11 */
+                                    switch (currentHash)
+                                    {
+                                        // For the first two items, nothing's changed, so keep them as is:
+                                        case 0:
+                                        case 1:
+                                            break;
+                                        // We added SHA-224, so shift the next three up one item:
+                                        case 2:
+                                        case 3:
+                                        case 4:
+                                            winHasherSettings.SetValue("SelectedHash", currentHash + 1, RegistryValueKind.DWord);
+                                            break;
+                                        // We added several new RIPEMD variants, so slip RIMEMD-160 up another:
+                                        case 5:
+                                            winHasherSettings.SetValue("SelectedHash", currentHash + 2, RegistryValueKind.DWord);
+                                            break;
+                                        // And Whirlpool and Tiger to accommodate the other RIPs:
+                                        case 6:
+                                        case 7:
+                                            winHasherSettings.SetValue("SelectedHash", currentHash + 4, RegistryValueKind.DWord);
+                                            break;
+                                        // If we get anything else, that should be an error.  For now, we'll
+                                        // hard-code this to be the current value for SHA-1, although to be
+                                        // "proper" we should check the HashEngine.DefaultHash property and
+                                        // somehow convert that to an integer.  I'm lazy, however...
+                                        default:
+                                            winHasherSettings.SetValue("SelectedHash", 1, RegistryValueKind.DWord);
+                                            break;
+                                    }
+                                }
+                                winHasherSettings.Close();
+                            }
+                        }
+
+                        // Now that we've done all our tests, close the upper level registry keys and exit:
+                        GPFComics.Close();
+                    }
+                    HKCU_Software.Close();
+                }
+            }
+            // If anything blows up, silently ignore it.  This may not be the best course of action, but
+            // we'll change that later if necessary.
+            catch { }
+        }
+
+        #endregion
         
     }
 }

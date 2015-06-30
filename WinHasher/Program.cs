@@ -37,9 +37,12 @@
  * ResultDialog class rather than MessageBox to give the user easier access to the hash value
  * and to allow them to compare the hash with a pre-computed value more easily.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * UPDATED June 29, 2015 (1.7):  Updates for Bouncy Castle conversion as well as to enable
+ * "portable" mode
+ * 
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -77,6 +80,11 @@ namespace com.gpfcomics.WinHasher
             // If no command-line arguments are given, go ahead and run the program in
             // interactive GUI mode:
             if (args.Length == 0) { Application.Run(new MainForm()); }
+            // If we have one and only one command-line argument and it's the portable
+            // flag, load the main application in portable mode (i.e. no writes to the
+            // registry):
+            else if (args.Length == 1 && args[0].ToLower() == "-portable")
+            { Application.Run(new MainForm(true)); }
             // Otherwise, assume we're going to process one or more files, show the results
             // in a dialog box, then exit:
             else
@@ -85,11 +93,10 @@ namespace com.gpfcomics.WinHasher
                 // arguments.  We can't work with the argument array itself because we may
                 // need to strip off the first one if it's a hash switch.
                 string[] files = null;
-                // Default to doing SHA-1 unless otherwise instructed:
-                Hashes hash = Hashes.SHA1;
-                string hashString = "SHA-1";
-                // By default, output hex:
-                OutputType outputType = OutputType.Hex;
+                // Set our default hash and output type:
+                Hashes hash = HashEngine.DefaultHash;
+                string hashString = HashEngine.GetHashName(hash);
+                OutputType outputType = HashEngine.DefaultOutputType;
                 // All our command switches come first, so step through them:
                 while (args[0].StartsWith("-"))
                 {
@@ -99,31 +106,39 @@ namespace com.gpfcomics.WinHasher
                         // Most of these determine which hash to use:
                         case "-md5":
                             hash = Hashes.MD5;
-                            hashString = "MD5";
                             break;
                         case "-sha1":
                             hash = Hashes.SHA1;
-                            hashString = "SHA-1";
+                            break;
+                        case "-sha224":
+                            hash = Hashes.SHA224;
                             break;
                         case "-sha256":
                             hash = Hashes.SHA256;
-                            hashString = "SHA-256";
+                            break;
+                        case "-sha384":
+                            hash = Hashes.SHA384;
                             break;
                         case "-sha512":
                             hash = Hashes.SHA512;
-                            hashString = "SHA-512";
                             break;
-                        case "-ripemd106":
+                        case "-ripemd128":
+                            hash = Hashes.RIPEMD128;
+                            break;
+                        case "-ripemd160":
                             hash = Hashes.RIPEMD160;
-                            hashString = "RIPEMD-160";
+                            break;
+                        case "-ripemd256":
+                            hash = Hashes.RIPEMD256;
+                            break;
+                        case "-ripemd320":
+                            hash = Hashes.RIPEMD320;
                             break;
                         case "-whirlpool":
                             hash = Hashes.Whirlpool;
-                            hashString = "Whirlpool";
                             break;
                         case "-tiger":
                             hash = Hashes.Tiger;
-                            hashString = "Tiger";
                             break;
                         // But this switch enables Base64 hashing:
                         case "-base64":
@@ -143,6 +158,7 @@ namespace com.gpfcomics.WinHasher
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
                             break;
                     }
+                    hashString = HashEngine.GetHashName(hash);
                     // Now shift the array down to the next argument.  I wish there was a better,
                     // more efficient way of doing this (like a Perl or PHP shift()), but this is
                     // all I know of using simple arrays:

@@ -67,7 +67,7 @@ namespace com.gpfcomics.WinHasher
             this.linkLabel.Size = new System.Drawing.Size(340, 23);
             this.linkLabel.TabIndex = 2;
             this.linkLabel.TabStop = true;
-            this.linkLabel.Text = "http://code.google.com/p/winhasher/";
+            this.linkLabel.Text = "https://github.com/gpfjeff/winhasher";
             this.linkLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.toolTip1.SetToolTip(this.linkLabel, "Click this link to find\r\nWinHasher online.");
             this.linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);

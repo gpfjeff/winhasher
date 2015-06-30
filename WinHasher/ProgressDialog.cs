@@ -24,9 +24,11 @@
  * UPDATED February 12, 2009 (1.4):  Added necessary flags and members to introduce abstracted
  * output type methods in HashEngine.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * UPDATED June 29, 2015 (1.7):  Changes to default hash and output type values
+ * 
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -82,7 +84,7 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The hash algorithm being used
         /// </summary>
-        private Hashes hashAlgorithm;
+        private Hashes hashAlgorithm = HashEngine.DefaultHash;
 
         /// <summary>
         /// A System.ComponentModel.BackgroundWorker object which will perform the hashing
@@ -113,7 +115,7 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The output encoding for the resulting hash
         /// </summary>
-        private OutputType outputType = OutputType.Hex;
+        private OutputType outputType = HashEngine.DefaultOutputType;
 
         #endregion
 
@@ -168,21 +170,6 @@ namespace com.gpfcomics.WinHasher
         {
             get { return outputType; }
             set { outputType = value; }
-        }
-
-        /// <summary>
-        /// DEPRECIATED: Use OutputType instead. A boolean flag indicating whether the output
-        /// should be in Base64 format (true) or hexadecimal (false).  The default is false, or
-        /// output in hexadecimal.
-        /// </summary>
-        public bool Base64
-        {
-            get { return outputType == OutputType.Base64; }
-            set
-            {
-                if (value) outputType = OutputType.Base64;
-                else outputType = OutputType.Hex;
-            }
         }
 
         #endregion
@@ -246,7 +233,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm, bool centerInScreen)
-            : this(fileList, hashAlgorithm, centerInScreen, OutputType.Hex)
+            : this(fileList, hashAlgorithm, centerInScreen, HashEngine.DefaultOutputType)
         { }
 
 
@@ -258,7 +245,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm)
             :
-            this(fileList, hashAlgorithm, false, OutputType.Hex)
+            this(fileList, hashAlgorithm, false, HashEngine.DefaultOutputType)
         {
         }
 
@@ -323,7 +310,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="centerInScreen">True to center in the middle of the screen, false to
         /// center around the parent window</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
-            : this(filename, hashAlgorithm, centerInScreen, OutputType.Hex)
+            : this(filename, hashAlgorithm, centerInScreen, HashEngine.DefaultOutputType)
         {
         }
 
@@ -335,7 +322,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="hashAlgorithm">The hashing algorithm to use</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm)
             :
-            this(filename, hashAlgorithm, false, OutputType.Hex)
+            this(filename, hashAlgorithm, false, HashEngine.DefaultOutputType)
         {
         }
 

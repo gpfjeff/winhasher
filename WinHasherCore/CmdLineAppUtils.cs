@@ -21,9 +21,9 @@
  * allowing us to place the different inputs into sorted "buckets" (properties) and pass
  * them around as a single unit.
  * 
- * This program is Copyright 2011, Jeffrey T. Darlington.
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -52,9 +52,9 @@ namespace com.gpfcomics.WinHasher.Core
     /// </summary>
     public class CmdLineAppArgs
     {
-        private Hashes hash = Hashes.SHA1;
+        private Hashes hash = HashEngine.DefaultHash;
 
-        private OutputType outputType = OutputType.Hex;
+        private OutputType outputType = HashEngine.DefaultOutputType;
 
         private bool compareMode = false;
 
@@ -68,7 +68,7 @@ namespace com.gpfcomics.WinHasher.Core
 
         /// <summary>
         /// The cryptographic hash algorithm.  Must be a <see cref="Hashes"/> enum value.
-        /// Default is SHA-1.
+        /// The Default is the value of HashEngine.DefaultHash.
         /// </summary>
         public Hashes Hash
         {
@@ -77,8 +77,8 @@ namespace com.gpfcomics.WinHasher.Core
         }
 
         /// <summary>
-        /// The output type. Must  be a <see cref="OutputType"/> enum value.  Default is
-        /// Hex (lower-case hexadecimal).
+        /// The output type. Must  be a <see cref="OutputType"/> enum value.
+        /// The Default is the value of HashEngine.DefaultOutputType.
         /// </summary>
         public OutputType OutputType
         {
@@ -138,8 +138,8 @@ namespace com.gpfcomics.WinHasher.Core
         }
 
         /// <summary>
-        /// Default constructor.  Creates a CmdLineAppArgs object defaulting to the SHA-1
-        /// hash algorithm, lower-case hexadecimal output, compare mode is turned off, and
+        /// Default constructor.  Creates a CmdLineAppArgs object with the default hash and
+        /// output type (per HashEngine), compare mode is turned off, and
         /// no input or output files have been specified.
         /// </summary>
         public CmdLineAppArgs() { }
@@ -147,13 +147,14 @@ namespace com.gpfcomics.WinHasher.Core
         /// <summary>
         /// Full constructor.  Creates a CmdLineAppArgs object with the specified inputs.
         /// </summary>
-        /// <param name="hash"></param>
-        /// <param name="outputType"></param>
-        /// <param name="compareMode"></param>
-        /// <param name="outputFile"></param>
-        /// <param name="appendOutput"></param>
-        /// <param name="inputFile"></param>
-        /// <param name="files"></param>
+        /// <param name="hash">A Hashes enumeration value indicating the hash algorithm to perform</param>
+        /// <param name="outputType">An OutputType enumeration value indicating the output encoding</param>
+        /// <param name="compareMode">A Boolean flag indicating whether or not we're in comparison mode</param>
+        /// <param name="outputFile">A String to an optional output file name</param>
+        /// <param name="appendOutput">A Boolean flag indicating whether or not output should be appended
+        /// to the output file (true) or if the output file should be overwritten (false)</param>
+        /// <param name="inputFile">A String to an optional input file name</param>
+        /// <param name="files">A String array containing a list of files to hash.</param>
         public CmdLineAppArgs(Hashes hash, OutputType outputType, bool compareMode,
             string outputFile, bool appendOutput, string inputFile, string[] files)
         {
@@ -219,6 +220,9 @@ namespace com.gpfcomics.WinHasher.Core
                         case "-sha1":
                             parsedArgs.Hash = Hashes.SHA1;
                             break;
+                        case "-sha224":
+                            parsedArgs.Hash = Hashes.SHA224;
+                            break;
                         case "-sha256":
                             parsedArgs.Hash = Hashes.SHA256;
                             break;
@@ -228,8 +232,17 @@ namespace com.gpfcomics.WinHasher.Core
                         case "-sha512":
                             parsedArgs.Hash = Hashes.SHA512;
                             break;
+                        case "-ripemd128":
+                            parsedArgs.Hash = Hashes.RIPEMD128;
+                            break;
                         case "-ripemd160":
                             parsedArgs.Hash = Hashes.RIPEMD160;
+                            break;
+                        case "-ripemd256":
+                            parsedArgs.Hash = Hashes.RIPEMD256;
+                            break;
+                        case "-ripemd320":
+                            parsedArgs.Hash = Hashes.RIPEMD320;
                             break;
                         case "-whirlpool":
                             parsedArgs.Hash = Hashes.Whirlpool;
@@ -237,9 +250,16 @@ namespace com.gpfcomics.WinHasher.Core
                         case "-tiger":
                             parsedArgs.Hash = Hashes.Tiger;
                             break;
+                        case "-gost3411":
+                            parsedArgs.Hash = Hashes.GOST3411;
+                            break;
                         // But this one puts us in Base64 mode:
                         case "-base64":
                             parsedArgs.OutputType = OutputType.Base64;
+                            break;
+                        // And this outputs hexadecimal:
+                        case "-hex":
+                            parsedArgs.OutputType = OutputType.Hex;
                             break;
                         // And this outputs hex with capital letters:
                         case "-hexcaps":
@@ -321,7 +341,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// arguments</returns>
         public static CmdLineAppArgs ParseCmdLineArgs(string[] args)
         {
-            return ParseCmdLineArgs(args, Hashes.SHA1);
+            return ParseCmdLineArgs(args, HashEngine.DefaultHash);
         }
 
         /// <summary>
@@ -434,7 +454,7 @@ namespace com.gpfcomics.WinHasher.Core
                     {
                         status = new ConsoleStatusUpdater();
                         Console.WriteLine();
-                        Console.Write("Comparing " + GetHashString(args.Hash) + " of " +
+                        Console.Write("Comparing " + HashEngine.GetHashName(args.Hash) + " of " +
                             args.Files.Length + " files...   0%");
                     }
                     // Compute the hashes and compare the result.  Note that the
@@ -495,7 +515,7 @@ namespace com.gpfcomics.WinHasher.Core
             // This is a convenience version of the same method above, only this one does
             // not let us override the user's preferred hash.  No sense reinventing the
             // wheel, so...
-            return PerformHashes(args, false, Hashes.SHA1);
+            return PerformHashes(args, false, HashEngine.DefaultHash);
         }
 
         #endregion
@@ -531,44 +551,6 @@ namespace com.gpfcomics.WinHasher.Core
             }
         }
 
-        /// <summary>
-        /// Given a <see cref="Hashes"/> item, return a friendlier displayable
-        /// <see cref="String"/> for that item.
-        /// </summary>
-        /// <param name="hash">A Hashes enumeration item</param>
-        /// <returns>A string representing the same hash, suitable for display</returns>
-        private static string GetHashString(Hashes hash)
-        {
-            string hashString = "SHA-1";
-            switch (hash)
-            {
-                case Hashes.MD5:
-                    hashString = "MD5";
-                    break;
-                case Hashes.RIPEMD160:
-                    hashString = "RIPEMD-160";
-                    break;
-                case Hashes.SHA256:
-                    hashString = "SHA-256";
-                    break;
-                case Hashes.SHA384:
-                    hashString = "SHA-384";
-                    break;
-                case Hashes.SHA512:
-                    hashString = "SHA-512";
-                    break;
-                case Hashes.Tiger:
-                    hashString = "Tiger";
-                    break;
-                case Hashes.Whirlpool:
-                    hashString = "Whirlpool";
-                    break;
-                default:
-                    hashString = "SHA-1";
-                    break;
-            }
-            return hashString;
-        }
 
         /// <summary>
         /// Given a <see cref="Hashes"/> item, return a <see cref="String"/> for that item
@@ -578,35 +560,37 @@ namespace com.gpfcomics.WinHasher.Core
         /// <returns>A string representing the command-line switch used</returns>
         private static string GetHashSwitchString(Hashes hash)
         {
-            string hashString = "-sha1";
             switch (hash)
             {
                 case Hashes.MD5:
-                    hashString = "-md5";
-                    break;
-                case Hashes.RIPEMD160:
-                    hashString = "-ripemd160";
-                    break;
+                    return "-md5";
+                case Hashes.SHA1:
+                    return "-sha1";
+                case Hashes.SHA224:
+                    return "-sha256";
                 case Hashes.SHA256:
-                    hashString = "-sha256";
-                    break;
+                    return "-sha256";
                 case Hashes.SHA384:
-                    hashString = "-sha384";
-                    break;
+                    return "-sha384";
                 case Hashes.SHA512:
-                    hashString = "-sha512";
-                    break;
+                    return "-sha512";
+                case Hashes.RIPEMD128:
+                    return "-ripemd128";
+                case Hashes.RIPEMD160:
+                    return "-ripemd160";
+                case Hashes.RIPEMD256:
+                    return "-ripemd256";
+                case Hashes.RIPEMD320:
+                    return "-ripemd320";
                 case Hashes.Tiger:
-                    hashString = "-tiger";
-                    break;
+                    return "-tiger";
                 case Hashes.Whirlpool:
-                    hashString = "-whirlpool";
-                    break;
+                    return "-whirlpool";
+                case Hashes.GOST3411:
+                    return "-gost3411";
                 default:
-                    hashString = "-sha1";
-                    break;
+                    return "";
             }
-            return hashString;
         }
 
         /// <summary>

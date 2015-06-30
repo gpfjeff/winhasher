@@ -30,9 +30,11 @@
  * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
  * when a specific case is expected.
  * 
+ * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.
+ * 
  * This program is Copyright 2010, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
- * Web:     http://www.gpf-comics.com/
+ * Web:     https://github.com/gpfjeff/winhasher
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the Free Software Foundation; either version 2
@@ -79,59 +81,9 @@ namespace com.gpfcomics.WinHasher
             InitializeComponent();
             // Put the hash text in the result box:
             txtResult.Text = result;
-            // Build the hash type label.  For this, we'll do switches on the hash and
-            // output type to build a string that includes both, such as "SHA-1 / Base64".
-            string labelText = "";
-            switch (hash)
-            {
-                case Hashes.MD5:
-                    labelText += "MD5";
-                    break;
-                case Hashes.SHA1:
-                    labelText += "SHA-1";
-                    break;
-                case Hashes.SHA256:
-                    labelText += "SHA-256";
-                    break;
-                case Hashes.SHA384:
-                    labelText += "SHA-384";
-                    break;
-                case Hashes.SHA512:
-                    labelText += "SHA-512";
-                    break;
-                case Hashes.Tiger:
-                    labelText += "Tiger";
-                    break;
-                case Hashes.Whirlpool:
-                    labelText += "Whirlpool";
-                    break;
-                case Hashes.RIPEMD160:
-                    labelText += "RIPEMD-160";
-                    break;
-                default:
-                    labelText += "Invalid Hash";
-                    break;
-            }
-            labelText += " / ";
-            switch (outputType)
-            {
-                case OutputType.Base64:
-                    labelText += "Base64";
-                    break;
-                case OutputType.BubbleBabble:
-                    labelText += "Bubble Babble";
-                    break;
-                case OutputType.CapHex:
-                    labelText += "Hex (Caps)";
-                    break;
-                case OutputType.Hex:
-                    labelText += "Hexadecimal";
-                    break;
-                default:
-                    labelText += "Invalid Encoding";
-                    break;
-            }
-            lblResult.Text = labelText + ":";
+            // Build the hash type label:
+            string labelText = HashEngine.GetHashName(hash) + " / " +
+                HashEngine.GetOutputTypeName(outputType) + ":";
             // Hold onto the output type for comparison later:
             this.outputType = outputType;
         }
