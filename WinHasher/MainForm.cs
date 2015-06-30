@@ -189,13 +189,13 @@ namespace com.gpfcomics.WinHasher
                         Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
                         false).OpenSubKey("WinHasher", false);
                     // Try to set the hash combo box:
-                    hashComboBox.SelectedIndex = (int)winHasherSettings.GetValue("SelectedHash", 1);
+                    hashComboBox.SelectedItem = (string)winHasherSettings.GetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash));
                     hashComboBox_SelectedIndexChanged(null, null);
                     // Try to set the encoding combo box:
                     encodingComboBox.SelectedIndex = (int)winHasherSettings.GetValue("TextEncoding",
                         encodingComboBox.Items.IndexOf(Encoding.Default));
                     // Try to set the output format combo box:
-                    outputFormatComboBox.SelectedIndex = (int)winHasherSettings.GetValue("OutputFormat", 0);
+                    outputFormatComboBox.SelectedItem = (string)winHasherSettings.GetValue("OutputType", HashEngine.GetOutputTypeName(HashEngine.DefaultOutputType));
                     outputFormatComboBox_SelectedIndexChanged(null, null);
                     // Try to set the last directory:
                     string ldtemp = "";
@@ -742,12 +742,12 @@ namespace com.gpfcomics.WinHasher
                                 // safe the index value.  For the last directory, we'll save the
                                 // path string.  There might be a security question around saving
                                 // this path, of course, but we'll go with it as is.
-                                winHasherSettings.SetValue("SelectedHash",
-                                    hashComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("CurrentHash",
+                                    (string)hashComboBox.SelectedItem, RegistryValueKind.String);
                                 winHasherSettings.SetValue("TextEncoding",
                                     encodingComboBox.SelectedIndex, RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("OutputFormat",
-                                    outputFormatComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("OutputType",
+                                    (string)outputFormatComboBox.SelectedItem, RegistryValueKind.String);
                                 winHasherSettings.SetValue("LastDirectory",
                                     lastDirectory, RegistryValueKind.String);
                                 winHasherSettings.SetValue("LastTab", modeTabControl.SelectedIndex,
@@ -1101,7 +1101,10 @@ namespace com.gpfcomics.WinHasher
 
                         // For version 1.7, we added a number of new hash values, causing the order of those
                         // hashes to change in the drop-down box.  For that, we'll need to tweak the user's
-                        // last used hash preference to keep the value they had before.
+                        // last used hash preference to keep the value they had before.  While we're at it,
+                        // we'll convert the index-based registry keys for both the hash and output type to
+                        // a string, which will make things easier to deal with if the order of the hashes
+                        // moves around in the future.
                         if (current < v1_7)
                         {
                             winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
@@ -1115,45 +1118,80 @@ namespace com.gpfcomics.WinHasher
                                 int currentHash = (int)winHasherSettings.GetValue("SelectedHash", -1);
                                 if (currentHash >= 0)
                                 {
-                                    /* The mapping from old index values to new (1.7) ones:
-                                        MD5         0   0
-                                        SHA-1       1   1
-                                        SHA-256     2   3
-                                        SHA-384     3   4
-                                        SHA-512     4   5
-                                        RIPEMD-160  5   7
-                                        Whirlpool   6  10
-                                        Tiger       7  11 */
+                                    /* The mapping from old index values:
+                                        MD5         0
+                                        SHA-1       1
+                                        SHA-256     2
+                                        SHA-384     3
+                                        SHA-512     4
+                                        RIPEMD-160  5
+                                        Whirlpool   6
+                                        Tiger       7 */
+
+                                    // Based on the old index value, set the new string-based value using
+                                    // the hash name:
                                     switch (currentHash)
                                     {
-                                        // For the first two items, nothing's changed, so keep them as is:
                                         case 0:
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.MD5), RegistryValueKind.String);
+                                            break;
                                         case 1:
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA1), RegistryValueKind.String);
                                             break;
-                                        // We added SHA-224, so shift the next three up one item:
                                         case 2:
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA256), RegistryValueKind.String);
+                                            break;
                                         case 3:
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA384), RegistryValueKind.String);
+                                            break;
                                         case 4:
-                                            winHasherSettings.SetValue("SelectedHash", currentHash + 1, RegistryValueKind.DWord);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA512), RegistryValueKind.String);
                                             break;
-                                        // We added several new RIPEMD variants, so slip RIMEMD-160 up another:
                                         case 5:
-                                            winHasherSettings.SetValue("SelectedHash", currentHash + 2, RegistryValueKind.DWord);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.RIPEMD160), RegistryValueKind.String);
                                             break;
-                                        // And Whirlpool and Tiger to accommodate the other RIPs:
                                         case 6:
-                                        case 7:
-                                            winHasherSettings.SetValue("SelectedHash", currentHash + 4, RegistryValueKind.DWord);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Whirlpool), RegistryValueKind.String);
                                             break;
-                                        // If we get anything else, that should be an error.  For now, we'll
-                                        // hard-code this to be the current value for SHA-1, although to be
-                                        // "proper" we should check the HashEngine.DefaultHash property and
-                                        // somehow convert that to an integer.  I'm lazy, however...
+                                        case 7:
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Tiger), RegistryValueKind.String);
+                                            break;
                                         default:
-                                            winHasherSettings.SetValue("SelectedHash", 1, RegistryValueKind.DWord);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash), RegistryValueKind.String);
                                             break;
                                     }
+                                    // Delete the old index-based hash setting value:
+                                    winHasherSettings.DeleteValue("SelectedHash");
                                 }
+
+                                // For the output type, we'll pretty much to the same thing.  Get the old value,
+                                // map it to the string, save that as a new string registry value, then delete
+                                // the old key.
+                                currentHash = (int)winHasherSettings.GetValue("OutputFormat", -1);
+                                if (currentHash >= 0)
+                                {
+                                    switch (currentHash)
+                                    {
+                                        case 0:
+                                            winHasherSettings.SetValue("OutputType", HashEngine.GetOutputTypeName(OutputType.Hex), RegistryValueKind.String);
+                                            break;
+                                        case 1:
+                                            winHasherSettings.SetValue("OutputType", HashEngine.GetOutputTypeName(OutputType.CapHex), RegistryValueKind.String);
+                                            break;
+                                        case 2:
+                                            winHasherSettings.SetValue("OutputType", HashEngine.GetOutputTypeName(OutputType.Base64), RegistryValueKind.String);
+                                            break;
+                                        case 3:
+                                            winHasherSettings.SetValue("OutputType", HashEngine.GetOutputTypeName(OutputType.BubbleBabble), RegistryValueKind.String);
+                                            break;
+                                        default:
+                                            winHasherSettings.SetValue("OutputType", HashEngine.GetOutputTypeName(HashEngine.DefaultOutputType), RegistryValueKind.String);
+                                            break;
+                                    }
+                                    winHasherSettings.DeleteValue("OutputFormat");
+                                }
+
+                                // Close the registry:
                                 winHasherSettings.Close();
                             }
                         }
