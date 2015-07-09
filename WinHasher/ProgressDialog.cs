@@ -244,10 +244,8 @@ namespace com.gpfcomics.WinHasher
         /// <param name="fileList">An array of file path strings to compare</param>
         /// <param name="hashAlgorithm">The hashing algorithm to use in the comparison</param>
         public ProgressDialog(string[] fileList, Hashes hashAlgorithm)
-            :
-            this(fileList, hashAlgorithm, false, HashEngine.DefaultOutputType)
-        {
-        }
+            : this(fileList, hashAlgorithm, false, HashEngine.DefaultOutputType)
+        { }
 
         /// <summary>
         /// Constructs a progress dialog box with the given file path string and the
@@ -311,8 +309,7 @@ namespace com.gpfcomics.WinHasher
         /// center around the parent window</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm, bool centerInScreen)
             : this(filename, hashAlgorithm, centerInScreen, HashEngine.DefaultOutputType)
-        {
-        }
+        { }
 
         /// <summary>
         /// Constructs a progress dialog box with the given file path string and the
@@ -321,10 +318,8 @@ namespace com.gpfcomics.WinHasher
         /// <param name="filename">A string containing the path to the file to be hashed</param>
         /// <param name="hashAlgorithm">The hashing algorithm to use</param>
         public ProgressDialog(string filename, Hashes hashAlgorithm)
-            :
-            this(filename, hashAlgorithm, false, HashEngine.DefaultOutputType)
-        {
-        }
+            : this(filename, hashAlgorithm, false, HashEngine.DefaultOutputType)
+        { }
 
         #region Event Handlers
 
@@ -377,7 +372,7 @@ namespace com.gpfcomics.WinHasher
             // it anyway:
             catch (InvalidOperationException)
             {
-                MessageBox.Show("Error: The background hashing process is already busy.", "Error",
+                MessageBox.Show("The background hashing process is already busy.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Dispose();
             }
@@ -417,7 +412,7 @@ namespace com.gpfcomics.WinHasher
                     // reason.  Make sure to let the user know.
                     catch
                     {
-                        MessageBox.Show("Error: The background hashing process cannot be cancelled.",
+                        MessageBox.Show("The background hashing process cannot be cancelled.",
                             "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }

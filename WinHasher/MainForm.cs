@@ -50,7 +50,8 @@
  * UPDATE June 7, 2012 (1.6.1):  Fixes for Issue #4
  * https://github.com/gpfjeff/winhasher/issues/4
  * 
- * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.
+ * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.  Adding GPFUpdateChecker
+ * for automatic update checking and downloading.
  * 
  * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -79,10 +80,11 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Win32;
 using com.gpfcomics.WinHasher.Core;
+using com.gpfcomics.UpdateChecker;
 
 namespace com.gpfcomics.WinHasher
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IUpdateCheckListener
     {
         #region Private Variables
 
@@ -125,6 +127,48 @@ namespace com.gpfcomics.WinHasher
         /// try to read them upon launch.  This defaults to false.
         /// </summary>
         private bool portable = false;
+
+        /// <summary>
+        /// The actual <see cref="UpdateChecker"/> object, which will check for WinHasher
+        /// updates
+        /// </summary>
+        private UpdateChecker.UpdateChecker updateChecker = null;
+
+        /// <summary>
+        /// This Boolean flag determines whether or not to disable the built-in check for
+        /// updates.  This isn't recommended, of course, but a feature nonetheless.
+        /// </summary>
+        private bool disableUpdateCheck = false;
+
+        /// <summary>
+        /// A <see cref="Uri"/> for the official WinHasher updates feed.  The
+        /// <see cref="UpdateChecker"/> will use this feed to look for updated versions of
+        /// WinHasher.
+        /// </summary>
+        private Uri updateFeedUri = new Uri(Properties.Resources.UpdateFeedUri);
+
+        /// <summary>
+        /// The unique app string for <see cref="UpdateChecker"/> lookups
+        /// </summary>
+        private string updateFeedAppName = Properties.Resources.UpdateFeedAppName;
+
+        /// <summary>
+        /// The last update check timestamp for <see cref="UpdateChecker"/> lookups.  Note
+        /// that this defaults to <see cref="DateTime"/>.MinValue, which should force an
+        /// update on the first check, but that will be overwritten during initialization.
+        /// </summary>
+        private DateTime updateFeedLastCheck = DateTime.MinValue;
+
+        /// <summary>
+        /// The number of days between update checks, which we will passs to the
+        /// <see cref="UpdateChecker"/>.
+        /// </summary>
+        private int updateInterval = Int32.Parse(Properties.Resources.UpdateIntervalInDays);
+
+        /// <summary>
+        /// The alternate download page to download updates.
+        /// </summary>
+        private string updateAltDownloadPage = Properties.Resources.UpdateAltDownloadPage;
 
         #endregion
 
@@ -171,10 +215,13 @@ namespace com.gpfcomics.WinHasher
             // Take note of whether or not we were called in "portable" mode:
             this.portable = portable;
 
-            // If the user has elected to load the app in portable mode, populate the default settings:
+            // If the user has elected to load the app in portable mode, populate the default settings
+            // and disable the Options button (since we can't save any options if we can't write to
+            // the registry):
             if (portable)
             {
                 PopulateDefaultSettings();
+                optionsButton.Enabled = false;
             }
             // If we're not running in portable mode, try to read the settings from the registry and
             // restore them, falling back to the defaults if something fails:
@@ -208,6 +255,21 @@ namespace com.gpfcomics.WinHasher
                     // Try to restore the tooltips toggle:
                     tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
                         == 1 ? true : false;
+                    // Try to restore the disable update check setting:
+                    disableUpdateCheck = (int)winHasherSettings.GetValue("DisableUpdateCheck", 0)
+                        == 1 ? true : false;
+                    // Get the last update check date.  I'm not sure if the try/catch block is
+                    // really necessary, but I'm a belt-and-suspenders guy.  Also note that
+                    // the default, whether the parse fails for the registry value isn't set,
+                    // is DateTime.MinValue, which pretty much guarantees an update check on
+                    // the first go-around.
+                    try
+                    {
+                        updateFeedLastCheck =
+                            DateTime.Parse((string)winHasherSettings.GetValue("LastUpdateCheck",
+                            DateTime.MinValue.ToString()));
+                    }
+                    catch { updateFeedLastCheck = DateTime.MinValue; }
                     // Close the registry key:
                     winHasherSettings.Close();
                 }
@@ -231,6 +293,26 @@ namespace com.gpfcomics.WinHasher
             toolTip1.IsBalloon = true;
             if (tooltipsCheckbox.Checked) toolTip1.Active = true;
             else toolTip1.Active = false;
+
+            // Finally, initialize the update checker and set it to work.  The update check
+            // should occur in a separate thread, which will allow the main UI thread to
+            // continue without any problems.  The entire process *should* be transparent to
+            // the user unless an update is actually found.
+            if (!disableUpdateCheck)
+            {
+                try
+                {
+                    updateChecker = new UpdateChecker.UpdateChecker(updateFeedUri, updateFeedAppName,
+                        Assembly.GetExecutingAssembly().GetName().Version, this, updateFeedLastCheck,
+                        updateInterval, false);
+                    updateChecker.CheckForNewVersion();
+                }
+                catch
+                {
+                    MessageBox.Show("An error occurred while trying to perform the update check.  Please try another check later.",
+                        "Update Check Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         #region Button Events
@@ -280,6 +362,8 @@ namespace com.gpfcomics.WinHasher
             // Create our open file dialog box and show it:
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = lastDirectory;
+            ofd.CheckFileExists = true;
+            ofd.Multiselect = false;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -305,7 +389,7 @@ namespace com.gpfcomics.WinHasher
                 // the problem then restore the GUI to the default state.
                 catch (System.Security.SecurityException)
                 {
-                    MessageBox.Show("Error: You do not have permission to access the file \"" +
+                    MessageBox.Show("You do not have permission to access the file \"" +
                         ofd.FileName + "\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -313,7 +397,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Error: Access to the file \"" + ofd.FileName +
+                    MessageBox.Show("Access to the file \"" + ofd.FileName +
                         "\" has been denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -321,7 +405,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (PathTooLongException)
                 {
-                    MessageBox.Show("Error: The path \"" + ofd.FileName +
+                    MessageBox.Show("The path \"" + ofd.FileName +
                         "\" is too long for the system to handle.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
@@ -330,7 +414,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (NotSupportedException)
                 {
-                    MessageBox.Show("Error: The path \"" + ofd.FileName +
+                    MessageBox.Show("The path \"" + ofd.FileName +
                         "\" contains invalid characters.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
@@ -339,7 +423,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (ArgumentNullException)
                 {
-                    MessageBox.Show("Error: The file path specified was empty.", "Error",
+                    MessageBox.Show("The file path specified was empty.", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -347,7 +431,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (ArgumentException)
                 {
-                    MessageBox.Show("Error: The file path was empty, contained only white spaces, " +
+                    MessageBox.Show("The file path was empty, contained only white spaces, " +
                         "or contained invalid characters.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
@@ -357,7 +441,7 @@ namespace com.gpfcomics.WinHasher
                 // A generic catch, just in case:
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -375,11 +459,12 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void hashSingleButton_Click(object sender, EventArgs e)
         {
-            // If the file box is empty or just contains white space, complain:
-            if (fileSingleTextBox.Text.Trim() == "")
+            // If the file box is empty or doesn't point to a vald fiel name, complain:
+            if (String.IsNullOrEmpty(fileSingleTextBox.Text) || !File.Exists(fileSingleTextBox.Text.Trim()))
             {
-                MessageBox.Show("Error: No file has been specified, so there's nothing to do.",
+                MessageBox.Show("Please specify a valid file name in the File to Hash text box.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                hashSingleButton.Enabled = false;
             }
             else
             {
@@ -392,10 +477,11 @@ namespace com.gpfcomics.WinHasher
                     // Make it look like we're busy:
                     UseWaitCursor = true;
                     hashSingleTextBox.Text = "Hashing in progress...";
+                    fileSingleTextBox.Text = fileSingleTextBox.Text.Trim();
                     Refresh();
                     // Create the progress dialog and show it.  This kicks off the
                     // actual hashing process.
-                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text.Trim(), hash, 
+                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text, hash, 
                         false, outputType);
                     pd.ShowDialog();
                     // What we do next depends on the result:
@@ -433,7 +519,7 @@ namespace com.gpfcomics.WinHasher
                 // out the GUI and return it to its default state.
                 catch (HashEngineException hee)
                 {
-                    MessageBox.Show("Error: " + hee.ToString(), "Error", MessageBoxButtons.OK,
+                    MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -443,7 +529,7 @@ namespace com.gpfcomics.WinHasher
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     fileSingleTextBox.Text = "";
                     hashSingleButton.Enabled = false;
@@ -473,6 +559,7 @@ namespace com.gpfcomics.WinHasher
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = lastDirectory;
             ofd.Multiselect = true;
+            ofd.CheckFileExists = true;
             // If they clicked OK:
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -518,9 +605,11 @@ namespace com.gpfcomics.WinHasher
             // This should never happen:
             else
             {
-                MessageBox.Show("Error: You must select at least one file before you can " +
+                MessageBox.Show("You must select at least one file before you can " +
                     "remove anything from the list.", "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+                removeButton.Enabled = false;
+                clearButton.Enabled = false;
             }
         }
 
@@ -576,7 +665,7 @@ namespace com.gpfcomics.WinHasher
             // error message, so just spit it back out:
             catch (HashEngineException hee)
             {
-                MessageBox.Show("Error: " + hee.ToString(), "Error", MessageBoxButtons.OK,
+                MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 UseWaitCursor = false;
                 Refresh();
@@ -584,7 +673,7 @@ namespace com.gpfcomics.WinHasher
             // Generic exception catch, just in case:
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 UseWaitCursor = false;
                 Refresh();
@@ -618,10 +707,12 @@ namespace com.gpfcomics.WinHasher
         private void hashTextButton_Click(object sender, EventArgs e)
         {
             // Only bother if there's text to hash:
-            if (inputTextBox.Text != null && inputTextBox.Text != "")
+            if (!String.IsNullOrEmpty(inputTextBox.Text))
             {
                 // This one's simple enough:  Grab the selected hash, the text, the selected
-                // encoding and output formats, and hash it:
+                // encoding and output formats, and hash it.  Note that we do *NOT* want to use
+                // a Trim() on this, because we're going to consider all text, including all
+                // whitespace, as significant.
                 try
                 {
                     outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
@@ -634,9 +725,20 @@ namespace com.gpfcomics.WinHasher
                 }
             }
             // If no text is in the box, complain:
-            else MessageBox.Show("Error: No text has been specified, so there's nothing to do.",
+            else MessageBox.Show("No text has been specified, so there's nothing to do.",
                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        /// <summary>
+        /// What to do when the Options button has been clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void optionsButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This feature hasn't been implemented yet!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
 
         #endregion
 
@@ -676,8 +778,15 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void fileSingleTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (fileSingleTextBox.Text.Trim() == "") { hashSingleButton.Enabled = false; }
-            else { hashSingleButton.Enabled = true; }
+            // A minor improvement on the previous version of this logic.  Rather than simply test
+            // to see if the file path text box is empty or not, we now test to see if the file
+            // specified in the box actually exists.  If it does, we'll enable the Compute Hash
+            // button; otherwise, we'll disable it.  Thus, the button should only be enabled if
+            // there's something in the path box worth hashing.
+            if (!String.IsNullOrEmpty(fileSingleTextBox.Text) && File.Exists(fileSingleTextBox.Text.Trim()))
+                hashSingleButton.Enabled = true;
+            else
+                hashSingleButton.Enabled = false;
         }
 
         /// <summary>
@@ -758,6 +867,11 @@ namespace com.gpfcomics.WinHasher
                                 winHasherSettings.SetValue("ShowToolTips",
                                     (tooltipsCheckbox.Checked ? 1 : 0),
                                     RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("DisableUpdateCheck",
+                                    (disableUpdateCheck ? 1 : 0),
+                                    RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("LastUpdateCheck",
+                                    updateFeedLastCheck.ToString(), RegistryValueKind.String);
                                 // We're done, so close up shop:
                                 winHasherSettings.Close();
                             }
@@ -815,21 +929,23 @@ namespace com.gpfcomics.WinHasher
                 // hex), that means forcing the hash to be lower-case, even if pasted in as
                 // upper-case.  The same goes for Bubble Babble, which is almost always lower-
                 // case, and the inverse is true for our "CapHex" setting (force it to be
-                // upper-case).  Note that we don't do anything for Base64, which by definition
-                // includes mixed-case characters.  Of course, this only makes sense if there's
-                // something in the field to compare against.
+                // upper-case).  For *all* instances, we'll tack on a Trim() to remove any
+                // excess whitespace on either end; I've lost count of how many times I've copied
+                // a hash from a website and it was marked as "no match" just because some
+                // extra whitespace was accidentally tacked onto the end.
                 if (!String.IsNullOrEmpty(compareToTextBox.Text))
                 {
                     switch (outputType)
                     {
                         case OutputType.Hex:
                         case OutputType.BubbleBabble:
-                            compareToTextBox.Text = compareToTextBox.Text.ToLower();
+                            compareToTextBox.Text = compareToTextBox.Text.Trim().ToLower();
                             break;
                         case OutputType.CapHex:
-                            compareToTextBox.Text = compareToTextBox.Text.ToUpper();
+                            compareToTextBox.Text = compareToTextBox.Text.Trim().ToUpper();
                             break;
                         default:
+                            compareToTextBox.Text = compareToTextBox.Text.Trim();
                             break;
                     }
                 }
@@ -895,7 +1011,7 @@ namespace com.gpfcomics.WinHasher
             // Something other files were dropped:
             else
             {
-                MessageBox.Show("Error: Only files can be dropped onto this tab.",
+                MessageBox.Show("Only files can be dropped onto this tab.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -925,14 +1041,14 @@ namespace com.gpfcomics.WinHasher
                 // Got too many files:
                 else
                 {
-                    MessageBox.Show("Error: Two many files; only drop one into this box.",
+                    MessageBox.Show("Two many files; only drop one into this box.",
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             // The data dropped wasn't a file:
             else
             {
-                MessageBox.Show("Error: Only files can be dropped onto this tab.",
+                MessageBox.Show("Only files can be dropped onto this tab.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -996,46 +1112,46 @@ namespace com.gpfcomics.WinHasher
             // are thrown by its DirectoryName property.
             catch (System.Security.SecurityException)
             {
-                MessageBox.Show("Error: You do not have permission to access one or more of " +
+                MessageBox.Show("You do not have permission to access one or more of " +
                     "the files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Error: Access to one or more of the files has been denied.",
+                MessageBox.Show("Access to one or more of the files has been denied.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (PathTooLongException)
             {
-                MessageBox.Show("Error: One or more of the file paths is too long for the " +
+                MessageBox.Show("One or more of the file paths is too long for the " +
                     "system to handle.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (NotSupportedException)
             {
-                MessageBox.Show("Error: One or more of the file paths contains invalid " +
+                MessageBox.Show("One or more of the file paths contains invalid " +
                     "characters.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (ArgumentNullException)
             {
-                MessageBox.Show("Error: One or more of the file paths specified was empty.",
+                MessageBox.Show("One or more of the file paths specified was empty.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (ArgumentException)
             {
-                MessageBox.Show("Error: One or more of the file paths was empty, contained " +
+                MessageBox.Show("One or more of the file paths was empty, contained " +
                     "only white spaces, or contained invalid characters.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // This could be thrown by ListBox.Items.Add():
             catch (SystemException)
             {
-                MessageBox.Show("Error: The system ran out of memory while adding files to the " +
+                MessageBox.Show("The system ran out of memory while adding files to the " +
                     "list. Try removing a few files and comparing them again.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // A generic catch, just in case:
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             #endregion
@@ -1062,6 +1178,9 @@ namespace com.gpfcomics.WinHasher
             modeTabControl.SelectedIndex = 0;
             // Default to tooltips being on:
             tooltipsCheckbox.Checked = true;
+            // Always check for updates:
+            disableUpdateCheck = false;
+            updateFeedLastCheck = DateTime.MinValue;
         }
 
         /// <summary>
@@ -1191,6 +1310,15 @@ namespace com.gpfcomics.WinHasher
                                     winHasherSettings.DeleteValue("OutputFormat");
                                 }
 
+                                // Create the new disable update check registry flag and assign it the default
+                                // value of false (zero).  This is a new registry setting, so it doesn't already exist.
+                                winHasherSettings.SetValue("DisableUpdateCheck", 0, RegistryValueKind.DWord);
+
+                                // Create the new last update check registry and assign it the default minimum
+                                // value of DateTime, ensuring that the first time this runs, we'll do an update
+                                // check.  This is a new registry setting, so it doesn't already exist.
+                                winHasherSettings.SetValue("LastUpdateCheck", DateTime.MinValue.ToString(), RegistryValueKind.String);
+
                                 // Close the registry:
                                 winHasherSettings.Close();
                             }
@@ -1208,6 +1336,89 @@ namespace com.gpfcomics.WinHasher
         }
 
         #endregion
-        
+
+        #region IUpdateCheckListener Implementations
+
+        // These methods implement the IUpdateCheckListener interface, which is used to check
+        // for updates for WinHasher.  They shouldn't have to actually do much, as the update
+        // checker does most of the work.
+
+        /// <summary>
+        /// What to do if a new update is found.
+        /// </summary>
+        void IUpdateCheckListener.OnFoundNewerVersion()
+        {
+            // This is pretty simple.  If the update check found a new version, tell it to
+            // go ahead and download it.  Note that the update checker will handle any user
+            // notifications, which includes a prompt on whether or not they'd like to
+            // upgrade.  The null check is probably redudant--this method should never be
+            // called if the update checker is null--but it's a belt-and-suspenders thing.
+            try
+            {
+                if (updateChecker != null) updateChecker.GetNewerVersion();
+            }
+            catch
+            {
+                MessageBox.Show("An error occurred while attempting to download the new version. " +
+                    "Please try downloading it again later.", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// What to do if the update checker says to record a new last update check date.
+        /// This gets called by the update checker whenever a check is started, whether it
+        /// is successful or not.
+        /// </summary>
+        /// <param name="lastCheck">The new date of the last update check</param>
+        void IUpdateCheckListener.OnRecordLastUpdateCheck(DateTime lastCheck)
+        {
+            // Don't bother recording anything if we're in portable mode:
+            if (!portable)
+            {
+                // Cache the last update check date locally, then try to open the registry and write
+                // the date to our registry key.  Note that if this fails, we'll silently ignore the
+                // error and the date simply won't be recorded.
+                updateFeedLastCheck = lastCheck;
+                try
+                {
+                    RegistryKey winHasherSettings =
+                        Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
+                        false).OpenSubKey("WinHasher", true);
+                    if (winHasherSettings != null)
+                    {
+                        winHasherSettings.SetValue("LastUpdateCheck", updateFeedLastCheck.ToString(),
+                            RegistryValueKind.String);
+                        winHasherSettings.Close();
+                    }
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// What to do if the update checker wants us to close.  This gets called if the
+        /// update check has successfully download the file and now wants to install the
+        /// new version.
+        /// </summary>
+        void IUpdateCheckListener.OnRequestGracefulClose()
+        {
+            // We don't have a lot to do to close up shop.  Fortunately, we already have
+            // a method to do all that stuff, so call it:
+            MainForm_FormClosing(null, null);
+            Dispose();
+        }
+
+        // We don't really care to do anything in the case when no update is found or when an
+        // update check ends in an error.  The update checker does well enough on its own in
+        // both cases.  Thus, we'll provide empty implementations for both of these call-backs
+        // and let the update check handle these items itself.
+
+        void IUpdateCheckListener.OnNoUpdateFound() { }
+        void IUpdateCheckListener.OnUpdateCheckError() { }
+        void IUpdateCheckListener.OnDownloadCanceled() { }
+
+        #endregion
+
     }
 }

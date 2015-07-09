@@ -63,6 +63,7 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
             this.tooltipsCheckbox = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.optionsButton = new System.Windows.Forms.Button();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -139,7 +140,7 @@ namespace com.gpfcomics.WinHasher
             this.label3.Location = new System.Drawing.Point(6, 71);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 5;
+            this.label3.TabIndex = 4;
             this.label3.Text = "Hash:";
             // 
             // hashSingleTextBox
@@ -149,7 +150,7 @@ namespace com.gpfcomics.WinHasher
             this.hashSingleTextBox.Name = "hashSingleTextBox";
             this.hashSingleTextBox.ReadOnly = true;
             this.hashSingleTextBox.Size = new System.Drawing.Size(264, 43);
-            this.hashSingleTextBox.TabIndex = 4;
+            this.hashSingleTextBox.TabIndex = 5;
             this.toolTip1.SetToolTip(this.hashSingleTextBox, resources.GetString("hashSingleTextBox.ToolTip"));
             // 
             // hashSingleButton
@@ -161,8 +162,8 @@ namespace com.gpfcomics.WinHasher
             this.hashSingleButton.TabIndex = 3;
             this.hashSingleButton.Text = "Compute Hash";
             this.toolTip1.SetToolTip(this.hashSingleButton, "This button will activate the selected hashing\r\nalgorithm and compute the hash of" +
-                    " the\r\nspecified file.  This button only becomes\r\nactive if a file path is in the" +
-                    " text box above.");
+        " the\r\nspecified file.  This button only becomes\r\nactive if a file path is in the" +
+        " text box above.");
             this.hashSingleButton.UseVisualStyleBackColor = true;
             this.hashSingleButton.Click += new System.EventHandler(this.hashSingleButton_Click);
             // 
@@ -174,7 +175,7 @@ namespace com.gpfcomics.WinHasher
             this.browseSingleButton.TabIndex = 2;
             this.browseSingleButton.Text = "Browse...";
             this.toolTip1.SetToolTip(this.browseSingleButton, "Click this button to browse your hard disk\r\nor network shares for a file to hash." +
-                    "");
+        "");
             this.browseSingleButton.UseVisualStyleBackColor = true;
             this.browseSingleButton.Click += new System.EventHandler(this.browseSingleButton_Click);
             // 
@@ -186,7 +187,7 @@ namespace com.gpfcomics.WinHasher
             this.fileSingleTextBox.Size = new System.Drawing.Size(264, 20);
             this.fileSingleTextBox.TabIndex = 1;
             this.toolTip1.SetToolTip(this.fileSingleTextBox, "This box should contain the full path to the file\r\nyou would like to compute the " +
-                    "hash of.");
+        "hash of.");
             this.fileSingleTextBox.TextChanged += new System.EventHandler(this.fileSingleTextBox_TextChanged);
             // 
             // label2
@@ -239,8 +240,8 @@ namespace com.gpfcomics.WinHasher
             this.compareButton.TabIndex = 5;
             this.compareButton.Text = "Compare Hashes";
             this.toolTip1.SetToolTip(this.compareButton, "Click this button to compute the hashes of\r\nall the files in the file list and co" +
-                    "mpare them.\r\nYou will receive a message indicating whether\r\nor not all the files" +
-                    " match.");
+        "mpare them.\r\nYou will receive a message indicating whether\r\nor not all the files" +
+        " match.");
             this.compareButton.UseVisualStyleBackColor = true;
             this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
             // 
@@ -264,7 +265,7 @@ namespace com.gpfcomics.WinHasher
             this.addButton.TabIndex = 2;
             this.addButton.Text = "Add...";
             this.toolTip1.SetToolTip(this.addButton, "Click this button to open a file dialog box and\r\nselect files to add to the list." +
-                    "");
+        "");
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
@@ -316,7 +317,7 @@ namespace com.gpfcomics.WinHasher
             this.outputTextBox.Size = new System.Drawing.Size(264, 69);
             this.outputTextBox.TabIndex = 5;
             this.toolTip1.SetToolTip(this.outputTextBox, "This box contains the result of hashing the\r\ntext in the box above, using the cho" +
-                    "sen\r\nencoding and hashing algorithm.");
+        "sen\r\nencoding and hashing algorithm.");
             // 
             // hashTextButton
             // 
@@ -347,8 +348,8 @@ namespace com.gpfcomics.WinHasher
             this.encodingComboBox.Size = new System.Drawing.Size(132, 21);
             this.encodingComboBox.TabIndex = 2;
             this.toolTip1.SetToolTip(this.encodingComboBox, "This drop-down box lists all the available text\r\nencodings for your system.  Your" +
-                    " system\'s\r\ndefault encoding is chosen by default and\r\nwill be what you want to u" +
-                    "se most of the time.");
+        " system\'s\r\ndefault encoding is chosen by default and\r\nwill be what you want to u" +
+        "se most of the time.");
             // 
             // label5
             // 
@@ -391,10 +392,10 @@ namespace com.gpfcomics.WinHasher
             // closeButton
             // 
             this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.closeButton.Location = new System.Drawing.Point(212, 269);
+            this.closeButton.Location = new System.Drawing.Point(212, 290);
             this.closeButton.Name = "closeButton";
             this.closeButton.Size = new System.Drawing.Size(75, 23);
-            this.closeButton.TabIndex = 4;
+            this.closeButton.TabIndex = 8;
             this.closeButton.Text = "Close";
             this.toolTip1.SetToolTip(this.closeButton, "Click this button to\r\nclose WinHasher.");
             this.closeButton.UseVisualStyleBackColor = true;
@@ -402,14 +403,14 @@ namespace com.gpfcomics.WinHasher
             // 
             // aboutButton
             // 
-            this.aboutButton.Location = new System.Drawing.Point(212, 238);
+            this.aboutButton.Location = new System.Drawing.Point(212, 262);
             this.aboutButton.Name = "aboutButton";
             this.aboutButton.Size = new System.Drawing.Size(75, 23);
-            this.aboutButton.TabIndex = 3;
+            this.aboutButton.TabIndex = 7;
             this.aboutButton.Text = "About...";
             this.toolTip1.SetToolTip(this.aboutButton, "Click this button to see more information about\r\nWinHasher, such as the full vers" +
-                    "ion number, the\r\nURL where you can find it online, and the\r\nlicense under which " +
-                    "it was released.");
+        "ion number, the\r\nURL where you can find it online, and the\r\nlicense under which " +
+        "it was released.");
             this.aboutButton.UseVisualStyleBackColor = true;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
             // 
@@ -425,7 +426,7 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox.Location = new System.Drawing.Point(90, 269);
             this.outputFormatComboBox.Name = "outputFormatComboBox";
             this.outputFormatComboBox.Size = new System.Drawing.Size(116, 21);
-            this.outputFormatComboBox.TabIndex = 6;
+            this.outputFormatComboBox.TabIndex = 4;
             this.toolTip1.SetToolTip(this.outputFormatComboBox, resources.GetString("outputFormatComboBox.ToolTip"));
             this.outputFormatComboBox.SelectedIndexChanged += new System.EventHandler(this.outputFormatComboBox_SelectedIndexChanged);
             // 
@@ -434,13 +435,13 @@ namespace com.gpfcomics.WinHasher
             this.tooltipsCheckbox.AutoSize = true;
             this.tooltipsCheckbox.Checked = true;
             this.tooltipsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.tooltipsCheckbox.Location = new System.Drawing.Point(72, 298);
+            this.tooltipsCheckbox.Location = new System.Drawing.Point(7, 296);
             this.tooltipsCheckbox.Name = "tooltipsCheckbox";
             this.tooltipsCheckbox.Size = new System.Drawing.Size(148, 17);
-            this.tooltipsCheckbox.TabIndex = 7;
+            this.tooltipsCheckbox.TabIndex = 5;
             this.tooltipsCheckbox.Text = "Show verbose tooltip help";
             this.toolTip1.SetToolTip(this.tooltipsCheckbox, "Use this checkbox to toggle these\r\nannoying tooltips on or off.  (C\'mon,\r\nwe know" +
-                    " you love them, right?\r\nRight?  Um... please?)");
+        " you love them, right?\r\nRight?  Um... please?)");
             this.tooltipsCheckbox.UseVisualStyleBackColor = true;
             this.tooltipsCheckbox.CheckedChanged += new System.EventHandler(this.tooltipsCheckbox_CheckedChanged);
             // 
@@ -450,8 +451,20 @@ namespace com.gpfcomics.WinHasher
             this.label7.Location = new System.Drawing.Point(4, 272);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(74, 13);
-            this.label7.TabIndex = 5;
+            this.label7.TabIndex = 3;
             this.label7.Text = "Output format:";
+            // 
+            // optionsButton
+            // 
+            this.optionsButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.optionsButton.Location = new System.Drawing.Point(212, 237);
+            this.optionsButton.Name = "optionsButton";
+            this.optionsButton.Size = new System.Drawing.Size(75, 23);
+            this.optionsButton.TabIndex = 6;
+            this.optionsButton.Text = "Options...";
+            this.toolTip1.SetToolTip(this.optionsButton, "Click this button to\r\nopen the Options\r\ndialog box.");
+            this.optionsButton.UseVisualStyleBackColor = true;
+            this.optionsButton.Click += new System.EventHandler(this.optionsButton_Click);
             // 
             // MainForm
             // 
@@ -459,6 +472,7 @@ namespace com.gpfcomics.WinHasher
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.closeButton;
             this.ClientSize = new System.Drawing.Size(292, 319);
+            this.Controls.Add(this.optionsButton);
             this.Controls.Add(this.tooltipsCheckbox);
             this.Controls.Add(this.outputFormatComboBox);
             this.Controls.Add(this.label7);
@@ -520,6 +534,7 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.TextBox compareToTextBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label compareResultLabel;
+        private System.Windows.Forms.Button optionsButton;
     }
 }
 

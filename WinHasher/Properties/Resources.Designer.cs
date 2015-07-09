@@ -93,6 +93,42 @@ namespace com.gpfcomics.WinHasher.Properties {
         /// <summary>
         ///   Looks up a localized string similar to https://github.com/gpfjeff/winhasher.
         /// </summary>
+        internal static string UpdateAltDownloadPage {
+            get {
+                return ResourceManager.GetString("UpdateAltDownloadPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WinHasher.
+        /// </summary>
+        internal static string UpdateFeedAppName {
+            get {
+                return ResourceManager.GetString("UpdateFeedAppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to http://www.cryptnos.com/files/cryptnos_updates_feed.xml.
+        /// </summary>
+        internal static string UpdateFeedUri {
+            get {
+                return ResourceManager.GetString("UpdateFeedUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 7.
+        /// </summary>
+        internal static string UpdateIntervalInDays {
+            get {
+                return ResourceManager.GetString("UpdateIntervalInDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://github.com/gpfjeff/winhasher.
+        /// </summary>
         internal static string URL {
             get {
                 return ResourceManager.GetString("URL", resourceCulture);

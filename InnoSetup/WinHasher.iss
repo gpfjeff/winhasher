@@ -30,6 +30,7 @@ SetupIconFile=..\WinHasher\Icon1.ico
 [Files]
 Source: "..\WinHasherCore\bin\Release\WinHasherCore.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
 Source: "..\BouncyCastle.Crypto.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
+Source: "..\GPFUpdateChecker.dll"; DestDir: "{app}"; Components: Windows_application
 Source: "..\WinHasher\bin\Release\WinHasher.exe"; DestDir: "{app}"; Components: Windows_application
 Source: "..\hash\bin\Release\hash.exe"; DestDir: "{app}"; Components: Console_applications
 Source: "PathTweaker.exe"; DestDir: "{app}"; Components: Console_applications
@@ -97,7 +98,7 @@ begin
       // If they decided not to download .NET now, tell them they
       // can always get it from Windows Update:
       else begin
-         MsgBox('Ok, but you can also install the framework through Windows Update.  This installer will now exit.', mbInformation, MB_OK);
+         MsgBox('OK, but you can also install the framework through Windows Update.  This installer will now exit.', mbInformation, MB_OK);
       end;
       // In all cases above, we want to stop the installation here:
       Result := False;

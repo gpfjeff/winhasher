@@ -462,6 +462,18 @@ consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.</value>
   </data>
+  <data name="UpdateAltDownloadPage" xml:space="preserve">
+    <value>https://github.com/gpfjeff/winhasher</value>
+  </data>
+  <data name="UpdateFeedAppName" xml:space="preserve">
+    <value>WinHasher</value>
+  </data>
+  <data name="UpdateFeedUri" xml:space="preserve">
+    <value>http://www.cryptnos.com/files/cryptnos_updates_feed.xml</value>
+  </data>
+  <data name="UpdateIntervalInDays" xml:space="preserve">
+    <value>7</value>
+  </data>
   <data name="URL" xml:space="preserve">
     <value>https://github.com/gpfjeff/winhasher</value>
   </data>

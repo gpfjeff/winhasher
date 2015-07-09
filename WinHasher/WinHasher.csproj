@@ -52,6 +52,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GPFUpdateChecker">
+      <HintPath>..\GPFUpdateChecker.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -72,6 +75,12 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OptionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OptionsDialog.Designer.cs">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
@@ -87,6 +96,9 @@
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OptionsDialog.resx">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProgressDialog.resx">
       <SubType>Designer</SubType>

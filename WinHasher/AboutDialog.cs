@@ -14,7 +14,7 @@
  * UPDATE March 26, 2009:  Added Boolean flag to constructor to allow us turn on or off the
  * tooltips, which some people might find annoying.
  * 
- * This program is Copyright 2009, Jeffrey T. Darlington.
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     http://www.gpf-comics.com/
  * 
@@ -74,7 +74,7 @@ namespace com.gpfcomics.WinHasher
             // If this fails, just tell the user to go there on their own:
             catch
             {
-                MessageBox.Show("Error: Could not launch default Web browser. Please type in the " +
+                MessageBox.Show("Could not launch default Web browser. Please type in the " +
                     "URL manually.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -91,7 +91,7 @@ namespace com.gpfcomics.WinHasher
             try { System.Diagnostics.Process.Start(helpFile); }
             catch
             {
-                MessageBox.Show("Error: Could not launch default Web browser. Please use the " +
+                MessageBox.Show("Could not launch default Web browser. Please use the " +
                     "Start menu shortcut to load the HTML help file manually.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

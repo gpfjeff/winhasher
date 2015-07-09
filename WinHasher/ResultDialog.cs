@@ -30,9 +30,10 @@
  * lower-case is expected) causes the comparison to fail.  This kludge forces the correct case
  * when a specific case is expected.
  * 
- * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.
+ * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.  Minor enhancement to the
+ * comparison text box validation to strip whitespace off the ends.
  * 
- * This program is Copyright 2010, Jeffrey T. Darlington.
+ * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     https://github.com/gpfjeff/winhasher
  * 
@@ -131,21 +132,23 @@ namespace com.gpfcomics.WinHasher
                 // hex), that means forcing the hash to be lower-case, even if pasted in as
                 // upper-case.  The same goes for Bubble Babble, which is almost always lower-
                 // case, and the inverse is true for our "CapHex" setting (force it to be
-                // upper-case).  Note that we don't do anything for Base64, which by definition
-                // includes mixed-case characters.  Of course, this only makes sense if there's
-                // something in the field to compare against.
+                // upper-case).  For *all* instances, we'll tack on a Trim() to remove any
+                // excess whitespace on either end; I've lost count of how many times I've copied
+                // a hash from a website and it was marked as "no match" just because some
+                // extra whitespace was accidentally tacked onto the end.
                 if (!String.IsNullOrEmpty(txtCompare.Text))
                 {
                     switch (outputType)
                     {
                         case OutputType.Hex:
                         case OutputType.BubbleBabble:
-                            txtCompare.Text = txtCompare.Text.ToLower();
+                            txtCompare.Text = txtCompare.Text.Trim().ToLower();
                             break;
                         case OutputType.CapHex:
-                            txtCompare.Text = txtCompare.Text.ToUpper();
+                            txtCompare.Text = txtCompare.Text.Trim().ToUpper();
                             break;
                         default:
+                            txtCompare.Text = txtCompare.Text.Trim();
                             break;
                     }
                 }
