@@ -6,6 +6,7 @@ sha1/bin
 sha1/obj
 WinHasher/bin
 WinHasher/obj
+WinHahser/WinHasher.csproj.user
 WinHasherCore/bin
 WinHasherCore/obj
 WinHasher.v11.suo

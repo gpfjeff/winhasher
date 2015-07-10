@@ -287,7 +287,8 @@ namespace com.gpfcomics.WinHasher
             compareFilesListBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
             compareFilesListBox.DragDrop += new DragEventHandler(compareFilesListBox_DragDrop);
             // Set our title bar to include the version number:
-            Text = versionShort;
+            if (portable) Text = versionShort + " (Portable)";
+            else Text = versionShort;
             // Turn on or off the tooltips depending on whether the checkbox has been
             // checked:
             toolTip1.IsBalloon = true;
@@ -736,7 +737,22 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void optionsButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This feature hasn't been implemented yet!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            // This is pretty simple:  Build the options dialog, pass it a couple values, and show it.
+            // If the user clicks OK, grab the user's preference on disabling update checks.  (Everything
+            // else is handled within the dialog itself.)
+            OptionsDialog od = new OptionsDialog();
+            od.DisableUpdateCheck = disableUpdateCheck;
+            od.EnableTooltips = toolTip1.Active;
+            od.LastUpdateCheck = updateFeedLastCheck;
+            od.UpdateFeedUri = updateFeedUri;
+            od.UpdateFeedAppName = updateFeedAppName;
+            od.UpdateAltDownloadPage = updateAltDownloadPage;
+            od.Version = Assembly.GetExecutingAssembly().GetName().Version;
+            if (od.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                disableUpdateCheck = od.DisableUpdateCheck;
+                updateFeedLastCheck = od.LastUpdateCheck;
+            }
         }
 
 
@@ -1165,12 +1181,12 @@ namespace com.gpfcomics.WinHasher
             // We used to default to MD5 then to SHA-1 explicitly.  Now we'll drive the default value
             // of the hash drop-down by whatever the default we set in the HashEngine:
             hash = HashEngine.DefaultHash;
-            hashComboBox.SelectedValue = HashEngine.GetHashName(hash);
+            hashComboBox.SelectedItem = HashEngine.GetHashName(hash);
             // Select the system default encoding by default:
             encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
             // Force the output drop-down to the HashEngine default:
             outputType = HashEngine.DefaultOutputType;
-            outputFormatComboBox.SelectedValue = HashEngine.GetOutputTypeName(outputType);
+            outputFormatComboBox.SelectedItem = HashEngine.GetOutputTypeName(outputType);
             // Set our the last directory to My Documents:
             try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
             catch { lastDirectory = Environment.CurrentDirectory; }

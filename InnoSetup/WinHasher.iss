@@ -31,6 +31,7 @@ SetupIconFile=..\WinHasher\Icon1.ico
 Source: "..\WinHasherCore\bin\Release\WinHasherCore.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
 Source: "..\BouncyCastle.Crypto.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
 Source: "..\GPFUpdateChecker.dll"; DestDir: "{app}"; Components: Windows_application
+Source: "..\gpf_update_checker1.xsd"; DestDir: "{app}"; Flags: ignoreversion; Components: Windows_application
 Source: "..\WinHasher\bin\Release\WinHasher.exe"; DestDir: "{app}"; Components: Windows_application
 Source: "..\hash\bin\Release\hash.exe"; DestDir: "{app}"; Components: Console_applications
 Source: "PathTweaker.exe"; DestDir: "{app}"; Components: Console_applications

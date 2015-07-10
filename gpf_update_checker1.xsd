@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	GPF Update Checker XML Schema Definition
+	Version 1
+	Jeffrey T. Darlington
+	May 12, 2010
+	
+	This XML schema defines the syntax expected by the GPFUpdateChecker library.
+	Applications that wish to use this library for update checking must generate
+	an XML file matching this schema for the update check to parse.  An invalid
+	feed will result in a failed upate check, so the schema should be carefully
+	matched.
+	
+	For more information on the GPFUpdateChecker library, please see our Google
+	Code site:   https://code.google.com/p/gpfupdatechecker/
+-->
+
+<xs:schema
+	targetNamespace="http://www.gpf-comics.com/"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:gpfupdate="http://www.gpf-comics.com/"
+	elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<!-- ******************************************************************* -->
+
+	<!-- Basic type definitions: -->
+
+	<!-- Version can only be 1 (for now): -->
+	<xs:simpleType name="versionType">
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Define integers.  I'm not sure if I should be using a home-grown value
+	     here or not; this may get replaced with a standard value later.  The
+		 main concern is that this must be a positive value. -->
+	<xs:simpleType name="integer">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]+"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Timestamp in YYYYMMDDHHMMSS format: -->
+	<xs:simpleType name="timestamp">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]{14}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Version numbers are in Major.Minor.SubMinor.Revision format, where
+	     each portion must be an integer: -->
+	<xs:simpleType name="verString">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- ******************************************************************* -->
+
+	<!-- Define an individual application entry.  This consists of five
+	     elements, each of which may only appear once per entry:
+		 
+		   *  The name element defines the application name.  This is how the
+		      application is uniquely identified within the feed.  This must
+			  match the name value passed into the UpdateChecker constructor
+			  when called by the parent app.
+		   *  The latest version of the application available.  This will be
+		      compared with the applicaton's internal version number; if the
+			  value in the feed is higher, the user will be notified that a new
+			  version is available.
+		   *  The URL where the new installer can be downloaded.
+		   *  The size in bytes (not kilobytes, megabytes, etc.) of the
+		      installer file to be downloaded.  The downloader will use this as
+			  part of the validation and to track the download progress.
+		   *  A Base64-encoded SHA-256 hash or digets of the install file.  The
+		      downloaded file will be hashed and compared to this value to check
+			  it for validation.  If the hash fails, the entire update will
+			  fail. -->
+	<xs:complexType name="appType">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="currentVer" type="gpfupdate:verString" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="url" type="xs:string" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="size" type="gpfupdate:integer" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="digest" type="xs:string" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- A feed may actually contain multiple application entries, each with a
+	     unique name element.  Thus, you can use a single feed to manage
+		 multiple related apps, like the same app compiled for different
+		 platforms.  However, there must be at least one app entry per file. -->
+	<xs:complexType name="appListType">
+		<xs:sequence>
+			<xs:element name="app" type="gpfupdate:appType" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- ******************************************************************* -->
+
+	<!-- Define the main body of the XML file: -->
+
+	<!-- The main element: -->
+	<xs:element name="gpfupdate">
+		<xs:complexType>
+			<xs:sequence>
+			
+				<!-- The version number.  This is required. -->
+				<xs:element name="version" type="gpfupdate:versionType" minOccurs="1" maxOccurs="1"/>
+
+				<!-- An optional generator string.  If nothing else, this should
+				     identify which application, including version number,
+					 generated the parameter file.  That will help when it comes
+					 to debugging cross-platform issues. -->
+				<xs:element name="generator" type="xs:string" minOccurs="0" maxOccurs="1"/>
+
+				<!-- An optional comment string.  I'm not sure if this will ever
+				     get used, since these files should be system generated and
+					 never appear decrypted.  That said, I don't see a valid
+					 reason NOT to have it, and adding it now might be easier,
+					 just in case it's needed later. -->
+				<xs:element name="comment" type="xs:string" minOccurs="0" maxOccurs="1"/>
+
+				<!-- A timestamp indicating the date of the latest update to
+				     the feed (NOT the apps): -->
+				<xs:element name="pubDate" type="gpfupdate:timestamp" minOccurs="1" maxOccurs="1"/>
+
+				<!-- The app list block, as defined above.  There should be
+				     only one site list block per file, but there may be many
+					 app entries within it. -->
+				<xs:element name="apps" type="gpfupdate:appListType" minOccurs="1" maxOccurs="1"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+</xs:schema>
