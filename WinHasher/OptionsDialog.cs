@@ -64,6 +64,11 @@ namespace com.gpfcomics.WinHasher
     public partial class OptionsDialog : Form, IUpdateCheckListener
     {
         /// <summary>
+        /// A reference to the main form, so we can ask it to close itself if we successfully download an update
+        /// </summary>
+        private MainForm parent = null;
+
+        /// <summary>
         /// The path to the user's Send To folder as a string
         /// </summary>
         private string sendToPath = null;
@@ -99,6 +104,21 @@ namespace com.gpfcomics.WinHasher
         /// Our current app version, used for checking updates
         /// </summary>
         private Version version = null;
+
+        /// <summary>
+        /// A reference to the main form, so we can ask it to close itself if we successfully download an update
+        /// </summary>
+        public MainForm ParentDialog
+        {
+            get
+            {
+                return parent;
+            }
+            set
+            {
+                parent = value;
+            }
+        }
 
         /// <summary>
         /// A Boolean flag indicating whether or not update checks should be disabled.  Setting this value determines the state
@@ -380,7 +400,7 @@ namespace com.gpfcomics.WinHasher
                     DateTime.MinValue, 1, false);
                 updateChecker.CheckForNewVersion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("I was unable to check for updates.  Please try again later.", "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -390,49 +410,92 @@ namespace com.gpfcomics.WinHasher
 
         #region IUpdateCheckListner Implementation
 
+        // These methods implement the IUpdateCheckListener interface, which is used to check
+        // for updates for WinHasher.  They shouldn't have to actually do much, as the update
+        // checker does most of the work.
+
+        /// <summary>
+        /// What to do when the download has been cancelled
+        /// </summary>
         void IUpdateCheckListener.OnDownloadCanceled()
         {
+            // Re-enable the Check for Updates button:
             btnCheckForUpdates.Enabled = true;
         }
 
+        /// <summary>
+        /// What to do if a new update is found.
+        /// </summary>
         void IUpdateCheckListener.OnFoundNewerVersion()
         {
             try
             {
+                // Pure and simple:  Tell the updater to get the new version:
                 if (updateChecker != null) updateChecker.GetNewerVersion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("I was unable to download the latest update.  Please try again later.", "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// What to do if no update was found
+        /// </summary>
         void IUpdateCheckListener.OnNoUpdateFound()
         {
+            // I can't remember if the UpdateChecker displays its own dialog box here, or if
+            // we need to do so.  I'll leave this in for now until I can test the update
+            // process thoroughly.
             MessageBox.Show("You appear to have the latest version of WinHasher.  Please try again later.", "Update Check",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Re-enable the Check for Updates button:
             btnCheckForUpdates.Enabled = true;
         }
 
+        /// <summary>
+        /// What to do if the update checker says to record a new last update check date.
+        /// This gets called by the update checker whenever a check is started, whether it
+        /// is successful or not.
+        /// </summary>
+        /// <param name="lastCheck">The new date of the last update check</param>
         void IUpdateCheckListener.OnRecordLastUpdateCheck(DateTime lastCheck)
         {
             try
             {
+                // Take note of the new update check date.  Unfortunately, we can't really
+                // update the label that displays the date, since this code is actually called
+                // by the BackgroundWorker thread in the UpdateChecker, so we can't directly
+                // touch the UI.
                 lastUpdateCheck = lastCheck;
-                lblUpdateCheck.Text = "Last update check:  " + lastUpdateCheck.ToString();
+                //lblUpdateCheck.Text = "Last update check:  " + lastUpdateCheck.ToString();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("I was unable to check for updates.  Please try again later.", "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// What to do if the update checker wants us to close.  This gets called if the
+        /// update check has successfully download the file and now wants to install the
+        /// new version.
+        /// </summary>
         void IUpdateCheckListener.OnRequestGracefulClose()
         {
-            Dispose();
+            // I'm not sure if this will actually work, but try to get our parent form
+            // to close itself:
+            if (parent != null)
+            {
+                parent.Close();
+                parent.Dispose();
+            }
         }
+
+        // We don't really care what happens when an error occurs.  The update checker displays
+        // its own error dialog, so adding another one here would be redundant.
 
         void IUpdateCheckListener.OnUpdateCheckError() { }
 

@@ -741,6 +741,7 @@ namespace com.gpfcomics.WinHasher
             // If the user clicks OK, grab the user's preference on disabling update checks.  (Everything
             // else is handled within the dialog itself.)
             OptionsDialog od = new OptionsDialog();
+            od.ParentDialog = this;
             od.DisableUpdateCheck = disableUpdateCheck;
             od.EnableTooltips = toolTip1.Active;
             od.LastUpdateCheck = updateFeedLastCheck;

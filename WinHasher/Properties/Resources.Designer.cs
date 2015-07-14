@@ -109,7 +109,7 @@ namespace com.gpfcomics.WinHasher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://www.cryptnos.com/files/cryptnos_updates_feed.xml.
+        ///   Looks up a localized string similar to http://www.cryptnos.com/files/winhasher_updates_feed.xml.
         /// </summary>
         internal static string UpdateFeedUri {
             get {

@@ -469,7 +469,7 @@ Public License instead of this License.</value>
     <value>WinHasher</value>
   </data>
   <data name="UpdateFeedUri" xml:space="preserve">
-    <value>http://www.cryptnos.com/files/cryptnos_updates_feed.xml</value>
+    <value>http://www.cryptnos.com/files/winhasher_updates_feed.xml</value>
   </data>
   <data name="UpdateIntervalInDays" xml:space="preserve">
     <value>7</value>
