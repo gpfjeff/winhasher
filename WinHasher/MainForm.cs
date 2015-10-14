@@ -51,7 +51,7 @@
  * https://github.com/gpfjeff/winhasher/issues/4
  * 
  * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.  Adding GPFUpdateChecker
- * for automatic update checking and downloading.
+ * for automatic update checking and downloading.  Added "portable mode" support.
  * 
  * This program is Copyright 2015, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
@@ -342,7 +342,8 @@ namespace com.gpfcomics.WinHasher
         {
             // Get the full path to the HTML help file:
             string helpFile = Application.StartupPath;
-            if (!helpFile.EndsWith("\\")) helpFile += "\\";
+            if (!helpFile.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                helpFile += Path.DirectorySeparatorChar.ToString();
             helpFile += Properties.Resources.HelpFile;
             // Now build and show the about dialog:
             AboutDialog ad = new AboutDialog(version, copyright, Properties.Resources.URL,

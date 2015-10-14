@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OptionsDialog));
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.chkDisableUpdateCheck = new System.Windows.Forms.CheckBox();
@@ -48,6 +49,9 @@
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 7;
             this.okButton.Text = "OK";
+            this.toolTip1.SetToolTip(this.okButton, "Click here to save all your settings\r\nspecified above. Any Send To shortcuts\r\nwil" +
+        "l be created or deleted, depending on\r\nthe state of their checkboxes.  You will\r" +
+        "\nthen be returned to the main window.");
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
@@ -59,6 +63,8 @@
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 8;
             this.cancelButton.Text = "Cancel";
+            this.toolTip1.SetToolTip(this.cancelButton, "Click this button to close this dialog\r\nwithout saving any changed settings.\r\nYou" +
+        " will then be returned to the\r\nmain window.");
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
@@ -113,6 +119,7 @@
             this.listSentToShortcuts.Name = "listSentToShortcuts";
             this.listSentToShortcuts.Size = new System.Drawing.Size(265, 139);
             this.listSentToShortcuts.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.listSentToShortcuts, resources.GetString("listSentToShortcuts.ToolTip"));
             // 
             // lblUpdateCheck
             // 
@@ -130,6 +137,9 @@
             this.btnCheckForUpdates.Size = new System.Drawing.Size(184, 23);
             this.btnCheckForUpdates.TabIndex = 2;
             this.btnCheckForUpdates.Text = "Check for Updates Now...";
+            this.toolTip1.SetToolTip(this.btnCheckForUpdates, "Click this button to manually check\r\nfor WinHasher updates.  If a newer\r\nversion " +
+        "is found, you\'ll be prompted\r\nto download it.  Obviously, this\r\nrequires an acti" +
+        "ve Internet connection.");
             this.btnCheckForUpdates.UseVisualStyleBackColor = true;
             this.btnCheckForUpdates.Click += new System.EventHandler(this.btnCheckForUpdates_Click);
             // 

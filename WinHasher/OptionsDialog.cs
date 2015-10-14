@@ -245,7 +245,7 @@ namespace com.gpfcomics.WinHasher
                 {
                     // Convert the path to the Send To folder to a string for our convenience:
                     sendToPath = Environment.GetFolderPath(Environment.SpecialFolder.SendTo);
-                    // Set up the output types drop-down.  This is pretty simple, and mimics what we don on the main form.
+                    // Set up the output types drop-down.  This is pretty simple, and mimics what we did on the main form.
                     // However, we don't know the current state of any existing shortcuts, so we'll default the output type
                     // drop-down to the default value.
                     comboOutputTypes.Items.Clear();

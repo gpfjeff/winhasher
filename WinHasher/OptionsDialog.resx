@@ -120,9 +120,15 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
+  <data name="listSentToShortcuts.ToolTip" xml:space="preserve">
+    <value>To create Send To shortcuts, select each hash
+you'd like to create a shortcut for by checking
+the checkbox next to its name, then selecting
+the output type in the drop-down list below.
+A shortcut will be created for each checked
+hash. If a hash was previously checked and is
+now unchecked, its shortcut will be deleted.</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>34</value>
   </metadata>
