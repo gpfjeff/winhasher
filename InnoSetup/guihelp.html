@@ -7,7 +7,7 @@ blockquote { background: #EEEEEE; }
 </head>
 <body><h1>WinHasher Windows App Help</h1>
 <p>Official WinHasher Site: <a href="http://code.google.com/p/winhasher/">http://code.google.com/p/winhasher/</a><br />
-Last Updated October 14, 2015</p>
+Last Updated October 16, 2015</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -179,20 +179,31 @@ Last Updated October 14, 2015</p>
 <li>The output format used;</li>
 <li>The last text encoding (on the Hash Text tab) used;</li>
 <li>The last folder or directory used for browsing files;</li>
-<li>And the show tooltips setting.</li>
+<li>The show tooltips setting;</li>
+<li>The last time an update check was performed;</li>
+<li>And the user's automatic update check preference from the <a href="#optionsdialog">Options dialog</a>.</li>
 </ul>
-<p>If you use the installer to install WinHasher, you can also use the uninstall feature to delete these preferences from the registry when the program is uninstalled. You may also elect to leave these preferences in place if you plan to reinstall WinHasher later.</p>
+<p>If you use the installer to install WinHasher, you can also use the uninstall feature to delete these preferences from the registry when the program is uninstalled. You may also elect to leave these preferences in place if you plan to reinstall WinHasher later. Note that these preferences are only removed for the user who runs the uninstaller; if more than one user on the system has run WinHasher, the other user's preferences are not deleted.</p>
+
+<a name="optionsdialog"><h3>The Options Dialog</h3></a>
+
+<p>The Options dialog allows you to set a number of preferences that can affect WinHasher's operation, but which you probably don't need to change very frequently.</p>
+<p>Starting with WinHasher 1.7, the program now performs a periodic check for updates to help you make sure you have the latest version of the software. As of this writing, this check is performed at most once per week. If no updates are found or if an error occurs during the check (for example, if there is no available Internet connection), the user is not notified. Thus, you should only see a notifcation if a new version of the software is found. You can then choose to download the new version or defer the download until later; obviously, we recommend you update as soon as possible.</p>
+<p>Although not recommended, you can disable automatic update checks in the Options dialog by checking the <strong>Disable Automatic Update Checks checkbox</strong>. If you wish to perform a manual check, you can click the <strong>Check for Updates Now button</strong>. Unlike the automatic check, the manual check will notify you if no update was found or if an error occurs.</p>
+<p>The Options dialog also allows you to create a series of <a href="#sendto">"Send To" shortcuts</a>. See the dedicated section for this feature for more details.</p>
+<p>Clicking the <strong>OK button</strong> in the Options dialog will save your preferences and create or remove your "Send To" shortcuts as appropriate. If you wish to close the Options dialog without saving your changes, click the <strong>Cancel button</strong>.</p>
 
 <a name="sendto"><h3>The "SendTo" Shortcuts</h3></a>
 
-<p>When you install WinHasher, you are given the option to add WinHasher shortcuts in the "Send To" portion of the Windows Explorer context menu. This menu appears when you (usually) right-click a file in Explorer and gives you the option to open, copy, cut, rename, see the properties of, etc. the selected file or files. (Of course, if you've swapped your mouse buttons, left-click to bring up the context menu.) With the WinHasher shortcuts in your Send To menu, computing the hash of a file or comparing multiple files is as simple as a click away.</p>
-<p>To compute the hash of a single file, select that file in Windows Explorer and right-click to bring up the context menu. Select Send To, then the WinHasher hash to compute. What hashes are available depends on which shortcuts you created during the install. Note that each shortcut will use a single hashing algorithm (for example, "WinHasher MD5" will only perform MD5 hashes). Once the shortcut is selected, WinHasher will silently load the file and compute the hash. The progress dialog will let you know the process is running; the main application window will not open. When the hash is ready, the progress dialog will disappear and a dialog box will appear, displaying the computed hash. When the dialog is dismissed, WinHasher will silently close.</p>
-<p>To compare multiple files, select each file to compare using the standard Windows Explorer Shift+Click and Control+Click actions. Once all the files are selected, right-click to bring up the context menu, select Send To, and then the WinHasher shortcut of the preferred hash. The hash of each file will be silently computed and compared and the progress dialog will let you know how far along the process is. A single dialog will eventually appear showing the results. When the dialog is cleared, WinHasher will exit.</p>
-<p>Note: By default, the "Send To" shortcuts generate command lines to generate hashes in hexadecimal format. To enable Base64 output, you can edit the "Send To" shortcut properties to include the <code>-base64</code> command line switch. This is considered an advanced topic and is left as an exercise for the user, but it's not really that hard to do.</p>
+<p>The <a href="#optionsdialog">Options dialog</a> gives you the option to add WinHasher shortcuts in the "Send To" portion of the Windows Explorer context menu. This menu appears when you (usually) right-click a file in Explorer and gives you the option to open, copy, cut, rename, see the properties of, etc. the selected file or files. (Of course, if you've swapped your mouse buttons, left-click to bring up the context menu.) With the WinHasher shortcuts in your Send To menu, computing the hash of a file or comparing multiple files is as simple as a click away.</p>
+<p>To create the "Send To" shortcuts, open the Options dialog. In the center of the dialog is a list of checkboxes, one for each available hash algorithm supported by WinHasher. If you check a box, a "Send To" shortcut will be created for that hash; if you clear a box, any existing shortcuts will be deleted if they exist. Once you have selected which hashes you would like to create shortcuts for, select the <strong>Output Type for Send To Shortcuts</strong> from the drop-down list below the list box. All "Send To" shortcuts will use the same output type; we recommend leaving this on hexadecimal, since this is the most commonly used output format, unless you have need for a different format. When you click the <strong>OK button</strong>, your shortcuts will be created or removed, depending on the status of the checkboxes.</p>
+<p>To compute the hash of a single file, select that file in Windows Explorer and right-click to bring up the context menu. Select the shortcut for the hash you wish to use to compute. What hashes are available depends on which shortcuts you created within the Options dialog. Note that each shortcut will use a single hashing algorithm (for example, "MD5" will only perform MD5 hashes). Once the shortcut is selected, WinHasher will silently load the file and compute the hash. The progress dialog will let you know the process is running; the main application window will not open. When the hash is ready, the progress dialog will disappear and a dialog box will appear, displaying the computed hash. When the dialog is dismissed, WinHasher will silently close.</p>
+<p>To compare multiple files, select each file to compare using the standard Windows Explorer Shift+Click and Control+Click actions. Once all the files are selected, right-click to bring up the context menu, select Send To, and then the WinHasher shortcut of the preferred hash. The hash of each file will be silently computed and compared and the progress dialog will let you know how far along the process is. A single dialog will eventually appear showing the results. When the dialog is cleared, WinHasher will exit. Note that if you need to compute the hash of multiple files in different folders or directories, you may need to open the full WinHasher application and use the <a href="#comparetab">Compare Files tab</a>, since all selected files need to be in the same window for the Send To shortcut to work.</p>
+<p>Send To shortcuts are not removed when WinHasher is uninstalled via the uninstaller. You will need to delete the Send To shortcuts via the Options menu by clearing all of the checkboxes before uninstalling the program, or manually delete the shortcuts from the Send To folder after the application is uninstalled.</p>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
 <a name=""><h2></h2></a>
 
-<p>This document is &#169; Copyright 2009, Jeffrey T. Darlington. It and the software it describes are released under the <a href="gpl.html">GNU General Public License, Version 2</a>.</p>
+<p>This document is &#169; Copyright 2015, Jeffrey T. Darlington. It and the software it describes are released under the <a href="gpl.html">GNU General Public License, Version 2</a>.</p>
 </body></html>
