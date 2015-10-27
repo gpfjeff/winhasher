@@ -200,6 +200,8 @@ namespace com.gpfcomics.WinHasher.Core
                 // Create a new CmdLineAppArgs object with the default values (SHA-1,
                 // lower-case hex output, no compare mode, and no input or output files):
                 CmdLineAppArgs parsedArgs = new CmdLineAppArgs();
+                // Override the default hash with whatever was given to us in the parse
+                // call:
                 parsedArgs.Hash = defaultHash;
                 // Run through the array and look for option commands.  Note that even
                 // though we tested for null above, we need to test for it again because

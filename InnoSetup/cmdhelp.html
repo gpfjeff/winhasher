@@ -7,7 +7,7 @@ blockquote { background: #EEEEEE; }
 </head>
 <body><h1>WinHasher Command-Line Help</h1>
 <p>Official WinHasher Site: <a href="http://code.google.com/p/winhasher/">http://code.google.com/p/winhasher/</a><br />
-Last Updated October 16, 2015</p>
+Last Updated October 27, 2015</p>
 
 <a name="toc"><h2>Table of Contents</h2></a>
 <ul>
@@ -181,7 +181,7 @@ character; any line that starts with this character will also be ignored.</pre><
 13dde34a8ebfb13ee2877114f7d6072be249fe4b  file1.jpg
 ed4277cc0e49cef5c5caef97c5747aa521ee2e00  file2.jpg</pre></blockquote>
 
-<p>To compare two files, you must now specify the <code>-compare</code> parameter. The hash (SHA-1 by default) for each file is computed individually, then all the hashes are compared. If the hashes of every file specified are equal, then all the files are said to match:</p>
+<p>To compare two or more files, you must now specify the <code>-compare</code> parameter. The hash (SHA-1 by default) for each file is computed individually, then all the hashes are compared. If the hashes of every file specified are equal, then all the files are said to match:</p>
 <blockquote><pre>C:\Program Files\WinHasher>hash -compare file1.jpg file2.jpg
 
 Comparing SHA-1 of 2 files... 100%
@@ -211,13 +211,36 @@ YuWAXOl2EayIU3U8nk89f77AQes=  somefile.jpg</pre></blockquote>
 
 ximiv-huboh-sypil-kegyp-sudoh-fituf-sulig-zezil-zozus-bubev-roxox  somefile.jpg</pre></blockquote>
 <p>If the first argument is not a recognized switch (say, you made a typo and typed <code>hash -sha258</code>), an error message is displayed and the algorithm defaults to SHA-1, hexadecimal output. Then the first argument is treated as a file name, which may or may not be what you wanted. (In this example, "-sha258" is not likely to be a valid file name.)</p>
-<p>The algorithm switch can, of course, be combined with multiple file arguments. For example, to compare three files using RIPEMD-160:</p>
-<blockquote><pre>C:\Program Files\WinHasher>hash -ripemd160 -compare file1.jpg file2.jpg file3.jpg</pre></blockquote>
+<p>The algorithm switch can, of course, be combined with <code>-compare</code> switch to compare multiple files using that hash. For example, to compare three files using RIPEMD-160:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -ripemd160 -compare file1.jpg file2.jpg file3.jpg
+
+Comparing RIPEMD160 of 3 files...  65%
+WARNING! One or more of these 3 files do not match!</pre></blockquote>
+<p><code>hash</code> also supports reading a list of files from a file. This input file should be a plain text file consisting of a list file names, with one file per line. If the files are outside the current working directory or in different directories, the full path to the file may be required. As a convenience, empty lines or lines consisting of nothing by white space (spaces, tabs, newlines, etc.) are ignored, which can be handy when visually sorting or grouping the file list. Comments can be also be added by starting the line with the pound or hash character (#). Comments are also ignored. To feed <code>hash</code> an input file, replace the list of files to hash on the command line with the <code>-in</code> flag followed by the input file path:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -in testfiles.txt
+
+62e5805ce97611ac8853753c9e4f3d7fbec041eb  file1.jpg
+13dde34a8ebfb13ee2877114f7d6072be249fe4b  file2.doc
+ed4277cc0e49cef5c5caef97c5747aa521ee2e00  file3.txt</pre></blockquote>
+<p>If the <code>-in</code> flag is specified, you should not specify any additional files on the command line; these files will be ignored. Naturally, the <code>-in</code> flag can be combined with any of the other flags:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -sha256 -compare -in testfiles.txt
+
+Comparing SHA-256 of 3 files...  65%
+WARNING! One or more of these 3 files do not match!</pre></blockquote>
+<p>You can redirect the output of <code>hash</code> to its own file by using the <code>-out</code> flag, followed by the name of the file to write the output to:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -out hashresults.txt file1.jpg file2.doc file3.txt</pre></blockquote>
+<p>In the example above, the SHA-1 hash of the three files will be generated, encoded into hexadecimal format, and written to the file <code>hashresults.txt</code>. By default, the <code>-out</code> flag overwrites the specified file if it already exists. You can force <code>hash</code> to append to an existing output file by adding the <code>-append</code> flag:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -out hashresults.txt -append file1.jpg file2.doc file3.txt</pre></blockquote>
+<p>Naturally, you can combine <code>-in</code> and <code>-out</code> with any other command line arguments:</p>
+<blockquote><pre>C:\Program Files\WinHasher>hash -sha512 -base64 -in testfiles.txt -out hashresults.txt -append</pre></blockquote>
+<p>The above command reads a list of files from <code>testfiles.txt</code>, performs the SHA-512 hash on each, encodes those hashes to Base64, and writes the results to the file <code>hashresults.txt</code>, appending to the existing file if it already exists.</p>
 
 <a name="batchfiles"><h3>A Matter of Convenience: Algorithm Batch Files</h3></a>
 
 <p>As a convenience, I've also included Windows batch files as a "shortcut" for running specific hashes. There is one batch file for each algorithm, using the same name as the command line switch for the <code>hash</code> program. (For example, <code>md5</code> performs an MD5 hash, while <code>sha256</code> performs a SHA-256 hash.) Each batch file is equivalent to using the specified algorithm command line switch: Running <code>sha1</code> is same as running <code>hash -sha1</code>.</p>
-<p>Aside from defaulting the algorithm, the batch files work identically to the main <code>hash</code> program. All of them accept the <code>-base64</code> and <code>-bubbab</code> switches, but only if they comes first before the file list.</p>
+<p>Aside from defaulting the algorithm, the batch files work identically to the main <code>hash</code> program. All of them accept the rest of the command-line switches. For example:</p>
+<blockquote><pre>C:\Program Files\WinHasher>sha512 -base64 -in testfiles.txt -out hashresults.txt -append</pre></blockquote>
+<p>The above command uses the <code>sha512</code> batch file, but will read the file list from an input file, use Base64 to encode the hashes, and append the output to the output file.</p>
 
 <blockquote><pre></pre></blockquote>
 
