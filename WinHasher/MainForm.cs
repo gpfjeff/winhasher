@@ -205,10 +205,16 @@ namespace com.gpfcomics.WinHasher
             {
                 outputFormatComboBox.Items.Add(HashEngine.GetOutputTypeName(otTemp));
             }
-            // Populate the encoding drop-down:
+            // Set up the encoding's drop-down box.  Note the try/catch block; this is a
+            // kludge to prevent this bit of code from blowing up under Mono.  Apparently
+            // there is a bug in their implementation of Encoding.GetEncodings() that
+            // returns a bunch of invalid encodings for the platform.  The try/catch
+            // block, while inelegant, should populate the drop-down box with only valid
+            // encodings for the platform.  See: https://bugzilla.xamarin.com/show_bug.cgi?id=8117
             foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
             {
-                encodingComboBox.Items.Add(encodingInfo.GetEncoding());
+                try { encodingComboBox.Items.Add(encodingInfo.GetEncoding()); }
+                catch { }
             }
             // Set it to show the display name in the dropdown:
             encodingComboBox.DisplayMember = "EncodingName";
@@ -239,8 +245,7 @@ namespace com.gpfcomics.WinHasher
                     hashComboBox.SelectedItem = (string)winHasherSettings.GetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash));
                     hashComboBox_SelectedIndexChanged(null, null);
                     // Try to set the encoding combo box:
-                    encodingComboBox.SelectedIndex = (int)winHasherSettings.GetValue("TextEncoding",
-                        encodingComboBox.Items.IndexOf(Encoding.Default));
+                    encodingComboBox.SelectedItem = Encoding.GetEncoding((string)winHasherSettings.GetValue("TextEncoding", Encoding.UTF8.WebName));
                     // Try to set the output format combo box:
                     outputFormatComboBox.SelectedItem = (string)winHasherSettings.GetValue("OutputType", HashEngine.GetOutputTypeName(HashEngine.DefaultOutputType));
                     outputFormatComboBox_SelectedIndexChanged(null, null);
@@ -872,7 +877,7 @@ namespace com.gpfcomics.WinHasher
                                 winHasherSettings.SetValue("CurrentHash",
                                     (string)hashComboBox.SelectedItem, RegistryValueKind.String);
                                 winHasherSettings.SetValue("TextEncoding",
-                                    encodingComboBox.SelectedIndex, RegistryValueKind.DWord);
+                                    ((Encoding)encodingComboBox.SelectedItem).WebName, RegistryValueKind.String);
                                 winHasherSettings.SetValue("OutputType",
                                     (string)outputFormatComboBox.SelectedItem, RegistryValueKind.String);
                                 winHasherSettings.SetValue("LastDirectory",
@@ -1184,8 +1189,9 @@ namespace com.gpfcomics.WinHasher
             // of the hash drop-down by whatever the default we set in the HashEngine:
             hash = HashEngine.DefaultHash;
             hashComboBox.SelectedItem = HashEngine.GetHashName(hash);
-            // Select the system default encoding by default:
-            encodingComboBox.SelectedIndex = encodingComboBox.Items.IndexOf(Encoding.Default);
+            // Previously, we set the system default encoding as the default.  However, in retrospect,
+            // UTF-8 is probably a better choice because it is universally supported.
+            encodingComboBox.SelectedItem = Encoding.UTF8;
             // Force the output drop-down to the HashEngine default:
             outputType = HashEngine.DefaultOutputType;
             outputFormatComboBox.SelectedItem = HashEngine.GetOutputTypeName(outputType);
@@ -1326,6 +1332,33 @@ namespace com.gpfcomics.WinHasher
                                             break;
                                     }
                                     winHasherSettings.DeleteValue("OutputFormat");
+                                }
+
+                                // We're going to have to switch the Text Encoding registry keep from a DWORD to a String to offer
+                                // better support under Mono, so we might as well delete the old value and readd it.  If we can, we'll
+                                // get the value of the old encoding preference (which is an index in the array of values) and convert
+                                // it to the actual name string for that encoding.  If that fails, we'll fall back to UTF-8, which is
+                                // a safe bet because it should be universally supported.  Note that in Mono, there's a bug in some of
+                                // the encoding code that could cause it to throw exceptions if an encoding doesn't exactly exist on
+                                // the machine; thus the try/catch block.
+                                try
+                                {
+                                    EncodingInfo[] encodings = Encoding.GetEncodings();
+                                    int currentEncoding = (int)winHasherSettings.GetValue("TextEncoding", -1);
+                                    winHasherSettings.DeleteValue("TextEncoding");
+                                    if (currentEncoding >= 0 && currentEncoding < encodings.Length)
+                                    {
+                                        winHasherSettings.SetValue("TextEncoding", encodings[currentEncoding].GetEncoding().WebName, RegistryValueKind.String);
+                                    }
+                                    else
+                                    {
+                                        winHasherSettings.SetValue("TextEncoding", Encoding.UTF8.WebName, RegistryValueKind.String);
+                                    }
+                                }
+                                catch
+                                {
+                                    winHasherSettings.DeleteValue("TextEncoding");
+                                    winHasherSettings.SetValue("TextEncoding", Encoding.UTF8.WebName, RegistryValueKind.String);
                                 }
 
                                 // Create the new disable update check registry flag and assign it the default
