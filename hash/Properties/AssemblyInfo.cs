@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GPF Comics")]
 [assembly: AssemblyProduct("hash")]
-[assembly: AssemblyCopyright("© Copyright 2015, Jeffrey T. Darlington.")]
+[assembly: AssemblyCopyright("© Copyright 2016, Jeffrey T. Darlington.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

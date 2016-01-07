@@ -21,7 +21,9 @@
  * allowing us to place the different inputs into sorted "buckets" (properties) and pass
  * them around as a single unit.
  * 
- * This program is Copyright 2015, Jeffrey T. Darlington.
+ * UPDATE January 7, 2015:  Adding SHA3 support.
+ * 
+ * This program is Copyright 2016, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     https://github.com/gpfjeff/winhasher
  * 
@@ -255,6 +257,26 @@ namespace com.gpfcomics.WinHasher.Core
                         case "-gost3411":
                             parsedArgs.Hash = Hashes.GOST3411;
                             break;
+                        case "-sha3-224":
+                            parsedArgs.Hash = Hashes.SHA3_224;
+                            break;
+                        case "-sha3-256":
+                            parsedArgs.Hash = Hashes.SHA3_256;
+                            break;
+                        case "-sha3-384":
+                            parsedArgs.Hash = Hashes.SHA3_384;
+                            break;
+                        case "-sha3-512":
+                            parsedArgs.Hash = Hashes.SHA3_512;
+                            break;
+                        /*
+                        case "-shake128":
+                            parsedArgs.Hash = Hashes.SHAKE128;
+                            break;
+                        case "-shake256":
+                            parsedArgs.Hash = Hashes.SHAKE256;
+                            break;
+                         */
                         // But this one puts us in Base64 mode:
                         case "-base64":
                             parsedArgs.OutputType = OutputType.Base64;
@@ -590,6 +612,20 @@ namespace com.gpfcomics.WinHasher.Core
                     return "-whirlpool";
                 case Hashes.GOST3411:
                     return "-gost3411";
+                case Hashes.SHA3_224:
+                    return "-sha3-224";
+                case Hashes.SHA3_256:
+                    return "-sha3-256";
+                case Hashes.SHA3_384:
+                    return "-sha3-384";
+                case Hashes.SHA3_512:
+                    return "-sha3-512";
+                /*
+                case Hashes.SHAKE128:
+                    return "-shake128";
+                case Hashes.SHAKE256:
+                    return "-shake256";
+                 */
                 default:
                     return "";
             }

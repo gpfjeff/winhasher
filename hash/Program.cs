@@ -30,7 +30,9 @@
  * rebuilt core library to do the heavy lifting.  Most of the new logic can be found in
  * WinHasherCore.CmdLineAppUtils.
  * 
- * This program is Copyright 2015, Jeffrey T. Darlington.
+ * UPDATE January 7, 2015:  Adding SHA3 support.
+ * 
+ * This program is Copyright 2016, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     https://github.com/gpfjeff/winhasher
  * 
@@ -123,7 +125,9 @@ namespace com.gpfcomics.WinHasher.hashconsole
             Console.WriteLine();
             //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
             Console.WriteLine("Usage: hash [-md5|-sha1|-sha224|-sha256|-sha384|-sha512|-ripemd128|-ripemd160|");
-            Console.WriteLine("       -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411]");
+            Console.WriteLine("       -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411|-sha3-224|-sha3-256|");
+            //Console.WriteLine("       -sha3-384|-sha3-512|-shake128|-shake256]");
+            Console.WriteLine("       -sha3-384|-sha3-512]");
             Console.WriteLine("       [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]");
             Console.WriteLine("       [-in infile | filename1 [filename2 ...]]");
             Console.WriteLine();

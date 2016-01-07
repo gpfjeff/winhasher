@@ -6,8 +6,8 @@ VersionInfoVersion=1.7.0.0
 VersionInfoCompany=GPF Comics
 VersionInfoDescription=This program will install WinHasher on your computer.  WinHasher is a cryptographic file hashing program using the Microsoft .NET 2.0 Framework.
 VersionInfoTextVersion=WinHasher Setup 1.7
-VersionInfoCopyright=Copyright 2015, Jeffrey T. Darlington.
-AppCopyright=Copyright 2015, Jeffrey T. Darlington.
+VersionInfoCopyright=Copyright 2016, Jeffrey T. Darlington.
+AppCopyright=Copyright 2016, Jeffrey T. Darlington.
 AppName=WinHasher
 AppVerName=WinHasher 1.7
 LicenseFile=.\gpl.rtf
@@ -51,6 +51,8 @@ Source: "ripemd320.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Con
 Source: "whirlpool.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
 Source: "tiger.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
 Source: "gost3411.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
+Source: "sha3.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
+Source: "keccak.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
 
 [Components]
 Name: "Windows_application"; Description: "Check this box to install the Windows GUI version of WinHasher"; Types: custom compact full
@@ -87,7 +89,8 @@ begin
    // Microsoft, it's good enough for us.
    DotNetRegKey := 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727';
    // The URL of where to download .NET:
-   DotNetDlURL := 'http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx';
+   //DotNetDlURL := 'http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx';
+   DotNetDlURL := 'https://www.microsoft.com/en-us/download/details.aspx?id=22';
    // Check the registry to see if the .NET registry key exists.
    // If not, then we go to work:
    if not RegKeyExists(HKLM, DotNetRegKey) then begin

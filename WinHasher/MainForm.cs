@@ -53,7 +53,10 @@
  * UPDATE June 29, 2015 (1.7):  Updates for Bouncy Castle conversion.  Adding GPFUpdateChecker
  * for automatic update checking and downloading.  Added "portable mode" support.
  * 
- * This program is Copyright 2015, Jeffrey T. Darlington.
+ * UPDATE January 7, 2016:  Changed the Hash Text tab to accept an empty text value, which is
+ * a valid test vector for any hash function.
+ * 
+ * This program is Copyright 2016, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     https://github.com/gpfjeff/winhasher
  * 
@@ -713,27 +716,28 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void hashTextButton_Click(object sender, EventArgs e)
         {
-            // Only bother if there's text to hash:
-            if (!String.IsNullOrEmpty(inputTextBox.Text))
+            // Originally, this code threw an error if the input text box was empty.  However, this
+            // was probably a bad idea.  An empty input value is technically a valid test vector for
+            // any hash algorithm, so we ought to be able to support that option.  So for safetly, if
+            // the input text is somehow null, we'll force it to be an empty string, just to make sure
+            // we're not passing null values into the hash function.
+            if (String.IsNullOrEmpty(inputTextBox.Text))
+                inputTextBox.Text = "";
+
+            // This one's simple enough:  Grab the selected hash, the text, the selected
+            // encoding and output formats, and hash it.  Note that we do *NOT* want to use
+            // a Trim() on this, because we're going to consider all text, including all
+            // whitespace, as significant.
+            try
             {
-                // This one's simple enough:  Grab the selected hash, the text, the selected
-                // encoding and output formats, and hash it.  Note that we do *NOT* want to use
-                // a Trim() on this, because we're going to consider all text, including all
-                // whitespace, as significant.
-                try
-                {
-                    outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
-                        (Encoding)encodingComboBox.SelectedItem, outputType);
-                }
-                // This should be more specific:
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
+                    (Encoding)encodingComboBox.SelectedItem, outputType);
             }
-            // If no text is in the box, complain:
-            else MessageBox.Show("No text has been specified, so there's nothing to do.",
-                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            // This should be more specific:
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>

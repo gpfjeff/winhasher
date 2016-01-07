@@ -84,7 +84,13 @@
  * of duplicated switch cases where display values and enumerations gets swapped, and again helps
  * with the future addition of new hashes.)
  * 
- * This program is Copyright 2015, Jeffrey T. Darlington.
+ * UPDATE January 7, 2016:  Taking advantage of the Bouncy Castle API swap to add SHA3, which was
+ * recently added in BC 1.8.  Tentative support for SHAKE has been added, but is currently
+ * commented out.  After doing a bit of research, Wikipedia's example of how SHAKE is supposed to
+ * work doesn't seem to line up with how the BC library defines their ShakeDigest() class; I think
+ * I'm probably missing something, but I'd rather be safe than sorry.
+ * 
+ * This program is Copyright 2016, Jeffrey T. Darlington.
  * E-mail:  jeff@gpf-comics.com
  * Web:     https://github.com/gpfjeff/winhasher
  * 
@@ -129,7 +135,13 @@ namespace com.gpfcomics.WinHasher.Core
         RIPEMD320,
         Whirlpool,
         Tiger,
-        GOST3411
+        GOST3411,
+        SHA3_224,
+        SHA3_256,
+        SHA3_384,
+        SHA3_512/*,
+        SHAKE128,
+        SHAKE256*/
     }
 
     /// <summary>
@@ -1003,6 +1015,20 @@ namespace com.gpfcomics.WinHasher.Core
                     return "Tiger";
                 case Hashes.GOST3411:
                     return "GOST3411";
+                case Hashes.SHA3_224:
+                    return "SHA3-224";
+                case Hashes.SHA3_256:
+                    return "SHA3-256";
+                case Hashes.SHA3_384:
+                    return "SHA3-384";
+                case Hashes.SHA3_512:
+                    return "SHA3-512";
+                /*
+                case Hashes.SHAKE128:
+                    return "SHAKE128";
+                case Hashes.SHAKE256:
+                    return "SHAKE256";
+                 */
                 default:
                     return "Invalid hash";
             }
@@ -1051,6 +1077,20 @@ namespace com.gpfcomics.WinHasher.Core
                     return Hashes.Tiger;
                 case "GOST3411":
                     return Hashes.GOST3411;
+                case "SHA3224":
+                    return Hashes.SHA3_224;
+                case "SHA3256":
+                    return Hashes.SHA3_256;
+                case "SHA3384":
+                    return Hashes.SHA3_384;
+                case "SHA3512":
+                    return Hashes.SHA3_512;
+                /*
+                case "SHAKE128":
+                    return Hashes.SHAKE128;
+                case "SHAKE256":
+                    return Hashes.SHAKE256;
+                 */
                 // If we didn't get a match on anything, return the default hash:
                 default:
                     return DefaultHash;
@@ -1196,6 +1236,36 @@ namespace com.gpfcomics.WinHasher.Core
                 case Hashes.GOST3411:
                     hasher = new Gost3411Digest();
                     break;
+                // The SHA3 hashes are slightly different.  They operate like the SHA2 hashes, but
+                // the Bouncy Castle guys created a single class that handled multiple bit lengths
+                // in the constructor, rather than a different class for each bit length.  SHAKE is
+                // a variant of SHA3; however, something about the way BC set up the class makes me
+                // a bit uncertain about how best to use it.  SHAKE is an "extendable output function";
+                // it kind of takes two inputs (besides the message itself):  the underlying Keccak
+                // capacity (for SHAKE128, that would be 128) and the output length.  The BC
+                // ShakeDigest constructor only has "bit length" as an input, like the Sha3Digest,
+                // so I don't know if that means the capacity or the output length.  For now, we'll
+                // hold off on supporting SHAKE until I can figure that out.
+                case Hashes.SHA3_224:
+                    hasher = new Sha3Digest(224);
+                    break;
+                case Hashes.SHA3_256:
+                    hasher = new Sha3Digest(256);
+                    break;
+                case Hashes.SHA3_384:
+                    hasher = new Sha3Digest(384);
+                    break;
+                case Hashes.SHA3_512:
+                    hasher = new Sha3Digest(512);
+                    break;
+                /*
+                case Hashes.SHAKE128:
+                    hasher = new ShakeDigest(128);
+                    break;
+                case Hashes.SHAKE256:
+                    hasher = new ShakeDigest(256);
+                    break;
+                 */
                 // If we didn't get something we expected, return the default:
                 default:
                     hasher = GetHashAlgorithm(DefaultHash);
