@@ -165,6 +165,10 @@ namespace com.gpfcomics.WinHasher
                     string[] args2 = new string[args.Length - 1];
                     Array.Copy(args, 1, args2, 0, args.Length - 1);
                     args = args2;
+
+                    //If there are no more arguments left, exit the loop
+                    if (args.Length == 0)
+                        break;
                 }
                 // By now, all our switches should be exhausted.  We should only have strings
                 // not starting with hyphens, which we'll interpret as file path strings.
