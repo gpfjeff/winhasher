@@ -170,7 +170,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// The buffer size for file reads.  Adjust this value if it is found to be too
         /// inefficient.
         /// </summary>
-        private static int bufferSize = 1024;
+        private static int bufferSize = 1024 * 1024;
 
         /// <summary>
         /// The default hash algorithm used by the HashEngine if no other hash has been specified.
