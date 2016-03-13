@@ -307,7 +307,7 @@ namespace com.gpfcomics.WinHasher
             // should occur in a separate thread, which will allow the main UI thread to
             // continue without any problems.  The entire process *should* be transparent to
             // the user unless an update is actually found.
-            if (!disableUpdateCheck)
+            if (!portable && !disableUpdateCheck)
             {
                 try
                 {
