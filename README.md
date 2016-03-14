@@ -4,7 +4,7 @@
 |:--------------------|:---------|
 | **Date of Release** | August 6, 2013 |
 | **Next Release Milestone** | 1.7.0 |
-| **Date of Next Release** | Unknown |
+| **Date of Next Release** | Spring 2016(?) |
 | **Status of Development** | Sporadic due to other priorities |
 
 # Download WinHasher #
