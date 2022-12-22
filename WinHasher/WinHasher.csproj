@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>com.gpfcomics.WinHasher</RootNamespace>
     <ApplicationIcon>Icon1.ico</ApplicationIcon>
@@ -25,6 +25,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>com.gpfcomics.WinHasher.Program</StartupObject>
+    <ErrorReport>none</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Icon1.ico" />
