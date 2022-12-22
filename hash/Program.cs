@@ -49,9 +49,6 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Reflection;
 using com.gpfcomics.WinHasher.Core;
 

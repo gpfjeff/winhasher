@@ -73,9 +73,6 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -83,11 +80,10 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Win32;
 using com.gpfcomics.WinHasher.Core;
-using com.gpfcomics.UpdateChecker;
 
 namespace com.gpfcomics.WinHasher
 {
-    public partial class MainForm : Form, IUpdateCheckListener
+    public partial class MainForm : Form
     {
         #region Private Variables
 
@@ -130,49 +126,6 @@ namespace com.gpfcomics.WinHasher
         /// try to read them upon launch.  This defaults to false.
         /// </summary>
         private bool portable = false;
-
-        /// <summary>
-        /// The actual <see cref="UpdateChecker"/> object, which will check for WinHasher
-        /// updates
-        /// </summary>
-        private UpdateChecker.UpdateChecker updateChecker = null;
-
-        /// <summary>
-        /// This Boolean flag determines whether or not to disable the built-in check for
-        /// updates.  This isn't recommended, of course, but a feature nonetheless.
-        /// </summary>
-        private bool disableUpdateCheck = false;
-
-        /// <summary>
-        /// A <see cref="Uri"/> for the official WinHasher updates feed.  The
-        /// <see cref="UpdateChecker"/> will use this feed to look for updated versions of
-        /// WinHasher.
-        /// </summary>
-        private Uri updateFeedUri = new Uri(Properties.Resources.UpdateFeedUri);
-
-        /// <summary>
-        /// The unique app string for <see cref="UpdateChecker"/> lookups
-        /// </summary>
-        private string updateFeedAppName = Properties.Resources.UpdateFeedAppName;
-
-        /// <summary>
-        /// The last update check timestamp for <see cref="UpdateChecker"/> lookups.  Note
-        /// that this defaults to <see cref="DateTime"/>.MinValue, which should force an
-        /// update on the first check, but that will be overwritten during initialization.
-        /// </summary>
-        private DateTime updateFeedLastCheck = DateTime.MinValue;
-
-        /// <summary>
-        /// The number of days between update checks, which we will passs to the
-        /// <see cref="UpdateChecker"/>.
-        /// </summary>
-        private int updateInterval = Int32.Parse(Properties.Resources.UpdateIntervalInDays);
-
-        /// <summary>
-        /// The alternate download page to download updates.
-        /// </summary>
-        private string updateAltDownloadPage = Properties.Resources.UpdateAltDownloadPage;
-
         #endregion
 
         /// <summary>
@@ -230,7 +183,6 @@ namespace com.gpfcomics.WinHasher
             if (portable)
             {
                 PopulateDefaultSettings();
-                optionsButton.Enabled = false;
             }
             // If we're not running in portable mode, try to read the settings from the registry and
             // restore them, falling back to the defaults if something fails:
@@ -263,22 +215,6 @@ namespace com.gpfcomics.WinHasher
                     // Try to restore the tooltips toggle:
                     tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
                         == 1 ? true : false;
-                    // Try to restore the disable update check setting:
-                    disableUpdateCheck = (int)winHasherSettings.GetValue("DisableUpdateCheck", 0)
-                        == 1 ? true : false;
-                    // Get the last update check date.  I'm not sure if the try/catch block is
-                    // really necessary, but I'm a belt-and-suspenders guy.  Also note that
-                    // the default, whether the parse fails for the registry value isn't set,
-                    // is DateTime.MinValue, which pretty much guarantees an update check on
-                    // the first go-around.
-                    try
-                    {
-                        updateFeedLastCheck =
-                            DateTime.Parse((string)winHasherSettings.GetValue("LastUpdateCheck",
-                            DateTime.MinValue.ToString()));
-                    }
-                    catch { updateFeedLastCheck = DateTime.MinValue; }
-                    // Close the registry key:
                     winHasherSettings.Close();
                 }
                 // If any of the registry reading code above fails, restore everything to the
@@ -302,26 +238,6 @@ namespace com.gpfcomics.WinHasher
             toolTip1.IsBalloon = true;
             if (tooltipsCheckbox.Checked) toolTip1.Active = true;
             else toolTip1.Active = false;
-
-            // Finally, initialize the update checker and set it to work.  The update check
-            // should occur in a separate thread, which will allow the main UI thread to
-            // continue without any problems.  The entire process *should* be transparent to
-            // the user unless an update is actually found.
-            if (!portable && !disableUpdateCheck)
-            {
-                try
-                {
-                    updateChecker = new UpdateChecker.UpdateChecker(updateFeedUri, updateFeedAppName,
-                        Assembly.GetExecutingAssembly().GetName().Version, this, updateFeedLastCheck,
-                        updateInterval, false);
-                    updateChecker.CheckForNewVersion();
-                }
-                catch
-                {
-                    MessageBox.Show("An error occurred while trying to perform the update check.  Please try another check later.",
-                        "Update Check Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
         }
 
         #region Button Events
@@ -739,34 +655,6 @@ namespace com.gpfcomics.WinHasher
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        /// <summary>
-        /// What to do when the Options button has been clicked
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void optionsButton_Click(object sender, EventArgs e)
-        {
-            // This is pretty simple:  Build the options dialog, pass it a couple values, and show it.
-            // If the user clicks OK, grab the user's preference on disabling update checks.  (Everything
-            // else is handled within the dialog itself.)
-            OptionsDialog od = new OptionsDialog();
-            od.ParentDialog = this;
-            od.DisableUpdateCheck = disableUpdateCheck;
-            od.EnableTooltips = toolTip1.Active;
-            od.LastUpdateCheck = updateFeedLastCheck;
-            od.UpdateFeedUri = updateFeedUri;
-            od.UpdateFeedAppName = updateFeedAppName;
-            od.UpdateAltDownloadPage = updateAltDownloadPage;
-            od.Version = Assembly.GetExecutingAssembly().GetName().Version;
-            if (od.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                disableUpdateCheck = od.DisableUpdateCheck;
-                updateFeedLastCheck = od.LastUpdateCheck;
-            }
-        }
-
-
         #endregion
 
         #region Other GUI Events
@@ -894,11 +782,6 @@ namespace com.gpfcomics.WinHasher
                                 winHasherSettings.SetValue("ShowToolTips",
                                     (tooltipsCheckbox.Checked ? 1 : 0),
                                     RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("DisableUpdateCheck",
-                                    (disableUpdateCheck ? 1 : 0),
-                                    RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("LastUpdateCheck",
-                                    updateFeedLastCheck.ToString(), RegistryValueKind.String);
                                 // We're done, so close up shop:
                                 winHasherSettings.Close();
                             }
@@ -1206,9 +1089,6 @@ namespace com.gpfcomics.WinHasher
             modeTabControl.SelectedIndex = 0;
             // Default to tooltips being on:
             tooltipsCheckbox.Checked = true;
-            // Always check for updates:
-            disableUpdateCheck = false;
-            updateFeedLastCheck = DateTime.MinValue;
         }
 
         /// <summary>
@@ -1365,15 +1245,6 @@ namespace com.gpfcomics.WinHasher
                                     winHasherSettings.SetValue("TextEncoding", Encoding.UTF8.WebName, RegistryValueKind.String);
                                 }
 
-                                // Create the new disable update check registry flag and assign it the default
-                                // value of false (zero).  This is a new registry setting, so it doesn't already exist.
-                                winHasherSettings.SetValue("DisableUpdateCheck", 0, RegistryValueKind.DWord);
-
-                                // Create the new last update check registry and assign it the default minimum
-                                // value of DateTime, ensuring that the first time this runs, we'll do an update
-                                // check.  This is a new registry setting, so it doesn't already exist.
-                                winHasherSettings.SetValue("LastUpdateCheck", DateTime.MinValue.ToString(), RegistryValueKind.String);
-
                                 // Close the registry:
                                 winHasherSettings.Close();
                             }
@@ -1391,89 +1262,5 @@ namespace com.gpfcomics.WinHasher
         }
 
         #endregion
-
-        #region IUpdateCheckListener Implementations
-
-        // These methods implement the IUpdateCheckListener interface, which is used to check
-        // for updates for WinHasher.  They shouldn't have to actually do much, as the update
-        // checker does most of the work.
-
-        /// <summary>
-        /// What to do if a new update is found.
-        /// </summary>
-        void IUpdateCheckListener.OnFoundNewerVersion()
-        {
-            // This is pretty simple.  If the update check found a new version, tell it to
-            // go ahead and download it.  Note that the update checker will handle any user
-            // notifications, which includes a prompt on whether or not they'd like to
-            // upgrade.  The null check is probably redudant--this method should never be
-            // called if the update checker is null--but it's a belt-and-suspenders thing.
-            try
-            {
-                if (updateChecker != null) updateChecker.GetNewerVersion();
-            }
-            catch
-            {
-                MessageBox.Show("An error occurred while attempting to download the new version. " +
-                    "Please try downloading it again later.", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// What to do if the update checker says to record a new last update check date.
-        /// This gets called by the update checker whenever a check is started, whether it
-        /// is successful or not.
-        /// </summary>
-        /// <param name="lastCheck">The new date of the last update check</param>
-        void IUpdateCheckListener.OnRecordLastUpdateCheck(DateTime lastCheck)
-        {
-            // Don't bother recording anything if we're in portable mode:
-            if (!portable)
-            {
-                // Cache the last update check date locally, then try to open the registry and write
-                // the date to our registry key.  Note that if this fails, we'll silently ignore the
-                // error and the date simply won't be recorded.
-                updateFeedLastCheck = lastCheck;
-                try
-                {
-                    RegistryKey winHasherSettings =
-                        Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
-                        false).OpenSubKey("WinHasher", true);
-                    if (winHasherSettings != null)
-                    {
-                        winHasherSettings.SetValue("LastUpdateCheck", updateFeedLastCheck.ToString(),
-                            RegistryValueKind.String);
-                        winHasherSettings.Close();
-                    }
-                }
-                catch { }
-            }
-        }
-
-        /// <summary>
-        /// What to do if the update checker wants us to close.  This gets called if the
-        /// update check has successfully download the file and now wants to install the
-        /// new version.
-        /// </summary>
-        void IUpdateCheckListener.OnRequestGracefulClose()
-        {
-            // We don't have a lot to do to close up shop.  Fortunately, we already have
-            // a method to do all that stuff, so call it:
-            MainForm_FormClosing(null, null);
-            Dispose();
-        }
-
-        // We don't really care to do anything in the case when no update is found or when an
-        // update check ends in an error.  The update checker does well enough on its own in
-        // both cases.  Thus, we'll provide empty implementations for both of these call-backs
-        // and let the update check handle these items itself.
-
-        void IUpdateCheckListener.OnNoUpdateFound() { }
-        void IUpdateCheckListener.OnUpdateCheckError() { }
-        void IUpdateCheckListener.OnDownloadCanceled() { }
-
-        #endregion
-
     }
 }
