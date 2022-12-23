@@ -39,8 +39,6 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace com.gpfcomics.WinHasher.Core
 {
@@ -49,11 +47,6 @@ namespace com.gpfcomics.WinHasher.Core
     /// </summary>
     public class ConsoleStatusUpdater
     {
-        /// <summary>
-        /// The ConsoleStatusUpdater constructor
-        /// </summary>
-        public ConsoleStatusUpdater() { }
-
         /// <summary>
         /// Set the percentage complete
         /// </summary>

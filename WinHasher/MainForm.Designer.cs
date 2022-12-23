@@ -320,9 +320,9 @@ namespace com.gpfcomics.WinHasher
             // 
             // hashTextButton
             // 
-            this.hashTextButton.Location = new System.Drawing.Point(205, 97);
+            this.hashTextButton.Location = new System.Drawing.Point(205, 96);
             this.hashTextButton.Name = "hashTextButton";
-            this.hashTextButton.Size = new System.Drawing.Size(65, 24);
+            this.hashTextButton.Size = new System.Drawing.Size(65, 22);
             this.hashTextButton.TabIndex = 4;
             this.hashTextButton.Text = "Hash";
             this.toolTip1.SetToolTip(this.hashTextButton, "Click this button to compute the hash of the\r\ntext in the box above.");
