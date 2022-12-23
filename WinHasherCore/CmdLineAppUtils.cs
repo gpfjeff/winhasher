@@ -148,121 +148,67 @@ namespace com.gpfcomics.WinHasher.Core
                 int i = 0;
                 for (i = 0; i < args.Length && args[i].StartsWith("-"); i++)
                 {
-                    // We'll allow upper-case or mixed-case options by forcing the
-                    // flag to lower-case:
-                    switch (args[i].ToLower())
+                    // Try to parse the Hash
+                    if (Enum.TryParse<Hashes>(args[i].ToUpper().Substring(1).Replace('-', '_'), out Hashes parsedHash))
                     {
-                        // Most of these determine which hash to use.  Overwrite the
-                        // default when one of these flags are encountered.  Note that
-                        // if the program forces a specific hash (like md5 forces MD5),
-                        // this could get overridden.
-                        case "-md5":
-                            parsedArgs.Hash = Hashes.MD5;
-                            break;
-                        case "-sha1":
-                            parsedArgs.Hash = Hashes.SHA1;
-                            break;
-                        case "-sha224":
-                            parsedArgs.Hash = Hashes.SHA224;
-                            break;
-                        case "-sha256":
-                            parsedArgs.Hash = Hashes.SHA256;
-                            break;
-                        case "-sha384":
-                            parsedArgs.Hash = Hashes.SHA384;
-                            break;
-                        case "-sha512":
-                            parsedArgs.Hash = Hashes.SHA512;
-                            break;
-                        case "-ripemd128":
-                            parsedArgs.Hash = Hashes.RIPEMD128;
-                            break;
-                        case "-ripemd160":
-                            parsedArgs.Hash = Hashes.RIPEMD160;
-                            break;
-                        case "-ripemd256":
-                            parsedArgs.Hash = Hashes.RIPEMD256;
-                            break;
-                        case "-ripemd320":
-                            parsedArgs.Hash = Hashes.RIPEMD320;
-                            break;
-                        case "-whirlpool":
-                            parsedArgs.Hash = Hashes.Whirlpool;
-                            break;
-                        case "-tiger":
-                            parsedArgs.Hash = Hashes.Tiger;
-                            break;
-                        case "-gost3411":
-                            parsedArgs.Hash = Hashes.GOST3411;
-                            break;
-                        case "-sha3-224":
-                            parsedArgs.Hash = Hashes.SHA3_224;
-                            break;
-                        case "-sha3-256":
-                            parsedArgs.Hash = Hashes.SHA3_256;
-                            break;
-                        case "-sha3-384":
-                            parsedArgs.Hash = Hashes.SHA3_384;
-                            break;
-                        case "-sha3-512":
-                            parsedArgs.Hash = Hashes.SHA3_512;
-                            break;
-                        /*
-                        case "-shake128":
-                            parsedArgs.Hash = Hashes.SHAKE128;
-                            break;
-                        case "-shake256":
-                            parsedArgs.Hash = Hashes.SHAKE256;
-                            break;
-                         */
-                        // But this one puts us in Base64 mode:
-                        case "-base64":
-                            parsedArgs.OutputType = OutputType.Base64;
-                            break;
-                        // And this outputs hexadecimal:
-                        case "-hex":
-                            parsedArgs.OutputType = OutputType.Hex;
-                            break;
-                        // And this outputs hex with capital letters:
-                        case "-hexcaps":
-                            parsedArgs.OutputType = OutputType.CapHex;
-                            break;
-                        // And this outputs Bubble Babble:
-                        case "-bubbab":
-                            parsedArgs.OutputType = OutputType.BubbleBabble;
-                            break;
-                        // If we encounter the compare switch, put us in compare mode rather
-                        // that hashing each file individually:
-                        case "-compare":
-                            parsedArgs.CompareMode = true;
-                            break;
-                        // If the output flag is found, we'll assume the next item on
-                        // the list is the name of the file where we'll write our
-                        // output.  Note that if no file name is found, this flag
-                        // essentially does nothing.
-                        case "-out":
-                            i++; // Skips the next arg that is the file
-                            if (i < args.Length)
-                                parsedArgs.OutputFile = args[i];
-                            break;
-                        // Similarly, if the input switch is encountered, the next item
-                        // is assumed to be the input file listing the files to hash:
-                        case "-in":
-                            i++; // Skips the next arg that is the file
-                            if (i < args.Length)
-                                parsedArgs.InputFile = args[i];
-                            break;
-                        // If this flag is set and an output file has been specified, this
-                        // will make sure we append to the existing file rather than overwrite
-                        // it.  If no output file was specified, this will get silently
-                        // ignored.
-                        case "-append":
-                            parsedArgs.AppendOutput = true;
-                            break;
-                        // If we didn't get a valid switch, complain:
-                        default:
-                            Console.Error.WriteLine($"ERROR: Invalid switch \"{args[i]}\"");
-                            break;
+                        // Is a known Hash alg :D
+                        parsedArgs.Hash = parsedHash;
+                    }
+                    else
+                    {
+                        // We'll allow upper-case or mixed-case options by forcing the
+                        // flag to lower-case:
+                        switch (args[i].ToLower())
+                        {
+                            // But this one puts us in Base64 mode:
+                            case "-base64":
+                                parsedArgs.OutputType = OutputType.Base64;
+                                break;
+                            // And this outputs hexadecimal:
+                            case "-hex":
+                                parsedArgs.OutputType = OutputType.Hex;
+                                break;
+                            // And this outputs hex with capital letters:
+                            case "-hexcaps":
+                                parsedArgs.OutputType = OutputType.CapHex;
+                                break;
+                            // And this outputs Bubble Babble:
+                            case "-bubbab":
+                                parsedArgs.OutputType = OutputType.BubbleBabble;
+                                break;
+                            // If we encounter the compare switch, put us in compare mode rather
+                            // that hashing each file individually:
+                            case "-compare":
+                                parsedArgs.CompareMode = true;
+                                break;
+                            // If the output flag is found, we'll assume the next item on
+                            // the list is the name of the file where we'll write our
+                            // output.  Note that if no file name is found, this flag
+                            // essentially does nothing.
+                            case "-out":
+                                i++; // Skips the next arg that is the file
+                                if (i < args.Length)
+                                    parsedArgs.OutputFile = args[i];
+                                break;
+                            // Similarly, if the input switch is encountered, the next item
+                            // is assumed to be the input file listing the files to hash:
+                            case "-in":
+                                i++; // Skips the next arg that is the file
+                                if (i < args.Length)
+                                    parsedArgs.InputFile = args[i];
+                                break;
+                            // If this flag is set and an output file has been specified, this
+                            // will make sure we append to the existing file rather than overwrite
+                            // it.  If no output file was specified, this will get silently
+                            // ignored.
+                            case "-append":
+                                parsedArgs.AppendOutput = true;
+                                break;
+                            // If we didn't get a valid switch, complain:
+                            default:
+                                Console.Error.WriteLine($"ERROR: Invalid switch \"{args[i]}\"");
+                                break;
+                        }
                     }
                 }
 
@@ -480,29 +426,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// <returns>A string representing the command-line switch used</returns>
         private static string GetHashSwitchString(Hashes hash)
         {
-            return hash switch
-            {
-                Hashes.MD5 => "-md5",
-                Hashes.SHA1 => "-sha1",
-                Hashes.SHA224 => "-sha256",
-                Hashes.SHA256 => "-sha256",
-                Hashes.SHA384 => "-sha384",
-                Hashes.SHA512 => "-sha512",
-                Hashes.RIPEMD128 => "-ripemd128",
-                Hashes.RIPEMD160 => "-ripemd160",
-                Hashes.RIPEMD256 => "-ripemd256",
-                Hashes.RIPEMD320 => "-ripemd320",
-                Hashes.Tiger => "-tiger",
-                Hashes.Whirlpool => "-whirlpool",
-                Hashes.GOST3411 => "-gost3411",
-                Hashes.SHA3_224 => "-sha3-224",
-                Hashes.SHA3_256 => "-sha3-256",
-                Hashes.SHA3_384 => "-sha3-384",
-                Hashes.SHA3_512 => "-sha3-512",
-                /*Hashes.SHAKE128 => "-shake128",
-                Hashes.SHAKE256 => "-shake256",*/
-                _ => "",
-            };
+            return $"-{Enum.ToObject(typeof(Hashes), hash).ToString().ToLower().Replace('_', '-')}";
         }
 
         /// <summary>

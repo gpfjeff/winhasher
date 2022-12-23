@@ -137,7 +137,7 @@ file(s) and prints it to the screen in mode similar to the UNIX md5sum,
 shasum, and related commands.  With no command-line switches, it computes
 the " + HashEngine.GetHashName(HashEngine.DefaultHash) + @" hash and displays it in hexadecimal format.  Various switches
 allow you to change to other hashing algorithms, such as MD5, the SHA
-family, RIPEMD-160, Whirlpool, and Tiger.  The ""-base64"" switch causes
+family, RIPEMD-160, WHIRLPOOL, and TIGER.  The ""-base64"" switch causes
 WinHasher to output hashes in MIME Base64 (RFC 2045) format rather than
 hexadecimal, ""-hexcaps"" outputs hexadecimal with all capital letters,
 and ""-bubbab"" uses Bubble Babble encoding.  If multiple files are

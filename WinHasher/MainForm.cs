@@ -1121,10 +1121,10 @@ namespace com.gpfcomics.WinHasher
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.RIPEMD160), RegistryValueKind.String);
                                             break;
                                         case 6:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Whirlpool), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.WHIRLPOOL), RegistryValueKind.String);
                                             break;
                                         case 7:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Tiger), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.TIGER), RegistryValueKind.String);
                                             break;
                                         default:
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash), RegistryValueKind.String);
