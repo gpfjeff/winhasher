@@ -679,7 +679,18 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void outputFormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            OutputType oldEncoding = this.OutputType;
             this.OutputType = HashEngine.GetOutputTypeFromName((string)this.outputFormatComboBox.SelectedItem);
+
+            // Updates teh current value
+            if (this.modeTabControl.SelectedTab == this.singleTabPage)
+            {
+                this.hashSingleTextBox.Text = HashEngine.ReEncodeBytes(oldEncoding, this.hashSingleTextBox.Text, this.OutputType);
+            }
+            else if (this.modeTabControl.SelectedTab == this.textTabPage)
+            {
+                this.outputTextBox.Text = HashEngine.ReEncodeBytes(oldEncoding, this.outputTextBox.Text, this.OutputType);
+            }
         }
 
         /// <summary>
@@ -1109,13 +1120,13 @@ namespace com.gpfcomics.WinHasher
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA1), RegistryValueKind.String);
                                             break;
                                         case 2:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA256), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_256), RegistryValueKind.String);
                                             break;
                                         case 3:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA384), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_384), RegistryValueKind.String);
                                             break;
                                         case 4:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA512), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_512), RegistryValueKind.String);
                                             break;
                                         case 5:
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.RIPEMD160), RegistryValueKind.String);

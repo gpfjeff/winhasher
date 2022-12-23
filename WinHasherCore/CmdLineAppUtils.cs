@@ -426,7 +426,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// <returns>A string representing the command-line switch used</returns>
         private static string GetHashSwitchString(Hashes hash)
         {
-            return $"-{Enum.ToObject(typeof(Hashes), hash).ToString().ToLower().Replace('_', '-')}";
+            return $"-{HashEngine.GetHashName(hash).ToLower()}";
         }
 
         /// <summary>

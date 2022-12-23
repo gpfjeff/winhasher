@@ -114,6 +114,7 @@ using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Utilities;
 
 namespace com.gpfcomics.WinHasher.Core
 {
@@ -124,10 +125,10 @@ namespace com.gpfcomics.WinHasher.Core
     {
         MD5,
         SHA1,
-        SHA224,
-        SHA256,
-        SHA384,
-        SHA512,
+        SHA_224,
+        SHA_256,
+        SHA_384,
+        SHA_512,
         RIPEMD128,
         RIPEMD160,
         RIPEMD256,
@@ -174,7 +175,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// <summary>
         /// The default hash algorithm used by the HashEngine if no other hash has been specified.
         /// </summary>
-        public const Hashes DefaultHash = Hashes.SHA256;
+        public const Hashes DefaultHash = Hashes.SHA_256;
 
         /// <summary>
         /// The default output type used by the HashEngine if no other output type has been specified.
@@ -520,6 +521,7 @@ namespace com.gpfcomics.WinHasher.Core
         /// <returns>A string representing the computed hash</returns>
         /// <exception cref="HashEngineException">Thrown whenever anything bad happens when the
         /// hash is computed</exception>
+        /// TODO: use the main hash method, just process the text before
         public static string HashText(Hashes hash, string text, Encoding encoding, OutputType outputType = HashEngine.DefaultOutputType)
         {
             // This one is pretty simple:
@@ -555,29 +557,7 @@ namespace com.gpfcomics.WinHasher.Core
             // Pure and simple:  switch on the input Hashes enumeration.  The default
             // should never be hit here, but if for some reason we hit it, we need to
             // print something intelligent anyway.
-            return hash switch
-            {
-                Hashes.MD5 => "MD5",
-                Hashes.SHA1 => "SHA-1",
-                Hashes.SHA224 => "SHA-224",
-                Hashes.SHA256 => "SHA-256",
-                Hashes.SHA384 => "SHA-384",
-                Hashes.SHA512 => "SHA-512",
-                Hashes.RIPEMD128 => "RIPEMD128",
-                Hashes.RIPEMD160 => "RIPEMD160",
-                Hashes.RIPEMD256 => "RIPEMD256",
-                Hashes.RIPEMD320 => "RIPEMD320",
-                Hashes.WHIRLPOOL => "WHIRLPOOL",
-                Hashes.TIGER => "TIGER",
-                Hashes.GOST3411 => "GOST3411",
-                Hashes.SHA3_224 => "SHA3-224",
-                Hashes.SHA3_256 => "SHA3-256",
-                Hashes.SHA3_384 => "SHA3-384",
-                Hashes.SHA3_512 => "SHA3-512",
-                /*Hashes.SHAKE128 => "SHAKE128",
-                Hashes.SHAKE256 => "SHAKE256",*/
-                _ => "Invalid hash",
-            };
+            return Enum.ToObject(typeof(Hashes), hash).ToString().ToUpper().Replace('_', '-');
         }
 
         /// <summary>
@@ -589,38 +569,15 @@ namespace com.gpfcomics.WinHasher.Core
         /// input String does not represent a valid Hashes option, the default hash is returned.</returns>
         public static Hashes GetHashFromName(string hashName)
         {
-            // If we get a null or empty string, just return the default hash:
-            if (String.IsNullOrEmpty(hashName))
-                return HashEngine.DefaultHash;
-
-            // To normalize things, force all upper case and strip out any non-alphanumeric characters:
-            hashName = Regex.Replace(hashName.ToUpper(), @"\W+", "").Replace("_", "");
-
-            // Now switch based on the modified input:
-            return hashName switch
+            if (Enum.TryParse<Hashes>(hashName.ToUpper().Replace('-', '_'), out Hashes parsedHash))
             {
-                "MD5" => Hashes.MD5,
-                "SHA1" => Hashes.SHA1,
-                "SHA224" => Hashes.SHA224,
-                "SHA256" => Hashes.SHA256,
-                "SHA384" => Hashes.SHA384,
-                "SHA512" => Hashes.SHA512,
-                "RIPEMD128" => Hashes.RIPEMD128,
-                "RIPEMD160" => Hashes.RIPEMD160,
-                "RIPEMD256" => Hashes.RIPEMD256,
-                "RIPEMD320" => Hashes.RIPEMD320,
-                "WHIRLPOOL" => Hashes.WHIRLPOOL,
-                "TIGER" => Hashes.TIGER,
-                "GOST3411" => Hashes.GOST3411,
-                "SHA3224" => Hashes.SHA3_224,
-                "SHA3256" => Hashes.SHA3_256,
-                "SHA3384" => Hashes.SHA3_384,
-                "SHA3512" => Hashes.SHA3_512,
-                /*"SHAKE128" => Hashes.SHAKE128,
-                "SHAKE256" => Hashes.SHAKE256,*/
-                // If we didn't get a match on anything, return the default hash:
-                _ => DefaultHash,
-            };
+                // Is a known Hash alg :D
+                return parsedHash;
+            }
+            else
+            {
+                return HashEngine.DefaultHash;
+            }
         }
 
         /// <summary>
@@ -681,7 +638,7 @@ namespace com.gpfcomics.WinHasher.Core
             return outputType switch
             {
                 // Encode with Base64:
-                OutputType.Base64 => BytesToBase64String(theHash),
+                OutputType.Base64 => Convert.ToBase64String(theHash),
                 // Encode with Bubble Babble:
                 OutputType.BubbleBabble => BytesToBubbleBabbleString(theHash),
                 // Encode with hexadecimal, but with upper-case letters:
@@ -690,8 +647,47 @@ namespace com.gpfcomics.WinHasher.Core
                 OutputType.Hex => BytesToHexString(theHash),
                 // If for some bizarre reason we don't end up with one of the proper output
                 // type values, drop back to the default:
-                _ => EncodeBytes(theHash, DefaultOutputType),
+                _ => HashEngine.EncodeBytes(theHash, HashEngine.DefaultOutputType)
             };
+        }
+
+        /// <summary>
+        /// Re-Encode in the specified output type.
+        /// </summary>
+        /// <param name="theHash">The byte array to encode</param>
+        /// <param name="outputType">The output type</param>
+        /// <returns>A string containing the encoded data</returns>
+        public static string ReEncodeBytes(OutputType inputType, string theHash, OutputType outputType)
+        {
+            try
+            {
+                // Just revert the encode process
+                byte[] baseHash = inputType switch
+                {
+                    // Decode with Base64:
+                    OutputType.Base64 => Convert.FromBase64String(theHash),
+                    // Decode with hexadecimal:
+                    OutputType.CapHex => HexStringToBytes(theHash),
+                    // Decode with hexadecimal:
+                    OutputType.Hex => HexStringToBytes(theHash),
+                    // What the heck is this encoding?
+                    OutputType.BubbleBabble => new byte[] { 0 },
+                    // If for some bizarre reason we don't end up with one of the proper output type values, send an null byte to encode
+                    _ => new byte[] { 0 }
+                };
+
+                // TODO: support the missing algorithms
+                if (baseHash.Length == 1 && baseHash[0] == 0)
+                    throw new HashEngineException("Unsupported reencoding");
+
+                // Classical encode
+                return HashEngine.EncodeBytes(baseHash, outputType);
+            }
+            catch
+            {
+                /* Is broke :/ */
+                return "Failed to transcode the data, please compute teh hash again to correct";
+            }
         }
         #endregion
         #endregion
@@ -708,10 +704,10 @@ namespace com.gpfcomics.WinHasher.Core
             {
                 Hashes.MD5 => new MD5Digest(),
                 Hashes.SHA1 => new Sha1Digest(),
-                Hashes.SHA224 => new Sha224Digest(),
-                Hashes.SHA256 => new Sha256Digest(),
-                Hashes.SHA384 => new Sha384Digest(),
-                Hashes.SHA512 => new Sha512Digest(),
+                Hashes.SHA_224 => new Sha224Digest(),
+                Hashes.SHA_256 => new Sha256Digest(),
+                Hashes.SHA_384 => new Sha384Digest(),
+                Hashes.SHA_512 => new Sha512Digest(),
                 Hashes.RIPEMD128 => new RipeMD128Digest(),
                 Hashes.RIPEMD160 => new RipeMD160Digest(),
                 Hashes.RIPEMD256 => new RipeMD256Digest(),
@@ -742,30 +738,85 @@ namespace com.gpfcomics.WinHasher.Core
 
         /// <summary>
         /// Convert a byte array into a string of hexadecimal digits
+        /// https://stackoverflow.com/questions/623104/byte-to-hex-string/10048895#10048895
         /// </summary>
         /// <param name="bytes">The input byte array</param>
-        /// <returns>A string of hexadecimal digits representing the input array</returns>
+        /// <returns>A string of hexadecimal digits representing the input array (lowercase)</returns>
         private static string BytesToHexString(byte[] bytes)
         {
-            // There's probably a more efficient way to do this, but this is all I've found
-            // so far:
-            StringBuilder sOutput = new StringBuilder(bytes.Length);
-            for (int i = 0; i < bytes.Length; i++)
+            char[] c = new char[bytes.Length * 2];
+            byte b;
+            for (int bx = 0, cx = 0; bx < bytes.Length; ++bx, ++cx)
             {
-                sOutput.Append(bytes[i].ToString("x2"));
+                b = ((byte)(bytes[bx] >> 4));
+                c[cx] = (char)(b > 9 ? b - 10 + 'a' : b + '0');
+
+                b = ((byte)(bytes[bx] & 0x0F));
+                c[++cx] = (char)(b > 9 ? b - 10 + 'a' : b + '0');
             }
-            return sOutput.ToString();
+
+            return new string(c);
         }
 
         /// <summary>
-        /// Convert a byte array into a Base64-encoded string
+        /// Convert an hex string into a byte array into
+        /// https://stackoverflow.com/questions/14332496/most-light-weight-conversion-from-hex-to-byte-in-c/14332574#14332574
         /// </summary>
-        /// <param name="bytes">The input byte array</param>
-        /// <returns>A Base64-encoded string representing the input array</returns>
-        private static string BytesToBase64String(byte[] bytes)
+        /// <param name="bytes">The input string (any case)</param>
+        /// <returns>The byte[] representation of the data</returns>
+        private static byte[] HexStringToBytes(string hexString)
         {
-            // This is simple enough:
-            return Convert.ToBase64String(bytes);
+            if (hexString.Length % 2 != 0)
+            {
+                throw new ArgumentException("Input must have even number of characters");
+            }
+
+            int length = hexString.Length / 2;
+            byte[] ret = new byte[length];
+            for (int i = 0, j = 0; i < length; i++)
+            {
+                int high = ParseNybble(hexString[j++]);
+                int low = ParseNybble(hexString[j++]);
+                ret[i] = (byte)((high << 4) | low);
+            }
+
+            return ret;
+        }
+
+        // Parse a nibble for the above function
+        private static int ParseNybble(char c)
+        {
+            // TODO: Benchmark using if statements instead
+            switch (c)
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    return c - '0';
+                case 'a':
+                case 'b':
+                case 'c':
+                case 'd':
+                case 'e':
+                case 'f':
+                    return c - ('a' - 10);
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'E':
+                case 'F':
+                    return c - ('A' - 10);
+                default:
+                    throw new ArgumentException("Invalid nybble: " + c);
+            }
         }
 
         /// <summary>
