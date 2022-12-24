@@ -114,7 +114,6 @@ using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Utilities;
 
 namespace com.gpfcomics.WinHasher.Core
 {
@@ -686,7 +685,7 @@ namespace com.gpfcomics.WinHasher.Core
             catch
             {
                 /* Is broke :/ */
-                return "Failed to transcode the data, please compute teh hash again to correct";
+                return "Failed to transcode the data, please compute the hash again to correct";
             }
         }
         #endregion

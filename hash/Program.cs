@@ -121,7 +121,7 @@ namespace com.gpfcomics.WinHasher.hashconsole
             Console.WriteLine(
                 @"https://github.com/gpfjeff/winhasher
 
-Usage: hash [-md5|-sha1|-sha224|-sha256|-sha384|-sha512|-ripemd128|-ripemd160|
+Usage: hash [-md5|-sha1|-sha-224|-sha-256|-sha-384|-sha-512|-ripemd128|-ripemd160|
         -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411|-sha3-224|-sha3-256
         -sha3-384|-sha3-512]
         [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]

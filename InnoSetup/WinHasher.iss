@@ -1,119 +1,295 @@
 [Setup]
-InternalCompressLevel=ultra
+AppName=WinHasher
+AppVersion=1.7
+AppCopyright=Copyright 2022, Jeffrey T. Darlington, Mmoi-Fr
+SetupIconFile=..\WinHasher\Icon1.ico
+
+ArchitecturesInstallIn64BitMode=x64
+DefaultDirName={autopf}\WinHasher
+DefaultGroupName=WinHasher
+
+LicenseFile=.\gpl.rtf
+
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog
+
+ChangesEnvironment=true
+
 OutputDir=.\bin
 OutputBaseFilename=WinHasher_1.7_Setup
+
+MinVersion=6.1.7601sp1
+
 VersionInfoVersion=1.7.0.0
 VersionInfoCompany=GPF Comics
-VersionInfoDescription=This program will install WinHasher on your computer.  WinHasher is a cryptographic file hashing program using the Microsoft .NET 2.0 Framework.
-VersionInfoTextVersion=WinHasher Setup 1.7
-VersionInfoCopyright=Copyright 2016, Jeffrey T. Darlington.
-AppCopyright=Copyright 2016, Jeffrey T. Darlington.
-AppName=WinHasher
-AppVerName=WinHasher 1.7
-LicenseFile=.\gpl.rtf
-PrivilegesRequired=poweruser
-MinVersion=0,5.0.2195sp3
-DefaultDirName={pf}\WinHasher
-DefaultGroupName=WinHasher
+VersionInfoDescription=WinHasher install program. WinHasher is a cryptographic file hashing program using Microsoft .NET 6 and BouncyCastle 2.0.
+VersionInfoCopyright=Copyright 2022, Jeffrey T. Darlington, Mmoi-Fr.
+
 AppID=GPFComicsWinHasher
 UninstallDisplayIcon={app}\WinHasher.exe
-Compression=lzma/ultra
-ChangesEnvironment=true
+
 AppPublisher=GPF Comics
 AppPublisherURL=http://www.gpf-comics.com/
 AppSupportURL=https://github.com/gpfjeff/winhasher
 AppUpdatesURL=https://github.com/gpfjeff/winhasher
-AppVersion=WinHasher 1.7
-UninstallDisplayName=WinHasher 1.7
-SetupIconFile=..\WinHasher\Icon1.ico
 
 [Files]
-Source: "..\WinHasherCore\bin\Release\WinHasherCore.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
-Source: "..\BouncyCastle.Crypto.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
-Source: "..\GPFUpdateChecker.dll"; DestDir: "{app}"; Components: Windows_application
-Source: "..\gpf_update_checker1.xsd"; DestDir: "{app}"; Flags: ignoreversion; Components: Windows_application
-Source: "..\WinHasher\bin\Release\WinHasher.exe"; DestDir: "{app}"; Components: Windows_application
-Source: "..\hash\bin\Release\hash.exe"; DestDir: "{app}"; Components: Console_applications
-Source: "PathTweaker.exe"; DestDir: "{app}"; Components: Console_applications
+Source: "..\WinHasherCore\bin\Release\netstandard2.1\WinHasherCore.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
+Source: "..\WinHasher\bin\Release\net6.0-windows\BouncyCastle.Cryptography.dll"; DestDir: "{app}"; Components: Windows_application Console_applications
+Source: "..\WinHasher\bin\Release\net6.0-windows\WinHasher.dll"; DestDir: "{app}"; Components: Windows_application
+Source: "..\WinHasher\bin\Release\net6.0-windows\WinHasher.exe"; DestDir: "{app}"; Components: Windows_application
+Source: "..\WinHasher\bin\Release\net6.0-windows\WinHasher.runtimeconfig.json"; DestDir: "{app}"; Components: Windows_application
+Source: "..\hash\bin\Release\net6.0\hash.dll"; DestDir: "{app}"; Components: Console_applications
+Source: "..\hash\bin\Release\net6.0\hash.exe"; DestDir: "{app}"; Components: Console_applications
+Source: "..\hash\bin\Release\net6.0\hash.runtimeconfig.json"; DestDir: "{app}"; Components: Console_applications
 Source: "cmdhelp.html"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications and HTML_help_file
 Source: "guihelp.html"; DestDir: "{app}"; Flags: ignoreversion; Components: Windows_application and HTML_help_file
 Source: "gpl.html"; DestDir: "{app}"; Flags: ignoreversion; Components: HTML_help_file
-Source: "md5.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha1.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha224.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha256.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha384.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha512.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "ripemd128.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "ripemd160.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "ripemd256.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "ripemd320.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "whirlpool.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "tiger.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "gost3411.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "sha3.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
-Source: "keccak.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications
+Source: "Aliases\md5.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha1.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha224.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha256.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha384.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha512.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\ripemd128.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\ripemd160.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\ripemd256.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\ripemd320.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\whirlpool.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\tiger.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\gost3411.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha3-224.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha3-256.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha3-384.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
+Source: "Aliases\sha3-512.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: Console_applications\Alias
 
 [Components]
-Name: "Windows_application"; Description: "Check this box to install the Windows GUI version of WinHasher"; Types: custom compact full
-Name: "Windows_application\Desktop_icon"; Description: "Place an icon for WinHasher on your desktop.  (If you are an administrator, this will make the icon available to all users.)"; Types: custom full
-Name: "Windows_application\QuickLaunch_icon"; Description: "Place an icon for WinHasher on your Quick Launch toolbar.  (This will only install the icon for yourself, not other users.)"; Types: full
-Name: "Console_applications"; Description: "Check this box to install the console (command-line) versions of WinHasher.  This will also add the WinHasher program path to your PATH environment variable."; Types: custom full
-Name: "HTML_help_file"; Description: "Check this box to install the HTML help files, which will be accessible through the Start Menu."; Types: full compact custom
+Name: "Windows_application"; Description: "Install the Windows GUI version of WinHasher"; Types: custom compact full
+Name: "Windows_application\ContextMenu"; Description: "Register WinHasher in the context menu (right clic)"; Types: custom compact full; Check: IsAdmin();
+Name: "Windows_application\Desktop_icon"; Description: "Place a shortcut to WinHasher on the desktop."; Types: custom full
+Name: "Windows_application\QuickLaunch_icon"; Description: "Place an icon for WinHasher on the Quick Launch toolbar."; Types: full
+Name: "Console_applications"; Description: "Install the console (command-line) versions of WinHasher."; Types: custom full
+Name: "Console_applications\Path"; Description: "Add the WinHasher program path to your PATH environment variable."; Types: custom full
+Name: "Console_applications\Alias"; Description: "Install the aliases for the known algorithm"; Types: custom full
+Name: "HTML_help_file"; Description: "Install the HTML help files, which will be accessible through the Start Menu."; Types: full compact custom
 
 [Icons]
-Name: "{group}\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{userdocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application
+Name: "{group}\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{autodocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application
 Name: "{group}\Command-line Help"; Filename: "{app}\cmdhelp.html"; WorkingDir: "{app}"; Comment: "Display help information for the command-line version of WinHasher in your default Web browser"; Components: Console_applications and HTML_help_file
 Name: "{group}\Windows App Help"; Filename: "{app}\guihelp.html"; WorkingDir: "{app}"; Comment: "Display help information for the Windows version of WinHasher in your default Web browser"; Components: Windows_application and HTML_help_file
 Name: "{group}\Uninstall WinHasher"; Filename: "{uninstallexe}"; WorkingDir: "{app}"; Comment: "Uninstall all WinHasher components"
-Name: "{commondesktop}\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{userdocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application\Desktop_icon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{userdocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application\QuickLaunch_icon
+Name: "{autodesktop}\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{autodocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application\Desktop_icon
+Name: "{autoappdata}\Microsoft\Internet Explorer\Quick Launch\WinHasher"; Filename: "{app}\WinHasher.exe"; WorkingDir: "{autodocs}"; IconFilename: "{app}\WinHasher.exe"; IconIndex: 0; Comment: "WinHasher allows you to computer cryptographic hashes of files, or compare the hashes of multiple files"; Components: Windows_application\QuickLaunch_icon
 
-[Run]
-Filename: {app}\PathTweaker.exe; Parameters: "-add ""{app}"""; WorkingDir: {app}; Flags: runminimized runhidden; Components: Console_applications; StatusMsg: "Adding ""{app}"" to the PATH..."
-[UninstallRun]
-Filename: {app}\PathTweaker.exe; Parameters: "-remove ""{app}"""; WorkingDir: {app}; Flags: runhidden; Components: Console_applications
+[Registry]
+// PATH -- https://stackoverflow.com/questions/3304463/how-do-i-modify-the-path-environment-variable-when-running-an-inno-setup-install/3431379#3431379
+Root: HKA; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: (not IsAdmin()) and NeedsAddPath(True, '{app}'); Components: Console_applications\Path
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: IsAdmin() and NeedsAddPath(False, '{app}'); Components: Console_applications\Path
+// Context menu
+Root: HKLM; Subkey: "Software\Classes\*\shell\Hash"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "Software\Classes\*\shell\Hash"; ValueType: string; ValueName: "SubCommands"; ValueData: "WinHasherSHA-1;WinHasherSHA-224;WinHasherSHA-256;WinHasherSHA-384;WinHasherSHA-512;WinHasherRIPEMD-128;WinHasherRIPEMD-160;WinHasherRIPEMD-256;WinHasherRIPEMD-320;WinHasherWHIRLPOOL;WinHasherTIGER;WinHasherGOST;WinHasherSHA3-224;WinHasherSHA3-256;WinHasherSHA3-384;WinHasherSHA3-512"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "Software\Classes\*\shell\Hash"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\WinHasher.exe"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-1"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-1"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA-1"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-1\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-1\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha1 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-224"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-224"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA-224"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-224\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-224\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha-224 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-256"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-256\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-256\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha-256 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-384"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-384"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA-384"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-384\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-384\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha-384 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-512"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-512"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA-512"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-512\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA-512\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha-512 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-128"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-128"; ValueType: string; ValueName: "MUIVerb"; ValueData: "RIPEMD-128"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-128\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-128\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -ripemd128 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-160"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-160"; ValueType: string; ValueName: "MUIVerb"; ValueData: "RIPEMD-160"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-160\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-160\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -ripemd160 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-256"; ValueType: string; ValueName: "MUIVerb"; ValueData: "RIPEMD-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-256\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-256\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -ripemd256 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-320"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-320"; ValueType: string; ValueName: "MUIVerb"; ValueData: "RIPEMD-320"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-320\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherRIPEMD-320\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -ripemd320 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherWHIRLPOOL"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherWHIRLPOOL"; ValueType: string; ValueName: "MUIVerb"; ValueData: "WHIRLPOOL"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherWHIRLPOOL\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherWHIRLPOOL\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -whirlpool ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherTIGER"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherTIGER"; ValueType: string; ValueName: "MUIVerb"; ValueData: "TIGER"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherTIGER\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherTIGER\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -tiger ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST"; ValueType: string; ValueName: "MUIVerb"; ValueData: "GOST3411"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -gost3411 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST"; ValueType: string; ValueName: "MUIVerb"; ValueData: "GOST3411"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherGOST\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -gost3411 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-224"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-224"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA3-224"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-224\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-224\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha3-224 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-256"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA3-256"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-256\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-256\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha3-256 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-384"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-384"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA3-384"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-384\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-384\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha3-384 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+//
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-512"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-512"; ValueType: string; ValueName: "MUIVerb"; ValueData: "SHA3-512"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-512\command"; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WinHasherSHA3-512\command"; ValueType: string; ValueData: "{app}\WinHasher.exe -sha3-512 ""%1"""; Flags: createvalueifdoesntexist uninsdeletekey; Components: Windows_application\ContextMenu
+
 [Code]
-// InitializeSetup:  Check to see if .NET 2.0 is installed and abort if it isn't.
+// To prevent double path add
+function NeedsAddPath(IsUser: boolean; PathToCheck: string): boolean;
+var
+  OrigPath: string;
+begin
+  // ADMIN && key read KO
+  if not IsUser and not RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', OrigPath) then
+  begin
+    Result := True;
+    exit;
+  end;
+
+  // USER && key read KO
+  if IsUser and not RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath) then
+  begin
+    Result := True;
+    exit;
+  end;
+
+  { look for the path with leading and trailing semicolon }
+  { Pos() returns 0 if not found }
+  Result := Pos(';' + Uppercase(PathToCheck) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
+end;
+
+// https://stackoverflow.com/questions/72479992/check-if-net-5-0-is-installed-in-inno-setup/72526428#72526428
+function IsDotNetInstalled(DotNetName: string): Boolean;
+var
+  Cmd, Args: string;
+  FileName: string;
+  Output: AnsiString;
+  Command: string;
+  ResultCode: Integer;
+begin
+  FileName := ExpandConstant('{tmp}\dotnet.txt');
+  Cmd := ExpandConstant('{cmd}');
+  Command := 'dotnet --list-runtimes';
+  Args := '/C ' + Command + ' > "' + FileName + '" 2>&1';
+  if Exec(Cmd, Args, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0) then
+  begin
+    if LoadStringFromFile(FileName, Output) then
+    begin
+      if Pos(DotNetName, Output) > 0 then
+      begin
+        Log('"' + DotNetName + '" found in output of "' + Command + '"');
+        Result := True;
+      end
+        else
+      begin
+        Log('"' + DotNetName + '" not found in output of "' + Command + '"');
+        Result := False;
+      end;
+    end
+      else
+    begin
+      Log('Failed to read output of "' + Command + '"');
+    end;
+  end
+    else
+  begin
+    Log('Failed to execute "' + Command + '"');
+    Result := False;
+  end;
+  DeleteFile(FileName);
+end;
+
+// InitializeSetup:  Check to see if .NET 6 is installed to warn the user.
 function InitializeSetup(): Boolean;
 var
-   DotNetRegKey: String;
-   DotNetDlURL:  String;
    ErrorCode:    Integer;
 begin
-   // Set up our constants, abstracted here to make changing them
-   // later easier.  The first is the .NET 2.0 registry key.
-   // Actually, it's the setup program's regkey, but a Google
-   // search said this was the best place to look.  .NET setup will
-   // not install if it finds this key, so if it's good enough for
-   // Microsoft, it's good enough for us.
-   DotNetRegKey := 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727';
-   // The URL of where to download .NET:
-   //DotNetDlURL := 'http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx';
-   DotNetDlURL := 'https://www.microsoft.com/en-us/download/details.aspx?id=22';
-   // Check the registry to see if the .NET registry key exists.
-   // If not, then we go to work:
-   if not RegKeyExists(HKLM, DotNetRegKey) then begin
-      // Ask the user if they want to download .NET:
-      if MsgBox('The Microsoft .NET Framework version 2.0 or higher is required to run this application, but I couldn''t find it installed on your system.  Would you like to download it now?', mbConfirmation, MB_YESNO) = IDYES then begin
-         // Open the download URL in the default browser:
-         ShellExec('open', DotNetDlURL, '', '', SW_SHOW, ewNoWait, ErrorCode);
-      end
-      // If they decided not to download .NET now, tell them they
-      // can always get it from Windows Update:
-      else begin
-         MsgBox('OK, but you can also install the framework through Windows Update.  This installer will now exit.', mbInformation, MB_OK);
-      end;
-      // In all cases above, we want to stop the installation here:
-      Result := False;
-   end
-   // If .NET was found, everything is rosy.  Proceed with the
-   // installation:
-   else begin
-      //MsgBox('Found .NET Framework 2.0 or higher', mbInformation, MB_OK);
+   if IsDotNetInstalled('Microsoft.NETCore.App 6.') then
+   begin
       Result := True;
-   end;
+    end
+      else
+    begin
+      if MsgBox('The .NET 6 runtime needs to be installed to run WinHasher, which appears not to be installed on the system. Do you want to open the browser to the download page of the runtime?', mbInformation, MB_YESNO) = IDYES then
+      begin
+         // Open the download URL in the default browser:
+         ShellExec('open', 'https://dotnet.microsoft.com/en-us/download/dotnet/6.0', '', '', SW_SHOW, ewNoWait, ErrorCode);
+      end;
+
+      Result := MsgBox('Do you want to install WinHasher anyway (the runtime can be installed later on)?', mbInformation, MB_YESNO) = IDYES;
+    end;
 end;
+
+// https://stackoverflow.com/questions/3304463/how-do-i-modify-the-path-environment-variable-when-running-an-inno-setup-install/46609047#46609047
+procedure EnvRemovePath(IsUser: boolean; PathToRemove: string);
+var
+    OrigPath: string;
+    P: Integer;
+begin
+    { Skip if registry entry not exists }
+    // ADMIN and key read KO
+    if not IsUser and not RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', OrigPath) then exit;
+    // USER && key read KO
+    if IsUser and not RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath) then exit;
+
+    { Skip if string not found in path }
+    P := Pos(';' + Uppercase(PathToRemove) + ';', ';' + Uppercase(OrigPath) + ';');
+    if P = 0 then exit;
+
+    { Update path variable }
+    Delete(OrigPath, P - 1, Length(PathToRemove) + 1);
+
+    { Overwrite path environment variable }
+    // ADMIN
+    if not IsUser and not RegWriteStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', OrigPath)
+    then Log(Format('Error while removing the [%s] from PATH: [%s]', [PathToRemove, OrigPath]));
+    // USER
+    if IsUser and not RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath)
+    then Log(Format('Error while removing the [%s] from PATH: [%s]', [PathToRemove, OrigPath]));
+end;
+
 // DeinitializeUninstall:  Offer to remove our registry keys upon uninstall if the user
 // doesn't want to keep them.
 procedure DeinitializeUninstall();
@@ -121,6 +297,9 @@ var
 	WinHasherRegKey: String;
 	GPFComicsRegKey: String;
 begin
+  // First, remove the PATH (if any)
+  EnvRemovePath(IsAdmin(), '{app}'); 
+
 	// Define both the GPF Comics key and the WinHasher key.  We'll definitely delete the
 	// WinHasher key if present and also the GPF Comics key if no other subkeys exists.
 	GPFComicsRegKey := 'SOFTWARE\GPF Comics';

@@ -25,4 +25,7 @@ Not so with Microsoft Windows. Windows does not include any built-in utilities f
 
 This "hashing divide" has annoyed me for some time. While I consider myself to be an operating system agnostic and find myself equally home on both Windows and Linux, there are many times I've downloaded Windows-only software but didn't have the capability to verify the file's hash. Either I've been unable to install and run OpenSSL on a given machine, or I haven't had the time or access to a Linux box to copy the file over, generate the hash, and verify it before install. So I wanted to create a quick, simple, easy-to-use Windows app so I could get the hash of a file without waiting or moving it around. I also thought it would be a nice idea to be able to quickly compare the hashes of multiple files without having to generate each one and manually check every hexadecimal digit, so I added that functionality too. After writing the program, I thought it might be useful to others, so I decided to share.
 
+# Legacy OSes #
+Please note that from the 1.7 release and the usage of .NET 6, legacy OSes are being dropped. The only remaining OSes are the [one that can run .NET 6] (https://github.com/dotnet/core/blob/main/release-notes/6.0/supported-os.md) ([for now](https://github.com/dotnet/core/blob/6de37acb50a0d37c4a58dd0ba44dd121cdc8def4/release-notes/6.0/supported-os.md), Windows 7 SP1 and up).
+
 For our full documentation, please see the [project wiki](https://github.com/gpfjeff/winhasher/tree/wiki).
