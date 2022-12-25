@@ -73,9 +73,6 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -83,26 +80,23 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Win32;
 using com.gpfcomics.WinHasher.Core;
-using com.gpfcomics.UpdateChecker;
+using System.Runtime.InteropServices;
 
 namespace com.gpfcomics.WinHasher
 {
-    public partial class MainForm : Form, IUpdateCheckListener
+    public partial class MainForm : Form
     {
         #region Private Variables
 
         /// <summary>
         /// The full version number of the assmebly for display:
         /// </summary>
-        private static string version = "WinHasher v. " +
-            Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        private static readonly string version = $"WinHasher v.{Assembly.GetExecutingAssembly().GetName().Version}";
 
         /// <summary>
         /// The shortened (major + minor) version number for display:
         /// </summary>
-        private static string versionShort = "WinHasher v. " +
-            Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
-            Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
+        private static readonly string versionShort = $"WinHasher v.{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}";
 
         /// <summary>
         /// Our copyright information, fetched from the assembly info:
@@ -112,67 +106,24 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The currently selected hash algorithm
         /// </summary>
-        private Hashes hash = HashEngine.DefaultHash;
+        private Hashes Hash { get; set; } = HashEngine.DefaultHash;
 
         /// <summary>
         /// The last selected directory
         /// </summary>
-        private string lastDirectory;
+        private string LastDirectory { get; set; } = Environment.CurrentDirectory;
 
         /// <summary>
         /// The ouput encoding for resulting hashes
         /// </summary>
-        private OutputType outputType = HashEngine.DefaultOutputType;
+        private OutputType OutputType { get; set; } = HashEngine.DefaultOutputType;
 
         /// <summary>
         /// Whether or not we were launched in "portable" mode.  Portable mode will not write
         /// its settings to the registry when the application closes, and will similarly not
         /// try to read them upon launch.  This defaults to false.
         /// </summary>
-        private bool portable = false;
-
-        /// <summary>
-        /// The actual <see cref="UpdateChecker"/> object, which will check for WinHasher
-        /// updates
-        /// </summary>
-        private UpdateChecker.UpdateChecker updateChecker = null;
-
-        /// <summary>
-        /// This Boolean flag determines whether or not to disable the built-in check for
-        /// updates.  This isn't recommended, of course, but a feature nonetheless.
-        /// </summary>
-        private bool disableUpdateCheck = false;
-
-        /// <summary>
-        /// A <see cref="Uri"/> for the official WinHasher updates feed.  The
-        /// <see cref="UpdateChecker"/> will use this feed to look for updated versions of
-        /// WinHasher.
-        /// </summary>
-        private Uri updateFeedUri = new Uri(Properties.Resources.UpdateFeedUri);
-
-        /// <summary>
-        /// The unique app string for <see cref="UpdateChecker"/> lookups
-        /// </summary>
-        private string updateFeedAppName = Properties.Resources.UpdateFeedAppName;
-
-        /// <summary>
-        /// The last update check timestamp for <see cref="UpdateChecker"/> lookups.  Note
-        /// that this defaults to <see cref="DateTime"/>.MinValue, which should force an
-        /// update on the first check, but that will be overwritten during initialization.
-        /// </summary>
-        private DateTime updateFeedLastCheck = DateTime.MinValue;
-
-        /// <summary>
-        /// The number of days between update checks, which we will passs to the
-        /// <see cref="UpdateChecker"/>.
-        /// </summary>
-        private int updateInterval = Int32.Parse(Properties.Resources.UpdateIntervalInDays);
-
-        /// <summary>
-        /// The alternate download page to download updates.
-        /// </summary>
-        private string updateAltDownloadPage = Properties.Resources.UpdateAltDownloadPage;
-
+        private bool Portable { get; set; } = false;
         #endregion
 
         /// <summary>
@@ -189,25 +140,28 @@ namespace com.gpfcomics.WinHasher
         public MainForm(bool portable)
         {
             // Let .NET do its initialization stuff:
-            InitializeComponent();
+            this.InitializeComponent();
+
             // Get our copyright information.  It seems a bit silly to do it this way,
             // but this seems to be the only way to do it that I can find.  We'll pull this
             // from the assembly so we only need to change it in one place, and it can be
             // automatically fetched from SVN.
             object[] obj = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
             if (obj != null && obj.Length > 0)
-                copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
+                MainForm.copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
+
             // Build the hash and output type combo boxes:
-            hashComboBox.Items.Clear();
+            this.hashComboBox.Items.Clear();
             foreach (Hashes hashTemp in Enum.GetValues(typeof(Hashes)))
             {
-                hashComboBox.Items.Add(HashEngine.GetHashName(hashTemp));
+                this.hashComboBox.Items.Add(HashEngine.GetHashName(hashTemp));
             }
-            outputFormatComboBox.Items.Clear();
+            this.outputFormatComboBox.Items.Clear();
             foreach (OutputType otTemp in Enum.GetValues(typeof(OutputType)))
             {
-                outputFormatComboBox.Items.Add(HashEngine.GetOutputTypeName(otTemp));
+                this.outputFormatComboBox.Items.Add(HashEngine.GetOutputTypeName(otTemp));
             }
+
             // Set up the encoding's drop-down box.  Note the try/catch block; this is a
             // kludge to prevent this bit of code from blowing up under Mono.  Apparently
             // there is a bug in their implementation of Encoding.GetEncodings() that
@@ -216,116 +170,47 @@ namespace com.gpfcomics.WinHasher
             // encodings for the platform.  See: https://bugzilla.xamarin.com/show_bug.cgi?id=8117
             foreach (EncodingInfo encodingInfo in Encoding.GetEncodings())
             {
-                try { encodingComboBox.Items.Add(encodingInfo.GetEncoding()); }
+                try
+                {
+                    this.encodingComboBox.Items.Add(encodingInfo.GetEncoding());
+                }
                 catch { }
             }
             // Set it to show the display name in the dropdown:
-            encodingComboBox.DisplayMember = "EncodingName";
+            this.encodingComboBox.DisplayMember = "EncodingName";
+
             // Take note of whether or not we were called in "portable" mode:
-            this.portable = portable;
+            this.Portable = portable;
 
             // If the user has elected to load the app in portable mode, populate the default settings
             // and disable the Options button (since we can't save any options if we can't write to
             // the registry):
             if (portable)
             {
-                PopulateDefaultSettings();
-                optionsButton.Enabled = false;
+                this.PopulateDefaultSettings();
             }
             // If we're not running in portable mode, try to read the settings from the registry and
             // restore them, falling back to the defaults if something fails:
             else
             {
-                try
-                {
-                    // Upgrade any existing settings if necessary:
-                    UpgradeSettings();
-                    // Try to open the HKCU\Software\GPF Comics\WinHasher key:
-                    RegistryKey winHasherSettings =
-                        Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
-                        false).OpenSubKey("WinHasher", false);
-                    // Try to set the hash combo box:
-                    hashComboBox.SelectedItem = (string)winHasherSettings.GetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash));
-                    hashComboBox_SelectedIndexChanged(null, null);
-                    // Try to set the encoding combo box:
-                    encodingComboBox.SelectedItem = Encoding.GetEncoding((string)winHasherSettings.GetValue("TextEncoding", Encoding.UTF8.WebName));
-                    // Try to set the output format combo box:
-                    outputFormatComboBox.SelectedItem = (string)winHasherSettings.GetValue("OutputType", HashEngine.GetOutputTypeName(HashEngine.DefaultOutputType));
-                    outputFormatComboBox_SelectedIndexChanged(null, null);
-                    // Try to set the last directory:
-                    string ldtemp = "";
-                    try { ldtemp = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
-                    catch { ldtemp = Environment.CurrentDirectory; }
-                    lastDirectory = (string)winHasherSettings.GetValue("LastDirectory", ldtemp);
-                    // Try to restore the last used tab:
-                    modeTabControl.SelectedIndex = (int)winHasherSettings.GetValue("LastTab", 0);
-                    modeTabControl_SelectedIndexChanged(null, null);
-                    // Try to restore the tooltips toggle:
-                    tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1)
-                        == 1 ? true : false;
-                    // Try to restore the disable update check setting:
-                    disableUpdateCheck = (int)winHasherSettings.GetValue("DisableUpdateCheck", 0)
-                        == 1 ? true : false;
-                    // Get the last update check date.  I'm not sure if the try/catch block is
-                    // really necessary, but I'm a belt-and-suspenders guy.  Also note that
-                    // the default, whether the parse fails for the registry value isn't set,
-                    // is DateTime.MinValue, which pretty much guarantees an update check on
-                    // the first go-around.
-                    try
-                    {
-                        updateFeedLastCheck =
-                            DateTime.Parse((string)winHasherSettings.GetValue("LastUpdateCheck",
-                            DateTime.MinValue.ToString()));
-                    }
-                    catch { updateFeedLastCheck = DateTime.MinValue; }
-                    // Close the registry key:
-                    winHasherSettings.Close();
-                }
-                // If any of the registry reading code above fails, restore everything to the
-                // default settings:
-                catch
-                {
-                    PopulateDefaultSettings();
-                }
+                this.LoadSettings();
             }
 
             // Set up the file boxes for drag & drop:
-            fileSingleTextBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
-            fileSingleTextBox.DragDrop += new DragEventHandler(fileSingleTextBox_DragDrop);
-            compareFilesListBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
-            compareFilesListBox.DragDrop += new DragEventHandler(compareFilesListBox_DragDrop);
-            // Set our title bar to include the version number:
-            if (portable) Text = versionShort + " (Portable)";
-            else Text = versionShort;
-            // Turn on or off the tooltips depending on whether the checkbox has been
-            // checked:
-            toolTip1.IsBalloon = true;
-            if (tooltipsCheckbox.Checked) toolTip1.Active = true;
-            else toolTip1.Active = false;
+            this.fileSingleTextBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
+            this.fileSingleTextBox.DragDrop += new DragEventHandler(fileSingleTextBox_DragDrop);
+            this.compareFilesListBox.DragEnter += new DragEventHandler(fileSingleTextBox_DragEnter);
+            this.compareFilesListBox.DragDrop += new DragEventHandler(compareFilesListBox_DragDrop);
 
-            // Finally, initialize the update checker and set it to work.  The update check
-            // should occur in a separate thread, which will allow the main UI thread to
-            // continue without any problems.  The entire process *should* be transparent to
-            // the user unless an update is actually found.
-            if (!portable && !disableUpdateCheck)
-            {
-                try
-                {
-                    updateChecker = new UpdateChecker.UpdateChecker(updateFeedUri, updateFeedAppName,
-                        Assembly.GetExecutingAssembly().GetName().Version, this, updateFeedLastCheck,
-                        updateInterval, false);
-                    updateChecker.CheckForNewVersion();
-                }
-                catch
-                {
-                    MessageBox.Show("An error occurred while trying to perform the update check.  Please try another check later.",
-                        "Update Check Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            // Set our title bar to include the version number:
+            this.Text = $"{MainForm.versionShort}{(this.Portable ? " (Portable)" : "")}";
+
+            // Turn on or off the tooltips depending on whether the checkbox has been checked:
+            this.toolTip1.IsBalloon = true;
+            this.toolTip1.Active = this.tooltipsCheckbox.Checked;
         }
 
         #region Button Events
-
         /// <summary>
         /// What to do when the Close button is clicked.
         /// </summary>
@@ -351,11 +236,10 @@ namespace com.gpfcomics.WinHasher
             // Get the full path to the HTML help file:
             string helpFile = Application.StartupPath;
             if (!helpFile.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                helpFile += Path.DirectorySeparatorChar.ToString();
+                helpFile += Path.DirectorySeparatorChar;
             helpFile += Properties.Resources.HelpFile;
             // Now build and show the about dialog:
-            AboutDialog ad = new AboutDialog(version, copyright, Properties.Resources.URL,
-                Properties.Resources.License, helpFile, tooltipsCheckbox.Checked);
+            AboutDialog ad = new(MainForm.version, MainForm.copyright, Properties.Resources.URL, Properties.Resources.License, helpFile, this.tooltipsCheckbox.Checked);
             ad.ShowDialog();
         }
 
@@ -370,10 +254,12 @@ namespace com.gpfcomics.WinHasher
         private void browseSingleButton_Click(object sender, EventArgs e)
         {
             // Create our open file dialog box and show it:
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = lastDirectory;
-            ofd.CheckFileExists = true;
-            ofd.Multiselect = false;
+            OpenFileDialog ofd = new()
+            {
+                InitialDirectory = this.LastDirectory,
+                CheckFileExists = true,
+                Multiselect = false
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -381,17 +267,17 @@ namespace com.gpfcomics.WinHasher
                     // Get the file name of the file and put it into the text box:
                     fileSingleTextBox.Text = ofd.FileName;
                     // Derive the directory information from the file's path:
-                    FileInfo fi = new FileInfo(ofd.FileName);
-                    lastDirectory = fi.DirectoryName;
+                    FileInfo fi = new(ofd.FileName);
+                    this.LastDirectory = fi.DirectoryName;
                     // Enable the hash button:
-                    hashSingleButton.Enabled = true;
+                    this.hashSingleButton.Enabled = true;
                     // Clear out any existing hash in the hash text box:
-                    hashSingleTextBox.Text = "";
+                    this.hashSingleTextBox.Text = "";
                     // Clear out comparison hash text and the result label.  We could
                     // force the comparison to be rerun, but it would be safer to
                     // clear out the comparison here instead.
-                    compareResultLabel.Visible = false;
-                    compareToTextBox.Text = "";
+                    this.compareResultLabel.Visible = false;
+                    this.compareToTextBox.Text = "";
                 }
                 #region Catch Exceptions
                 // Most of these are thrown by the FileInfo constructor, although a couple
@@ -399,63 +285,57 @@ namespace com.gpfcomics.WinHasher
                 // the problem then restore the GUI to the default state.
                 catch (System.Security.SecurityException)
                 {
-                    MessageBox.Show("You do not have permission to access the file \"" +
-                        ofd.FileName + "\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    MessageBox.Show($"You do not have permission to access the file \"{ofd.FileName}\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Access to the file \"" + ofd.FileName +
-                        "\" has been denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    MessageBox.Show($"Access to the file \"{ofd.FileName}\" has been denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 catch (PathTooLongException)
                 {
-                    MessageBox.Show("The path \"" + ofd.FileName +
-                        "\" is too long for the system to handle.", "Error", MessageBoxButtons.OK,
+                    MessageBox.Show($"The path \"{ofd.FileName}\" is too long for the system to handle.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 catch (NotSupportedException)
                 {
-                    MessageBox.Show("The path \"" + ofd.FileName +
-                        "\" contains invalid characters.", "Error", MessageBoxButtons.OK,
+                    MessageBox.Show($"The path \"{ofd.FileName}\" contains invalid characters.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 catch (ArgumentNullException)
                 {
-                    MessageBox.Show("The file path specified was empty.", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    MessageBox.Show("The file path specified is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 catch (ArgumentException)
                 {
-                    MessageBox.Show("The file path was empty, contained only white spaces, " +
-                        "or contained invalid characters.", "Error", MessageBoxButtons.OK,
+                    MessageBox.Show("The file path was empty, contained only white spaces, or contained invalid characters.", "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 // A generic catch, just in case:
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
                 }
                 #endregion
             }
@@ -472,9 +352,8 @@ namespace com.gpfcomics.WinHasher
             // If the file box is empty or doesn't point to a vald fiel name, complain:
             if (String.IsNullOrEmpty(fileSingleTextBox.Text) || !File.Exists(fileSingleTextBox.Text.Trim()))
             {
-                MessageBox.Show("Please specify a valid file name in the File to Hash text box.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                hashSingleButton.Enabled = false;
+                MessageBox.Show("Please specify a valid file name in the File to Hash text box.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.hashSingleButton.Enabled = false;
             }
             else
             {
@@ -485,41 +364,40 @@ namespace com.gpfcomics.WinHasher
                 try
                 {
                     // Make it look like we're busy:
-                    UseWaitCursor = true;
-                    hashSingleTextBox.Text = "Hashing in progress...";
-                    fileSingleTextBox.Text = fileSingleTextBox.Text.Trim();
-                    Refresh();
+                    this.UseWaitCursor = true;
+                    this.hashSingleTextBox.Text = "Hashing in progress...";
+                    this.fileSingleTextBox.Text = fileSingleTextBox.Text.Trim();
+                    this.Refresh();
                     // Create the progress dialog and show it.  This kicks off the
                     // actual hashing process.
-                    ProgressDialog pd = new ProgressDialog(fileSingleTextBox.Text, hash, 
-                        false, outputType);
+                    ProgressDialog pd = new(new string[] { fileSingleTextBox.Text }, this.Hash, false, this.OutputType);
                     pd.ShowDialog();
                     // What we do next depends on the result:
                     switch (pd.Result)
                     {
                         // Success:  Display the hash:
                         case ProgressDialog.ResultStatus.Success:
-                            hashSingleTextBox.Text = pd.Hash;
+                            this.hashSingleTextBox.Text = pd.Hash;
                             // If the comparison text box is not empty, rerun the comparison:
                             if (!String.IsNullOrEmpty(compareToTextBox.Text))
-                                compareToTextBox_TextChanged(null, null);
+                                this.compareToTextBox_TextChanged(null, null);
                             break;
                         // Cancelled:  Let the user know they cancelled the hash:
                         case ProgressDialog.ResultStatus.Cancelled:
-                            hashSingleTextBox.Text = "The hash of this file was cancelled.";
+                            this.hashSingleTextBox.Text = "The hash of this file was cancelled.";
                             break;
                         // Error:  Warn the user of the error:
                         case ProgressDialog.ResultStatus.Error:
-                            hashSingleTextBox.Text = "An error occurred while hashing this file.";
+                            this.hashSingleTextBox.Text = "An error occurred while hashing this file.";
                             break;
                         // Anything else:  Clear out the hash text box:
                         default:
-                            hashSingleTextBox.Text = "";
+                            this.hashSingleTextBox.Text = "";
                             break;
                     }
                     // Get ready to do stuff again:
-                    UseWaitCursor = false;
-                    Refresh();
+                    this.UseWaitCursor = false;
+                    this.Refresh();
                 }
                 #region Catch Exceptions
                 // The only thing we really need to catch here are HashEngineExceptions, which
@@ -529,32 +407,28 @@ namespace com.gpfcomics.WinHasher
                 // out the GUI and return it to its default state.
                 catch (HashEngineException hee)
                 {
-                    MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
-                    UseWaitCursor = false;
-                    Refresh();
+                    MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
+                    this.UseWaitCursor = false;
+                    this.Refresh();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                    fileSingleTextBox.Text = "";
-                    hashSingleButton.Enabled = false;
-                    hashSingleTextBox.Text = "";
-                    UseWaitCursor = false;
-                    Refresh();
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.fileSingleTextBox.Text = "";
+                    this.hashSingleButton.Enabled = false;
+                    this.hashSingleTextBox.Text = "";
+                    this.UseWaitCursor = false;
+                    this.Refresh();
                 }
                 #endregion
             }
         }
-
         #endregion
 
         #region Compare Files Tab Buttons
-
         /// <summary>
         /// When the Add button is clicked, open a file dialog and allow the user to select one
         /// or more files.  Then add those files to the list box, making sure that each file is
@@ -566,16 +440,17 @@ namespace com.gpfcomics.WinHasher
         {
             // Open and display the file dialog.  Note that multi-select is on, so the user
             // can grab any number of files.
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = lastDirectory;
-            ofd.Multiselect = true;
-            ofd.CheckFileExists = true;
+            OpenFileDialog ofd = new()
+            {
+                InitialDirectory = this.LastDirectory,
+                Multiselect = true,
+                CheckFileExists = true
+            };
             // If they clicked OK:
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                PopulateFileListBox(ofd.FileNames);
+                this.PopulateFileListBox(ofd.FileNames);
             }
-
         }
 
         /// <summary>
@@ -591,9 +466,9 @@ namespace com.gpfcomics.WinHasher
             {
                 // We can't iterate through the list and change it at the same time.  So
                 // create a separate array to hold the strings of the selected files' paths.
-                string[] fileList = new string[compareFilesListBox.Items.Count];
+                string[] fileList = new string[this.compareFilesListBox.Items.Count];
                 int counter = 0;
-                foreach (object file in compareFilesListBox.SelectedItems)
+                foreach (object file in this.compareFilesListBox.SelectedItems)
                 {
                     fileList[counter] = (string)file;
                     counter++;
@@ -601,25 +476,26 @@ namespace com.gpfcomics.WinHasher
                 // The step through the new array and remove each file from the list box:
                 foreach (string s in fileList)
                 {
-                    compareFilesListBox.Items.Remove(s);
+                    this.compareFilesListBox.Items.Remove(s);
                 }
                 // Check the count of the files and disable the Compare, Remove, and Clear
                 // buttons as appropriate:
-                if (compareFilesListBox.Items.Count <= 1) compareButton.Enabled = false;
-                if (compareFilesListBox.Items.Count < 1)
+                if (this.compareFilesListBox.Items.Count <= 1)
                 {
-                    removeButton.Enabled = false;
-                    clearButton.Enabled = false;
+                    this.compareButton.Enabled = false;
+                }
+                if (this.compareFilesListBox.Items.Count < 1)
+                {
+                    this.removeButton.Enabled = false;
+                    this.clearButton.Enabled = false;
                 }
             }
             // This should never happen:
             else
             {
-                MessageBox.Show("You must select at least one file before you can " +
-                    "remove anything from the list.", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                removeButton.Enabled = false;
-                clearButton.Enabled = false;
+                MessageBox.Show("You must select at least one file before you can remove anything from the list.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.removeButton.Enabled = false;
+                this.clearButton.Enabled = false;
             }
         }
 
@@ -638,55 +514,53 @@ namespace com.gpfcomics.WinHasher
                 // The hash engine compare function takes an array of file path strings.
                 // There's probably a better way to do this, but we'll step through each
                 // element in the list box and put it into a proper string array first:
-                string[] fileList = new string[compareFilesListBox.Items.Count];
-                for (int i = 0; i < compareFilesListBox.Items.Count; i++)
-                    fileList[i] = (string)compareFilesListBox.Items[i];
+                string[] fileList = new string[this.compareFilesListBox.Items.Count];
+                for (int i = 0; i < this.compareFilesListBox.Items.Count; i++)
+                {
+                    fileList[i] = (string)this.compareFilesListBox.Items[i];
+                }
                 // Make sure the user knows we're busy:
-                UseWaitCursor = true;
-                Refresh();
+                this.UseWaitCursor = true;
+                this.Refresh();
+
                 // Create the progress dialog and show it.  This will start the actual comparison
                 // process.
-                ProgressDialog pd = new ProgressDialog(fileList, hash);
+                ProgressDialog pd = new(fileList, this.Hash);
                 pd.ShowDialog();
                 // Check the progress dialog and make sure we got a result.  If it says the files
                 // match, show the success message:
+                // TODO: move those messages in the lower layer, as they are the same as in program.cs
                 if (pd.Result == ProgressDialog.ResultStatus.Success && pd.FilesMatch)
                 {
                     // The test passed; all hashes matched:
-                    MessageBox.Show("Congratulations! All " + fileList.Length +
-                        " files match!", "Hashes Match", MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                    MessageBox.Show($"Congratulations! All {fileList.Length} files match!", "Hashes Match", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 // If the dialog returns success, but the files didn't match, warn the user.
                 // If the dialog returned anything but success, we'll assume they've already
                 // seen the error message.
                 else if (pd.Result == ProgressDialog.ResultStatus.Success)
                 {
-                    MessageBox.Show("WARNING! At least one of the " + fileList.Length +
-                        " files did not match!", "Hashes Don't Match", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    MessageBox.Show($"WARNING! At least one of the {fileList.Length} files did not match!", "Hashes Don't Match", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 // Get rid of the wait cursor:
-                UseWaitCursor = false;
-                Refresh();
+                this.UseWaitCursor = false;
+                this.Refresh();
             }
             #region Catch Exceptions
             // Our primary concern is the HashEngineException.  This should already contain the
             // error message, so just spit it back out:
             catch (HashEngineException hee)
             {
-                MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                UseWaitCursor = false;
-                Refresh();
+                MessageBox.Show(hee.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.UseWaitCursor = false;
+                this.Refresh();
             }
             // Generic exception catch, just in case:
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                UseWaitCursor = false;
-                Refresh();
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.UseWaitCursor = false;
+                this.Refresh();
             }
             #endregion
         }
@@ -700,12 +574,11 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void clearButton_Click(object sender, EventArgs e)
         {
-            compareFilesListBox.Items.Clear();
-            removeButton.Enabled = false;
-            compareButton.Enabled = false;
-            clearButton.Enabled = false;
+            this.compareFilesListBox.Items.Clear();
+            this.removeButton.Enabled = false;
+            this.compareButton.Enabled = false;
+            this.clearButton.Enabled = false;
         }
-
         #endregion
 
         /// <summary>
@@ -730,8 +603,7 @@ namespace com.gpfcomics.WinHasher
             // whitespace, as significant.
             try
             {
-                outputTextBox.Text = HashEngine.HashText(hash, inputTextBox.Text,
-                    (Encoding)encodingComboBox.SelectedItem, outputType);
+                outputTextBox.Text = HashEngine.HashText(this.Hash, inputTextBox.Text, (Encoding)encodingComboBox.SelectedItem, this.OutputType);
             }
             // This should be more specific:
             catch (Exception ex)
@@ -739,38 +611,9 @@ namespace com.gpfcomics.WinHasher
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        /// <summary>
-        /// What to do when the Options button has been clicked
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void optionsButton_Click(object sender, EventArgs e)
-        {
-            // This is pretty simple:  Build the options dialog, pass it a couple values, and show it.
-            // If the user clicks OK, grab the user's preference on disabling update checks.  (Everything
-            // else is handled within the dialog itself.)
-            OptionsDialog od = new OptionsDialog();
-            od.ParentDialog = this;
-            od.DisableUpdateCheck = disableUpdateCheck;
-            od.EnableTooltips = toolTip1.Active;
-            od.LastUpdateCheck = updateFeedLastCheck;
-            od.UpdateFeedUri = updateFeedUri;
-            od.UpdateFeedAppName = updateFeedAppName;
-            od.UpdateAltDownloadPage = updateAltDownloadPage;
-            od.Version = Assembly.GetExecutingAssembly().GetName().Version;
-            if (od.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                disableUpdateCheck = od.DisableUpdateCheck;
-                updateFeedLastCheck = od.LastUpdateCheck;
-            }
-        }
-
-
         #endregion
 
         #region Other GUI Events
-
         /// <summary>
         /// When the hash dropdown changes, change the active hash
         /// </summary>
@@ -778,7 +621,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void hashComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            hash = HashEngine.GetHashFromName((string)hashComboBox.SelectedItem);
+            this.Hash = HashEngine.GetHashFromName((string)this.hashComboBox.SelectedItem);
         }
 
         /// <summary>
@@ -790,11 +633,14 @@ namespace com.gpfcomics.WinHasher
         private void modeTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             // For the single hash page, make it the Compute Hash button:
-            if (modeTabControl.SelectedIndex == 0) AcceptButton = hashSingleButton;
+            if (this.modeTabControl.SelectedIndex == 0)
+                this.AcceptButton = this.hashSingleButton;
             // For the compare tab, make it the Compare Hashes button:
-            else if (modeTabControl.SelectedIndex == 1) AcceptButton = compareButton;
+            else if (this.modeTabControl.SelectedIndex == 1)
+                this.AcceptButton = this.compareButton;
             // For the hash text tab, make it the Hash Text button:
-            else AcceptButton = hashTextButton;
+            else
+                this.AcceptButton = this.hashTextButton;
         }
 
         /// <summary>
@@ -810,10 +656,7 @@ namespace com.gpfcomics.WinHasher
             // specified in the box actually exists.  If it does, we'll enable the Compute Hash
             // button; otherwise, we'll disable it.  Thus, the button should only be enabled if
             // there's something in the path box worth hashing.
-            if (!String.IsNullOrEmpty(fileSingleTextBox.Text) && File.Exists(fileSingleTextBox.Text.Trim()))
-                hashSingleButton.Enabled = true;
-            else
-                hashSingleButton.Enabled = false;
+            this.hashSingleButton.Enabled = !String.IsNullOrEmpty(this.fileSingleTextBox.Text) && File.Exists(this.fileSingleTextBox.Text.Trim());
         }
 
         /// <summary>
@@ -825,8 +668,7 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void compareFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (compareFilesListBox.SelectedItems.Count > 0) removeButton.Enabled = true;
-            else removeButton.Enabled = false;
+            this.removeButton.Enabled = this.compareFilesListBox.SelectedItems.Count > 0;
         }
 
         /// <summary>
@@ -837,7 +679,18 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void outputFormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            outputType = HashEngine.GetOutputTypeFromName((string)outputFormatComboBox.SelectedItem);
+            OutputType oldEncoding = this.OutputType;
+            this.OutputType = HashEngine.GetOutputTypeFromName((string)this.outputFormatComboBox.SelectedItem);
+
+            // Updates teh current value
+            if (this.modeTabControl.SelectedTab == this.singleTabPage)
+            {
+                this.hashSingleTextBox.Text = HashEngine.ReEncodeBytes(oldEncoding, this.hashSingleTextBox.Text, this.OutputType);
+            }
+            else if (this.modeTabControl.SelectedTab == this.textTabPage)
+            {
+                this.outputTextBox.Text = HashEngine.ReEncodeBytes(oldEncoding, this.outputTextBox.Text, this.OutputType);
+            }
         }
 
         /// <summary>
@@ -849,68 +702,8 @@ namespace com.gpfcomics.WinHasher
         /// <param name="e"></param>
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Only try to write our settings to the registry if we weren't opened in
-            // portable mode:
-            if (!portable)
-            {
-                // Let's give it the old college try:
-                try
-                {
-                    // Try to open HKCU\Software.  This *should* always exist:
-                    RegistryKey HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", true);
-                    if (HKCU_Software != null)
-                    {
-                        // Try to open HKCU\Software\GPF Comics.  If this key doesn't exist we'll
-                        // try to create it:
-                        RegistryKey GPFComics = HKCU_Software.OpenSubKey("GPF Comics", true);
-                        if (GPFComics == null) GPFComics = HKCU_Software.CreateSubKey("GPF Comics");
-                        if (GPFComics != null)
-                        {
-                            // Try to open HKCU\Software\GPF Comics\WinHasher.  If this key doesn't
-                            // exist we'll try to create it:
-                            RegistryKey winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
-                            if (winHasherSettings == null) winHasherSettings =
-                                GPFComics.CreateSubKey("WinHasher");
-                            if (winHasherSettings != null)
-                            {
-                                // By now we should be in our own little private paradise.  Start
-                                // saving our settings.  For the drop-downs and tabs, we'll just
-                                // safe the index value.  For the last directory, we'll save the
-                                // path string.  There might be a security question around saving
-                                // this path, of course, but we'll go with it as is.
-                                winHasherSettings.SetValue("CurrentHash",
-                                    (string)hashComboBox.SelectedItem, RegistryValueKind.String);
-                                winHasherSettings.SetValue("TextEncoding",
-                                    ((Encoding)encodingComboBox.SelectedItem).WebName, RegistryValueKind.String);
-                                winHasherSettings.SetValue("OutputType",
-                                    (string)outputFormatComboBox.SelectedItem, RegistryValueKind.String);
-                                winHasherSettings.SetValue("LastDirectory",
-                                    lastDirectory, RegistryValueKind.String);
-                                winHasherSettings.SetValue("LastTab", modeTabControl.SelectedIndex,
-                                    RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("Version",
-                                    Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                                    RegistryValueKind.String);
-                                winHasherSettings.SetValue("ShowToolTips",
-                                    (tooltipsCheckbox.Checked ? 1 : 0),
-                                    RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("DisableUpdateCheck",
-                                    (disableUpdateCheck ? 1 : 0),
-                                    RegistryValueKind.DWord);
-                                winHasherSettings.SetValue("LastUpdateCheck",
-                                    updateFeedLastCheck.ToString(), RegistryValueKind.String);
-                                // We're done, so close up shop:
-                                winHasherSettings.Close();
-                            }
-                            GPFComics.Close();
-                        }
-                        HKCU_Software.Close();
-                    }
-                }
-                // If we failed for any reason, don't bother with anything else.  The defaults
-                // will be restored the next time the program is opened.
-                catch { }
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                this.SaveSettings();
         }
 
         /// <summary>
@@ -922,8 +715,7 @@ namespace com.gpfcomics.WinHasher
         {
             // Fortunately, the ToolTip.Active property turns tooltips on and off, so
             // this is relatively easy:
-            if (tooltipsCheckbox.Checked) toolTip1.Active = true;
-            else toolTip1.Active = false;
+            this.toolTip1.Active = this.tooltipsCheckbox.Checked;
         }
 
         /// <summary>
@@ -935,13 +727,13 @@ namespace com.gpfcomics.WinHasher
         {
             // If the Compare To field is empty (the default) we don't want to show a false
             // error.  In this case, just hide the lable.
-            if (String.IsNullOrEmpty(compareToTextBox.Text) ||
-                String.IsNullOrEmpty(hashSingleTextBox.Text))
+            if (String.IsNullOrEmpty(this.compareToTextBox.Text) ||
+                String.IsNullOrEmpty(this.hashSingleTextBox.Text))
             {
-                compareResultLabel.Visible = false;
-                compareResultLabel.Text = "";
-                compareResultLabel.ForeColor = SystemColors.ControlText;
-                compareResultLabel.BackColor = SystemColors.Control;
+                this.compareResultLabel.Visible = false;
+                this.compareResultLabel.Text = "";
+                this.compareResultLabel.ForeColor = SystemColors.ControlText;
+                this.compareResultLabel.BackColor = SystemColors.Control;
             }
             else
             {
@@ -960,47 +752,47 @@ namespace com.gpfcomics.WinHasher
                 // excess whitespace on either end; I've lost count of how many times I've copied
                 // a hash from a website and it was marked as "no match" just because some
                 // extra whitespace was accidentally tacked onto the end.
-                if (!String.IsNullOrEmpty(compareToTextBox.Text))
+                if (!String.IsNullOrEmpty(this.compareToTextBox.Text))
                 {
-                    switch (outputType)
+                    switch (this.OutputType)
                     {
                         case OutputType.Hex:
                         case OutputType.BubbleBabble:
-                            compareToTextBox.Text = compareToTextBox.Text.Trim().ToLower();
+                            this.compareToTextBox.Text = this.compareToTextBox.Text.Trim().ToLower();
                             break;
                         case OutputType.CapHex:
-                            compareToTextBox.Text = compareToTextBox.Text.Trim().ToUpper();
+                            this.compareToTextBox.Text = this.compareToTextBox.Text.Trim().ToUpper();
                             break;
-                        default:
-                            compareToTextBox.Text = compareToTextBox.Text.Trim();
+                        default: // OutputType.Base64:
+                            this.compareToTextBox.Text = this.compareToTextBox.Text.Trim();
                             break;
                     }
+
+                    // Not not let the position be reset at the start because of the above trick
+                    this.compareToTextBox.SelectionStart = this.compareToTextBox.Text.Length;
                 }
                 // If the two strings match, then the generated hash matches the pre-existing
                 // hash and the user can safely say the file is unaltered and intact:
-                if (String.Compare(hashSingleTextBox.Text, compareToTextBox.Text) == 0)
+                if (String.Compare(this.hashSingleTextBox.Text, this.compareToTextBox.Text) == 0)
                 {
-                    compareResultLabel.Visible = true;
-                    compareResultLabel.Text = "Hashes match";
-                    compareResultLabel.ForeColor = Color.White;
-                    compareResultLabel.BackColor = Color.Green;
+                    this.compareResultLabel.Text = "Hashes match";
+                    this.compareResultLabel.ForeColor = Color.White;
+                    this.compareResultLabel.BackColor = Color.Green;
                 }
                 // Otherwise, the strings don't match, the hashes don't match, and the file is
                 // not what it claims to be:
                 else
                 {
-                    compareResultLabel.Visible = true;
-                    compareResultLabel.Text = "Hashes do not match";
-                    compareResultLabel.ForeColor = Color.Yellow;
-                    compareResultLabel.BackColor = Color.Red;
+                    this.compareResultLabel.Text = "Hashes do not match";
+                    this.compareResultLabel.ForeColor = Color.Yellow;
+                    this.compareResultLabel.BackColor = Color.Red;
                 }
+                this.compareResultLabel.Visible = true;
             }
         }
-
         #endregion
 
         #region Drag and Drop Event Handlers
-
         /// <summary>
         /// We only accept files as drag and drop data.  Since all GUI elements do the
         /// same basic thing when we drag stuff onto them (copy the values), all the
@@ -1013,7 +805,8 @@ namespace com.gpfcomics.WinHasher
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
-            else e.Effect = DragDropEffects.None;
+            else
+                e.Effect = DragDropEffects.None;
         }
 
         /// <summary>
@@ -1033,13 +826,12 @@ namespace com.gpfcomics.WinHasher
                 // file names as a string array, add them to the file list, making
                 // sure no duplicates are added.
                 string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
-                PopulateFileListBox(fileList);
+                this.PopulateFileListBox(fileList);
             }
             // Something other files were dropped:
             else
             {
-                MessageBox.Show("Only files can be dropped onto this tab.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Only files can be dropped onto this tab.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -1061,29 +853,25 @@ namespace com.gpfcomics.WinHasher
                 string[] fileList = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (fileList.Length == 1)
                 {
-                    modeTabControl.SelectedTab = singleTabPage;
-                    fileSingleTextBox.Text = fileList[0];
-                    hashSingleButton_Click(sender, e);
+                    this.modeTabControl.SelectedTab = this.singleTabPage;
+                    this.fileSingleTextBox.Text = fileList[0];
+                    this.hashSingleButton_Click(sender, e);
                 }
                 // Got too many files:
                 else
                 {
-                    MessageBox.Show("Two many files; only drop one into this box.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Two many files; only drop one into this box.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             // The data dropped wasn't a file:
             else
             {
-                MessageBox.Show("Only files can be dropped onto this tab.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Only files can be dropped onto this tab.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         #endregion
 
         #region Generic Private Methods
-
         /// <summary>
         /// Abstracted here for code reuse, this method takes a string array which is assumed to
         /// contain a list of file path strings.  These can come from a drap & drop operation or
@@ -1106,7 +894,7 @@ namespace com.gpfcomics.WinHasher
                     // Assume that this particular file isn't already in the list:
                     bool inList = false;
                     // Step through the files currently in the list box:
-                    foreach (object listFile in compareFilesListBox.Items)
+                    foreach (object listFile in this.compareFilesListBox.Items)
                     {
                         // If the selected file is already in the list, we don't want to
                         // add it twice.  So mark that we found it and stop looping:
@@ -1121,17 +909,23 @@ namespace com.gpfcomics.WinHasher
                     // from.
                     if (!inList)
                     {
-                        compareFilesListBox.Items.Add(file);
+                        this.compareFilesListBox.Items.Add(file);
                         addedFiles = true;
-                        FileInfo fi = new FileInfo(file);
-                        lastDirectory = fi.DirectoryName;
+                        FileInfo fi = new(file);
+                        this.LastDirectory = fi.DirectoryName;
                     }
                 }
                 // If we added any files, enable the Compare Hashes and Clear List buttons:
                 if (addedFiles)
                 {
-                    if (compareFilesListBox.Items.Count > 1) { compareButton.Enabled = true; }
-                    if (compareFilesListBox.Items.Count > 0) { clearButton.Enabled = true; }
+                    if (compareFilesListBox.Items.Count > 1)
+                    {
+                        compareButton.Enabled = true;
+                    }
+                    if (compareFilesListBox.Items.Count > 0)
+                    {
+                        clearButton.Enabled = true;
+                    }
                 }
             }
             #region Catch Exceptions
@@ -1139,76 +933,116 @@ namespace com.gpfcomics.WinHasher
             // are thrown by its DirectoryName property.
             catch (System.Security.SecurityException)
             {
-                MessageBox.Show("You do not have permission to access one or more of " +
-                    "the files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("You do not have permission to access one or more of the files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Access to one or more of the files has been denied.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Access to one or more of the files has been denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (PathTooLongException)
             {
-                MessageBox.Show("One or more of the file paths is too long for the " +
-                    "system to handle.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("One or more of the file paths is too long for the system to handle.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (NotSupportedException)
             {
-                MessageBox.Show("One or more of the file paths contains invalid " +
-                    "characters.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("One or more of the file paths contains invalid characters.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (ArgumentNullException)
             {
-                MessageBox.Show("One or more of the file paths specified was empty.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("One or more of the file paths specified was empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (ArgumentException)
             {
-                MessageBox.Show("One or more of the file paths was empty, contained " +
-                    "only white spaces, or contained invalid characters.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("One or more of the file paths was empty, contained only white spaces, or contained invalid characters.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // This could be thrown by ListBox.Items.Add():
             catch (SystemException)
             {
-                MessageBox.Show("The system ran out of memory while adding files to the " +
-                    "list. Try removing a few files and comparing them again.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The system ran out of memory while adding files to the list. Try removing a few files and comparing them again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // A generic catch, just in case:
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             #endregion
         }
 
         /// <summary>
-        /// Reset all settings to their defaults
+        /// Reset all settings to their defaults (for portable mode and non Windows OSes)
         /// </summary>
         private void PopulateDefaultSettings()
         {
-            // We used to default to MD5 then to SHA-1 explicitly.  Now we'll drive the default value
-            // of the hash drop-down by whatever the default we set in the HashEngine:
-            hash = HashEngine.DefaultHash;
-            hashComboBox.SelectedItem = HashEngine.GetHashName(hash);
+            hashComboBox.SelectedItem = HashEngine.GetHashName(this.Hash);
+
             // Previously, we set the system default encoding as the default.  However, in retrospect,
             // UTF-8 is probably a better choice because it is universally supported.
             encodingComboBox.SelectedItem = Encoding.UTF8;
-            // Force the output drop-down to the HashEngine default:
-            outputType = HashEngine.DefaultOutputType;
-            outputFormatComboBox.SelectedItem = HashEngine.GetOutputTypeName(outputType);
+
+            outputFormatComboBox.SelectedItem = HashEngine.GetOutputTypeName(this.OutputType);
+
             // Set our the last directory to My Documents:
-            try { lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); }
-            catch { lastDirectory = Environment.CurrentDirectory; }
+            try
+            {
+                this.LastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+            catch { /* already has a default to pwd */ }
+
             // Default to the Hash Single File tab:
             modeTabControl.SelectedIndex = 0;
+
             // Default to tooltips being on:
             tooltipsCheckbox.Checked = true;
-            // Always check for updates:
-            disableUpdateCheck = false;
-            updateFeedLastCheck = DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Load the settings stored in the registry.
+        /// </summary>
+        private void LoadSettings()
+        {
+            try
+            {
+                // Upgrade any existing settings if necessary:
+                this.UpgradeSettings();
+
+                // Try to open the HKCU\Software\GPF Comics\WinHasher key:
+                RegistryKey winHasherSettings = Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics", false).OpenSubKey("WinHasher", false);
+
+                // Try to set the hash combo box:
+                this.hashComboBox.SelectedItem = (string)winHasherSettings.GetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash));
+                this.hashComboBox_SelectedIndexChanged(null, null);
+
+                // Try to set the encoding combo box:
+                this.encodingComboBox.SelectedItem = Encoding.GetEncoding((string)winHasherSettings.GetValue("TextEncoding", Encoding.UTF8.WebName));
+
+                // Try to set the output format combo box:
+                this.outputFormatComboBox.SelectedItem = (string)winHasherSettings.GetValue("OutputType", HashEngine.GetOutputTypeName(HashEngine.DefaultOutputType));
+                this.outputFormatComboBox_SelectedIndexChanged(null, null);
+
+                // Try to set the last directory:
+                string dirTemp = this.LastDirectory; // Default to pwd
+                try
+                {
+                    dirTemp = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                }
+                catch { }
+                this.LastDirectory = (string)winHasherSettings.GetValue("LastDirectory", dirTemp);
+
+                // Try to restore the last used tab:
+                this.modeTabControl.SelectedIndex = (int)winHasherSettings.GetValue("LastTab", 0);
+                this.modeTabControl_SelectedIndexChanged(null, null);
+
+                // Try to restore the tooltips toggle:
+                this.tooltipsCheckbox.Checked = (int)winHasherSettings.GetValue("ShowToolTips", 1) == 1 ? true : false;
+
+                winHasherSettings.Close();
+            }
+            // If any of the registry reading code above fails, restore everything to the
+            // default settings:
+            catch
+            {
+                this.PopulateDefaultSettings();
+            }
         }
 
         /// <summary>
@@ -1224,14 +1058,14 @@ namespace com.gpfcomics.WinHasher
                 // that, however, we'll need to look at the value of the Version registry entry to see
                 // which version last updated the registry settings.  Note that we don *NOT* look at the
                 // current version of the running code, which won't help us in this case.
-                Version v1_7 = new Version("1.7.0.0");
+                Version v1_7 = new("1.7.0.0");
 
                 // Get the version of the app that last wrote to the registry.  To do that, we'll need to
                 // open our registry values first.  Note that unlike the MainForm_FormClosing() method above,
                 // we won't try to create our registry keys if they don't exist; all of our tests will then
                 // silently fail.  By default, we'll set the "current" version to something ridiculously
                 // high so the other tests will fail if we can't read it from the registry.
-                Version current = new Version("9999.9999.9999.9999");
+                Version current = new("9999.9999.9999.9999");
                 RegistryKey HKCU_Software, GPFComics, winHasherSettings = null;
                 HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", false);
                 if (HKCU_Software != null)
@@ -1286,22 +1120,22 @@ namespace com.gpfcomics.WinHasher
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA1), RegistryValueKind.String);
                                             break;
                                         case 2:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA256), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_256), RegistryValueKind.String);
                                             break;
                                         case 3:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA384), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_384), RegistryValueKind.String);
                                             break;
                                         case 4:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA512), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.SHA_512), RegistryValueKind.String);
                                             break;
                                         case 5:
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.RIPEMD160), RegistryValueKind.String);
                                             break;
                                         case 6:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Whirlpool), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.WHIRLPOOL), RegistryValueKind.String);
                                             break;
                                         case 7:
-                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.Tiger), RegistryValueKind.String);
+                                            winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(Hashes.TIGER), RegistryValueKind.String);
                                             break;
                                         default:
                                             winHasherSettings.SetValue("CurrentHash", HashEngine.GetHashName(HashEngine.DefaultHash), RegistryValueKind.String);
@@ -1365,15 +1199,6 @@ namespace com.gpfcomics.WinHasher
                                     winHasherSettings.SetValue("TextEncoding", Encoding.UTF8.WebName, RegistryValueKind.String);
                                 }
 
-                                // Create the new disable update check registry flag and assign it the default
-                                // value of false (zero).  This is a new registry setting, so it doesn't already exist.
-                                winHasherSettings.SetValue("DisableUpdateCheck", 0, RegistryValueKind.DWord);
-
-                                // Create the new last update check registry and assign it the default minimum
-                                // value of DateTime, ensuring that the first time this runs, we'll do an update
-                                // check.  This is a new registry setting, so it doesn't already exist.
-                                winHasherSettings.SetValue("LastUpdateCheck", DateTime.MinValue.ToString(), RegistryValueKind.String);
-
                                 // Close the registry:
                                 winHasherSettings.Close();
                             }
@@ -1390,90 +1215,59 @@ namespace com.gpfcomics.WinHasher
             catch { }
         }
 
-        #endregion
-
-        #region IUpdateCheckListener Implementations
-
-        // These methods implement the IUpdateCheckListener interface, which is used to check
-        // for updates for WinHasher.  They shouldn't have to actually do much, as the update
-        // checker does most of the work.
-
         /// <summary>
-        /// What to do if a new update is found.
+        ///  Saves the crrent settings in the registry.
         /// </summary>
-        void IUpdateCheckListener.OnFoundNewerVersion()
+        private void SaveSettings()
         {
-            // This is pretty simple.  If the update check found a new version, tell it to
-            // go ahead and download it.  Note that the update checker will handle any user
-            // notifications, which includes a prompt on whether or not they'd like to
-            // upgrade.  The null check is probably redudant--this method should never be
-            // called if the update checker is null--but it's a belt-and-suspenders thing.
-            try
+            // Only try to write our settings to the registry if we weren't opened in
+            // portable mode:
+            if (!this.Portable)
             {
-                if (updateChecker != null) updateChecker.GetNewerVersion();
-            }
-            catch
-            {
-                MessageBox.Show("An error occurred while attempting to download the new version. " +
-                    "Please try downloading it again later.", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// What to do if the update checker says to record a new last update check date.
-        /// This gets called by the update checker whenever a check is started, whether it
-        /// is successful or not.
-        /// </summary>
-        /// <param name="lastCheck">The new date of the last update check</param>
-        void IUpdateCheckListener.OnRecordLastUpdateCheck(DateTime lastCheck)
-        {
-            // Don't bother recording anything if we're in portable mode:
-            if (!portable)
-            {
-                // Cache the last update check date locally, then try to open the registry and write
-                // the date to our registry key.  Note that if this fails, we'll silently ignore the
-                // error and the date simply won't be recorded.
-                updateFeedLastCheck = lastCheck;
+                // Let's give it the old college try:
                 try
                 {
-                    RegistryKey winHasherSettings =
-                        Registry.CurrentUser.OpenSubKey("Software", false).OpenSubKey("GPF Comics",
-                        false).OpenSubKey("WinHasher", true);
-                    if (winHasherSettings != null)
+                    // Try to open HKCU\Software.  This *should* always exist:
+                    RegistryKey HKCU_Software = Registry.CurrentUser.OpenSubKey("Software", true);
+                    if (HKCU_Software != null)
                     {
-                        winHasherSettings.SetValue("LastUpdateCheck", updateFeedLastCheck.ToString(),
-                            RegistryValueKind.String);
-                        winHasherSettings.Close();
+                        // Try to open HKCU\Software\GPF Comics.  If this key doesn't exist we'll
+                        // try to create it:
+                        RegistryKey GPFComics = HKCU_Software.OpenSubKey("GPF Comics", true);
+                        GPFComics ??= HKCU_Software.CreateSubKey("GPF Comics");
+                        if (GPFComics != null)
+                        {
+                            // Try to open HKCU\Software\GPF Comics\WinHasher.  If this key doesn't
+                            // exist we'll try to create it:
+                            RegistryKey winHasherSettings = GPFComics.OpenSubKey("WinHasher", true);
+                            winHasherSettings ??= GPFComics.CreateSubKey("WinHasher");
+                            if (winHasherSettings != null)
+                            {
+                                // By now we should be in our own little private paradise.  Start
+                                // saving our settings.  For the drop-downs and tabs, we'll just
+                                // safe the index value.  For the last directory, we'll save the
+                                // path string.  There might be a security question around saving
+                                // this path, of course, but we'll go with it as is.
+                                winHasherSettings.SetValue("CurrentHash", (string)this.hashComboBox.SelectedItem, RegistryValueKind.String);
+                                winHasherSettings.SetValue("TextEncoding", ((Encoding)this.encodingComboBox.SelectedItem).WebName, RegistryValueKind.String);
+                                winHasherSettings.SetValue("OutputType", (string)this.outputFormatComboBox.SelectedItem, RegistryValueKind.String);
+                                winHasherSettings.SetValue("LastDirectory", this.LastDirectory, RegistryValueKind.String);
+                                winHasherSettings.SetValue("LastTab", this.modeTabControl.SelectedIndex, RegistryValueKind.DWord);
+                                winHasherSettings.SetValue("Version", MainForm.version, RegistryValueKind.String);
+                                winHasherSettings.SetValue("ShowToolTips", (this.tooltipsCheckbox.Checked ? 1 : 0), RegistryValueKind.DWord);
+                                // We're done, so close up shop:
+                                winHasherSettings.Close();
+                            }
+                            GPFComics.Close();
+                        }
+                        HKCU_Software.Close();
                     }
                 }
+                // If we failed for any reason, don't bother with anything else.  The defaults
+                // will be restored the next time the program is opened.
                 catch { }
             }
         }
-
-        /// <summary>
-        /// What to do if the update checker wants us to close.  This gets called if the
-        /// update check has successfully download the file and now wants to install the
-        /// new version.
-        /// </summary>
-        void IUpdateCheckListener.OnRequestGracefulClose()
-        {
-            // We don't have a lot to do to close up shop.  Fortunately, we already have
-            // a method to do all that stuff, so call it:
-            MainForm_FormClosing(null, null);
-            Dispose();
-        }
-
-        // We don't really care to do anything in the case when no update is found or when an
-        // update check ends in an error.  The update checker does well enough on its own in
-        // both cases.  Thus, we'll provide empty implementations for both of these call-backs
-        // and let the update check handle these items itself.
-
-        void IUpdateCheckListener.OnNoUpdateFound() { }
-        void IUpdateCheckListener.OnUpdateCheckError() { }
-        void IUpdateCheckListener.OnDownloadCanceled() { }
-
         #endregion
-
     }
 }

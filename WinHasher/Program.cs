@@ -57,11 +57,8 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Text;
 using System.IO;
-using System.Reflection;
 using com.gpfcomics.WinHasher.Core;
 
 namespace com.gpfcomics.WinHasher
@@ -79,217 +76,137 @@ namespace com.gpfcomics.WinHasher
             Application.SetCompatibleTextRenderingDefault(false);
             // If no command-line arguments are given, go ahead and run the program in
             // interactive GUI mode:
-            if (args.Length == 0) { Application.Run(new MainForm()); }
+            if (args.Length == 0)
+            {
+                Application.Run(new MainForm());
+            }
             // If we have one and only one command-line argument and it's the portable
             // flag, load the main application in portable mode (i.e. no writes to the
             // registry):
             else if (args.Length == 1 && args[0].ToLower() == "-portable")
-            { Application.Run(new MainForm(true)); }
+            {
+                Application.Run(new MainForm(true));
+            }
             // Otherwise, assume we're going to process one or more files, show the results
             // in a dialog box, then exit:
             else
             {
-                // Start off by declaring a string array to hold a copy of the command line
-                // arguments.  We can't work with the argument array itself because we may
-                // need to strip off the first one if it's a hash switch.
-                string[] files = null;
-                // Set our default hash and output type:
-                Hashes hash = HashEngine.DefaultHash;
-                string hashString = HashEngine.GetHashName(hash);
-                OutputType outputType = HashEngine.DefaultOutputType;
-                // All our command switches come first, so step through them:
-                while (args[0].StartsWith("-"))
+                CmdLineAppArgs parsedArgs = CmdLineAppUtils.ParseCmdLineArgs(args);
+                if (parsedArgs != null)
                 {
-                    // Examine the switch:
-                    switch (args[0].ToLower())
+                    if (parsedArgs.Files.Length > 0)
                     {
-                        // Most of these determine which hash to use:
-                        case "-md5":
-                            hash = Hashes.MD5;
-                            break;
-                        case "-sha1":
-                            hash = Hashes.SHA1;
-                            break;
-                        case "-sha224":
-                            hash = Hashes.SHA224;
-                            break;
-                        case "-sha256":
-                            hash = Hashes.SHA256;
-                            break;
-                        case "-sha384":
-                            hash = Hashes.SHA384;
-                            break;
-                        case "-sha512":
-                            hash = Hashes.SHA512;
-                            break;
-                        case "-ripemd128":
-                            hash = Hashes.RIPEMD128;
-                            break;
-                        case "-ripemd160":
-                            hash = Hashes.RIPEMD160;
-                            break;
-                        case "-ripemd256":
-                            hash = Hashes.RIPEMD256;
-                            break;
-                        case "-ripemd320":
-                            hash = Hashes.RIPEMD320;
-                            break;
-                        case "-whirlpool":
-                            hash = Hashes.Whirlpool;
-                            break;
-                        case "-tiger":
-                            hash = Hashes.Tiger;
-                            break;
-                        // But this switch enables Base64 hashing:
-                        case "-base64":
-                            outputType = OutputType.Base64;
-                            break;
-                        // And this puts us in all-caps hex mode:
-                        case "-hexcaps":
-                            outputType = OutputType.CapHex;
-                            break;
-                        // And this puts us in Bubble Babble mode:
-                        case "-bubbab":
-                            outputType = OutputType.BubbleBabble;
-                            break;
-                        // If we didn't get a valid hash switch, complain:
-                        default:
-                            MessageBox.Show("Invalid switch \"" + args[0] + "\"", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            break;
-                    }
-                    hashString = HashEngine.GetHashName(hash);
-                    // Now shift the array down to the next argument.  I wish there was a better,
-                    // more efficient way of doing this (like a Perl or PHP shift()), but this is
-                    // all I know of using simple arrays:
-                    string[] args2 = new string[args.Length - 1];
-                    Array.Copy(args, 1, args2, 0, args.Length - 1);
-                    args = args2;
-
-                    //If there are no more arguments left, exit the loop
-                    if (args.Length == 0)
-                        break;
-                }
-                // By now, all our switches should be exhausted.  We should only have strings
-                // not starting with hyphens, which we'll interpret as file path strings.
-                // Only proceed if we have files to work with:
-                files = args;
-                if (files.Length > 0)
-                {
-                    // If we got one file, compute the hash and print it back:
-                    if (files.Length == 1)
-                    {
-                        // We could throw some exceptions here, so ignore Yoda's advice and give
-                        // it a try:
-                        try
+                        // If we got one file, compute the hash and print it back:
+                        if (parsedArgs.Files.Length == 1)
                         {
-                            // Only do this if the file exists:
-                            if (File.Exists(files[0]))
+                            // We could throw some exceptions here, so ignore Yoda's advice and give
+                            // it a try:
+                            try
                             {
-                                // Create a new progress dialog.  This does the actual work:
-                                ProgressDialog pd = new ProgressDialog(files[0], hash, true,
-                                    outputType);
-                                pd.ShowDialog();
-                                // If we got back a successful result, show the hash.  Otherwise,
-                                // the error message should already be shown so do nothing.
-                                if (pd.Result == ProgressDialog.ResultStatus.Success && pd.Hash != null)
+                                // Only do this if the file exists:
+                                // TODO: check that in the underlying function ComputeHash
+                                if (File.Exists(parsedArgs.Files[0]))
                                 {
-                                    ResultDialog rd = new ResultDialog(pd.Hash, hash, outputType);
-                                    rd.ShowDialog();
+                                    // Create a new progress dialog.  This does the actual work:
+                                    ProgressDialog pd = new ProgressDialog(parsedArgs.Files, parsedArgs.Hash, true, parsedArgs.OutputType);
+                                    pd.ShowDialog();
+                                    // If we got back a successful result, show the hash.  Otherwise,
+                                    // the error message should already be shown so do nothing.
+                                    if (pd.Result == ProgressDialog.ResultStatus.Success && pd.Hash != null)
+                                    {
+                                        ResultDialog rd = new ResultDialog(pd.Hash, parsedArgs.Hash, parsedArgs.OutputType);
+                                        rd.ShowDialog();
+                                    }
                                 }
-                            }
-                            // The file didn't exist:
-                            else
-                            {
-                                MessageBox.Show("Error: The specified file does not exist.", "Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                        }
-                        #region Catch Exceptions
-                        // Our hash engine can throw its own exceptions, which usually are just other
-                        // exceptions wrapped in our own message format.  We'll look for those first
-                        // and foremost:
-                        catch (HashEngineException hee)
-                        {
-                            MessageBox.Show("Error: " + hee.Message, "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                        }
-                        // Console.WriteLine() can throw this one:
-                        catch (IOException)
-                        {
-                            MessageBox.Show("Error: An unknown I/O error has occured.", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        // A catch-all to handle anything else:
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                        }
-                        #endregion
-                    }
-                    // If we receive more than one argument, will treat each one as a file path and
-                    // reach each one in turn, computing its hash.  The hash of each file is compared
-                    // against the hash of the first file.  If all the hashes match, we'll print out
-                    // a happy congratulatory message.  If just one of the hashes doesn't match the
-                    // others, we say the whole batch fails.
-                    else
-                    {
-                        try
-                        {
-                            // Create a new progress dialog and show it.  This is where the actual
-                            // work will be done.  Note we don't care about the Base64 flag, since
-                            // the actual hashes won't be displayed to the user.  (Whether we compare
-                            // hex strings or Base64 strings doesn't really matter.)
-                            ProgressDialog pd = new ProgressDialog(files, hash, true);
-                            pd.ShowDialog();
-                            // If we got a successful result, keep going.  Anything else should have
-                            // already thrown an error message.
-                            if (pd.Result == ProgressDialog.ResultStatus.Success)
-                            {
-                                // If the files matched, congratulate the user:
-                                if (pd.FilesMatch)
-                                {
-                                    MessageBox.Show("Congratulations!  All " + files.Length +
-                                        " files match!", hashString + " Hash", MessageBoxButtons.OK,
-                                        MessageBoxIcon.Information);
-                                }
-                                // Otherwise, warn them:
+                                // The file didn't exist:
                                 else
                                 {
-                                    MessageBox.Show("WARNING! One or more of these " + files.Length +
-                                        " files do not match!", hashString + " Hash",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    MessageBox.Show("Error: The specified file does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
                             }
+                            #region Catch Exceptions
+                            // Our hash engine can throw its own exceptions, which usually are just other
+                            // exceptions wrapped in our own message format.  We'll look for those first
+                            // and foremost:
+                            catch (HashEngineException hee)
+                            {
+                                MessageBox.Show("Error: " + hee.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            // Console.WriteLine() can throw this one:
+                            catch (IOException)
+                            {
+                                MessageBox.Show("Error: An unknown I/O error has occured.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            // A catch-all to handle anything else:
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            #endregion
                         }
-                        #region Catch Exceptions
-                        // Same as above:
-                        catch (HashEngineException hee)
+                        // If we receive more than one argument, will treat each one as a file path and
+                        // reach each one in turn, computing its hash.  The hash of each file is compared
+                        // against the hash of the first file.  If all the hashes match, we'll print out
+                        // a happy congratulatory message.  If just one of the hashes doesn't match the
+                        // others, we say the whole batch fails.
+                        else
                         {
-                            MessageBox.Show("Error: " + hee.Message, "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
+                            try
+                            {
+                                // Create a new progress dialog and show it.  This is where the actual
+                                // work will be done.  Note we don't care about the Base64 flag, since
+                                // the actual hashes won't be displayed to the user.  (Whether we compare
+                                // hex strings or Base64 strings doesn't really matter.)
+                                ProgressDialog pd = new ProgressDialog(parsedArgs.Files, parsedArgs.Hash, true);
+                                pd.ShowDialog();
+                                // If we got a successful result, keep going.  Anything else should have
+                                // already thrown an error message.
+                                if (pd.Result == ProgressDialog.ResultStatus.Success)
+                                {
+                                    // If the files matched, congratulate the user:
+                                    if (pd.FilesMatch)
+                                    {
+                                        MessageBox.Show("Congratulations!  All " + parsedArgs.Files.Length + " files match!",
+                                            HashEngine.GetHashName(parsedArgs.Hash) + " Hash",
+                                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    }
+                                    // Otherwise, warn them:
+                                    else
+                                    {
+                                        MessageBox.Show("WARNING! One or more of these " + parsedArgs.Files.Length + " files do not match!",
+                                            HashEngine.GetHashName(parsedArgs.Hash) + " Hash",
+                                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    }
+                                }
+                            }
+                            #region Catch Exceptions
+                            // Same as above:
+                            catch (HashEngineException hee)
+                            {
+                                MessageBox.Show("Error: " + hee.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            // Console.WriteLine() can throw this one:
+                            catch (IOException)
+                            {
+                                MessageBox.Show("Error: An unknown I/O error has occured.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            // A catch-all to handle anything else:
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            #endregion
                         }
-                        // Console.WriteLine() can throw this one:
-                        catch (IOException)
-                        {
-                            MessageBox.Show("Error: An unknown I/O error has occured.", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        // A catch-all to handle anything else:
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Error: " + ex.ToString(), "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                        }
-                        #endregion
+                    }
+                    // There were no files left in the list after the switches were exhausted:
+                    else
+                    {
+                        MessageBox.Show("Error: No files specified.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                // There were no files left in the list after the switches were exhausted:
                 else
                 {
-                    MessageBox.Show("Error: No files specified", "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    MessageBox.Show("Error: Unexpected error while parsing the arguments.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

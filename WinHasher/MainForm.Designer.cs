@@ -63,7 +63,6 @@ namespace com.gpfcomics.WinHasher
             this.outputFormatComboBox = new System.Windows.Forms.ComboBox();
             this.tooltipsCheckbox = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.optionsButton = new System.Windows.Forms.Button();
             this.modeTabControl.SuspendLayout();
             this.singleTabPage.SuspendLayout();
             this.compareTabPage.SuspendLayout();
@@ -321,9 +320,9 @@ namespace com.gpfcomics.WinHasher
             // 
             // hashTextButton
             // 
-            this.hashTextButton.Location = new System.Drawing.Point(205, 97);
+            this.hashTextButton.Location = new System.Drawing.Point(205, 96);
             this.hashTextButton.Name = "hashTextButton";
-            this.hashTextButton.Size = new System.Drawing.Size(65, 24);
+            this.hashTextButton.Size = new System.Drawing.Size(65, 22);
             this.hashTextButton.TabIndex = 4;
             this.hashTextButton.Text = "Hash";
             this.toolTip1.SetToolTip(this.hashTextButton, "Click this button to compute the hash of the\r\ntext in the box above.");
@@ -392,9 +391,9 @@ namespace com.gpfcomics.WinHasher
             // closeButton
             // 
             this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.closeButton.Location = new System.Drawing.Point(212, 290);
+            this.closeButton.Location = new System.Drawing.Point(212, 268);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(75, 23);
+            this.closeButton.Size = new System.Drawing.Size(75, 22);
             this.closeButton.TabIndex = 8;
             this.closeButton.Text = "Close";
             this.toolTip1.SetToolTip(this.closeButton, "Click this button to\r\nclose WinHasher.");
@@ -403,9 +402,9 @@ namespace com.gpfcomics.WinHasher
             // 
             // aboutButton
             // 
-            this.aboutButton.Location = new System.Drawing.Point(212, 262);
+            this.aboutButton.Location = new System.Drawing.Point(212, 239);
             this.aboutButton.Name = "aboutButton";
-            this.aboutButton.Size = new System.Drawing.Size(75, 23);
+            this.aboutButton.Size = new System.Drawing.Size(75, 22);
             this.aboutButton.TabIndex = 7;
             this.aboutButton.Text = "About...";
             this.toolTip1.SetToolTip(this.aboutButton, "Click this button to see more information about\r\nWinHasher, such as the full vers" +
@@ -454,25 +453,12 @@ namespace com.gpfcomics.WinHasher
             this.label7.TabIndex = 3;
             this.label7.Text = "Output format:";
             // 
-            // optionsButton
-            // 
-            this.optionsButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.optionsButton.Location = new System.Drawing.Point(212, 237);
-            this.optionsButton.Name = "optionsButton";
-            this.optionsButton.Size = new System.Drawing.Size(75, 23);
-            this.optionsButton.TabIndex = 6;
-            this.optionsButton.Text = "Options...";
-            this.toolTip1.SetToolTip(this.optionsButton, "Click this button to\r\nopen the Options\r\ndialog box.");
-            this.optionsButton.UseVisualStyleBackColor = true;
-            this.optionsButton.Click += new System.EventHandler(this.optionsButton_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.closeButton;
             this.ClientSize = new System.Drawing.Size(292, 319);
-            this.Controls.Add(this.optionsButton);
             this.Controls.Add(this.tooltipsCheckbox);
             this.Controls.Add(this.outputFormatComboBox);
             this.Controls.Add(this.label7);
@@ -534,7 +520,6 @@ namespace com.gpfcomics.WinHasher
         private System.Windows.Forms.TextBox compareToTextBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label compareResultLabel;
-        private System.Windows.Forms.Button optionsButton;
     }
 }
 

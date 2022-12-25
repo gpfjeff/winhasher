@@ -50,11 +50,7 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using com.gpfcomics.WinHasher.Core;
 
@@ -65,7 +61,7 @@ namespace com.gpfcomics.WinHasher
         /// <summary>
         /// The <see cref="OutputType"/> of the result hash
         /// </summary>
-        private OutputType outputType;
+        private OutputType outputType { get; set; }
 
         /// <summary>
         /// The ResultDialog constructor
@@ -80,11 +76,10 @@ namespace com.gpfcomics.WinHasher
         {
             // Do the usual initialization:
             InitializeComponent();
+
             // Put the hash text in the result box:
-            txtResult.Text = result;
-            // Build the hash type label:
-            string labelText = HashEngine.GetHashName(hash) + " / " +
-                HashEngine.GetOutputTypeName(outputType) + ":";
+            this.txtResult.Text = result;
+
             // Hold onto the output type for comparison later:
             this.outputType = outputType;
         }
@@ -114,8 +109,7 @@ namespace com.gpfcomics.WinHasher
             // object to set the colors here, so it will match the user interface.
             if (String.IsNullOrEmpty(txtCompare.Text))
             {
-                lblCompareResult.Text = "Please enter a pre-computed hash value in the " +
-                    "Compare To field to compare values.";
+                lblCompareResult.Text = "Please enter a pre-computed hash value in the \"Compare To\" field to compare values.";
                 lblCompareResult.ForeColor = SystemColors.ControlText;
                 lblCompareResult.BackColor = SystemColors.Control;
             }
@@ -136,22 +130,20 @@ namespace com.gpfcomics.WinHasher
                 // excess whitespace on either end; I've lost count of how many times I've copied
                 // a hash from a website and it was marked as "no match" just because some
                 // extra whitespace was accidentally tacked onto the end.
-                if (!String.IsNullOrEmpty(txtCompare.Text))
+                switch (outputType)
                 {
-                    switch (outputType)
-                    {
-                        case OutputType.Hex:
-                        case OutputType.BubbleBabble:
-                            txtCompare.Text = txtCompare.Text.Trim().ToLower();
-                            break;
-                        case OutputType.CapHex:
-                            txtCompare.Text = txtCompare.Text.Trim().ToUpper();
-                            break;
-                        default:
-                            txtCompare.Text = txtCompare.Text.Trim();
-                            break;
-                    }
+                    case OutputType.Hex:
+                    case OutputType.BubbleBabble:
+                        txtCompare.Text = txtCompare.Text.Trim().ToLower();
+                        break;
+                    case OutputType.CapHex:
+                        txtCompare.Text = txtCompare.Text.Trim().ToUpper();
+                        break;
+                    default: // OutputType.Base64:
+                        txtCompare.Text = txtCompare.Text.Trim();
+                        break;
                 }
+
                 // If the two strings match, then the generated hash matches the pre-existing
                 // hash and the user can safely say the file is unaltered and intact:
                 if (String.Compare(txtResult.Text, txtCompare.Text) == 0)

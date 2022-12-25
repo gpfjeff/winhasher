@@ -49,9 +49,6 @@
  * Boston, MA  02110-1301, USA.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Reflection;
 using com.gpfcomics.WinHasher.Core;
 
@@ -60,8 +57,7 @@ namespace com.gpfcomics.WinHasher.hashconsole
     class Program
     {
         // Get our version number from the assembly:
-        private static string version = "WinHasher v. " +
-            Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        private static readonly string version = $"WinHasher v.{Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
 
         // Our main method, which is pretty simple:
         static int Main(string[] args)
@@ -72,7 +68,6 @@ namespace com.gpfcomics.WinHasher.hashconsole
             if (args == null || args.Length == 0)
             {
                 Usage();
-                return 0;
             }
             // Otherwise...
             else
@@ -81,27 +76,28 @@ namespace com.gpfcomics.WinHasher.hashconsole
                 // which puts all our bits into the appropriate buckets:
                 CmdLineAppArgs parsedArgs = CmdLineAppUtils.ParseCmdLineArgs(args);
                 // If we got anything useful...
-                if (parsedArgs != null)
+                if (parsedArgs == null)
+                {
+                    // If we didn't get any useful arguments after parsing, that's an error.
+                    // Print the usage statement and exit with an error code:
+                    Usage();
+                    return 1;
+                }
+                else
                 {
                     // Use the common code in the core library to do the actual work.  If
                     // we get a true result from this, just return zero for success.
-                    if (CmdLineAppUtils.PerformHashes(parsedArgs)) return 0;
+                    if (!CmdLineAppUtils.PerformHashes(parsedArgs))
                     // If we didn't get a true result, something went wrong.  Print the
                     // usage statement and return a one as an error code.
-                    else
                     {
                         Usage();
                         return 1;
                     }
                 }
-                // If we didn't get any useful arguments after parsing, that's an error.
-                // Print the usage statement and exit with an error code:
-                else
-                {
-                    Usage();
-                    return 1;
-                }
             }
+
+            return 0;
         }
 
         /// <summary>
@@ -118,55 +114,55 @@ namespace com.gpfcomics.WinHasher.hashconsole
             object[] obj = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
             if (obj != null && obj.Length > 0)
                 copyright = ((AssemblyCopyrightAttribute)obj[0]).Copyright;
-            Console.WriteLine();
-            Console.WriteLine(version);
-            if (copyright != null) Console.WriteLine(copyright);
-            Console.WriteLine("https://github.com/gpfjeff/winhasher");
-            Console.WriteLine();
-            //*****************123456789012345678901234567890123456789012345678901234567890123456789012345
-            Console.WriteLine("Usage: hash [-md5|-sha1|-sha224|-sha256|-sha384|-sha512|-ripemd128|-ripemd160|");
-            Console.WriteLine("       -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411|-sha3-224|-sha3-256|");
-            //Console.WriteLine("       -sha3-384|-sha3-512|-shake128|-shake256]");
-            Console.WriteLine("       -sha3-384|-sha3-512]");
-            Console.WriteLine("       [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]");
-            Console.WriteLine("       [-in infile | filename1 [filename2 ...]]");
-            Console.WriteLine();
-            Console.WriteLine("WinHasher is a command-line cryptographic hash generator for files.  It");
-            Console.WriteLine("runs in one of two modes:  file hashing and multi-file comparison.  If the");
-            Console.WriteLine("\"-compare\" switch is supplied, compare mode is active; otherwise, multiple");
-            Console.WriteLine("input files will be hashed individually and the result for each displayed.");
-            Console.WriteLine();
-            Console.WriteLine("In hashing mode, WinHasher computes the cryptographic hash of the given");
-            Console.WriteLine("file(s) and prints it to the screen in mode similar to the UNIX md5sum, ");
-            Console.WriteLine("shasum, and related commands.  With no command-line switches, it computes");
-            Console.WriteLine("the SHA-1 hash and displays it in hexadecimal format.  Various switches");
-            Console.WriteLine("allow you to change to other hashing algorithms, such as MD5, the SHA");
-            Console.WriteLine("family, RIPEMD-160, Whirlpool, and Tiger.  The \"-base64\" switch causes");
-            Console.WriteLine("WinHasher to output hashes in MIME Base64 (RFC 2045) format rather than");
-            Console.WriteLine("hexadecimal, \"-hexcaps\" outputs hexadecimal with all capital letters,");
-            Console.WriteLine("and \"-bubbab\" uses Bubble Babble encoding.  If multiple files are");
-            Console.WriteLine("specified, each file is hashed in turn and the result displayed.");
-            Console.WriteLine();
-            Console.WriteLine("In multi-file comparison mode, WinHasher computes the specified hash for");
-            Console.WriteLine("each file given and compares the results.  If the hash of every file");
-            Console.WriteLine("matches, then all files in the batch are declared to be the same.  If");
-            Console.WriteLine("one or more hashes do not match the others, a warning will be displayed");
-            Console.WriteLine("indicating as such.  In this way, you can determine whether two or more");
-            Console.WriteLine("files share the same contents despite file name, path, and modification");
-            Console.WriteLine("time differences.");
-            Console.WriteLine();
-            Console.WriteLine("The result of the either operation can be sent to a file by using the");
-            Console.WriteLine("\"-out\" switch followed by a path to the file.  If you also supply the");
-            Console.WriteLine("\"-append\" switch, the result will be appended to the end of the file;");
-            Console.WriteLine("otherwise, the file will be overwritten if it already exists.");
-            Console.WriteLine();
-            Console.WriteLine("You may also specify the list of files to hash or compare by listing");
-            Console.WriteLine("them in a simple text file and using the \"-in\" switch, followed by the");
-            Console.WriteLine("path to the file.  Input files should have the path to each file listed");
-            Console.WriteLine("on a separate line.  Leading and trailing white space will be ignored, as");
-            Console.WriteLine("will any blank lines or lines that contain only white space.  You may place");
-            Console.WriteLine("comments in this file by starting a line with the pound or hash (#)");
-            Console.WriteLine("character; any line that starts with this character will also be ignored.");
+            Console.WriteLine($"\n{version}");
+            if (copyright != null)
+                Console.WriteLine(copyright);
+
+            Console.WriteLine(
+                @"https://github.com/gpfjeff/winhasher
+
+Usage: hash [-md5|-sha1|-sha-224|-sha-256|-sha-384|-sha-512|-ripemd128|-ripemd160|
+        -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411|-sha3-224|-sha3-256
+        -sha3-384|-sha3-512]
+        [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]
+        [-in infile | filename1 [filename2 ...]]
+
+WinHasher is a command-line cryptographic hash generator for files.  It
+runs in one of two modes:  file hashing and multi-file comparison.  If the
+""-compare"" switch is supplied, compare mode is active; otherwise, multiple
+input files will be hashed individually and the result for each displayed.
+
+In hashing mode, WinHasher computes the cryptographic hash of the given
+file(s) and prints it to the screen in mode similar to the UNIX md5sum,
+shasum, and related commands.  With no command-line switches, it computes
+the " + HashEngine.GetHashName(HashEngine.DefaultHash) + @" hash and displays it in hexadecimal format.  Various switches
+allow you to change to other hashing algorithms, such as MD5, the SHA
+family, RIPEMD-160, WHIRLPOOL, and TIGER.  The ""-base64"" switch causes
+WinHasher to output hashes in MIME Base64 (RFC 2045) format rather than
+hexadecimal, ""-hexcaps"" outputs hexadecimal with all capital letters,
+and ""-bubbab"" uses Bubble Babble encoding.  If multiple files are
+specified, each file is hashed in turn and the result displayed.
+
+In multi-file comparison mode, WinHasher computes the specified hash for
+each file given and compares the results.  If the hash of every file
+matches, then all files in the batch are declared to be the same.  If
+one or more hashes do not match the others, a warning will be displayed
+indicating as such.  In this way, you can determine whether two or more
+files share the same contents despite file name, path, and modification
+time differences.
+
+The result of the either operation can be sent to a file by using the
+""-out"" switch followed by a path to the file.  If you also supply the
+""-append"" switch, the result will be appended to the end of the file;
+otherwise, the file will be overwritten if it already exists.
+
+You may also specify the list of files to hash or compare by listing
+them in a simple text file and using the ""-in"" switch, followed by the
+path to the file.  Input files should have the path to each file listed
+on a separate line.  Leading and trailing white space will be ignored, as
+will any blank lines or lines that contain only white space.  You may place
+comments in this file by starting a line with the pound or hash (#)
+character; any line that starts with this character will also be ignored.");
         }
     }
 }
