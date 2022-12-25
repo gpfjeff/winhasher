@@ -1,9 +1,6 @@
-# Project Status #
+# Download #
 
-| **Current Release** | 1.7 |
-|:--------------------|:---------|
-| **Date of Release** | January X, 2023 |
-| **Realease note** | Upgraded to .NET 6, rewrites, added algorithms |
+To download the installer, please check the [release page](https://github.com/gpfjeff/winhasher/releases)
 
 # About WinHasher #
 
