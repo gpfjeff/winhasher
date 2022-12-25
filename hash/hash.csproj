@@ -7,6 +7,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ErrorReport>none</ErrorReport>
   </PropertyGroup>
+  <PropertyGroup>
+    <RollForward>LatestMajour</RollForward>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn />
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>

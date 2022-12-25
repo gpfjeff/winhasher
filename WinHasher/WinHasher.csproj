@@ -12,6 +12,9 @@
     <StartupObject>com.gpfcomics.WinHasher.Program</StartupObject>
     <ErrorReport>none</ErrorReport>
   </PropertyGroup>
+  <PropertyGroup>
+    <RollForward>LatestMajour</RollForward>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>CA1416</NoWarn>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
