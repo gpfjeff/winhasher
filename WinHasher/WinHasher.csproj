@@ -13,7 +13,7 @@
     <ErrorReport>none</ErrorReport>
   </PropertyGroup>
   <PropertyGroup>
-    <RollForward>LatestMajour</RollForward>
+    <RollForward>LatestMajor</RollForward>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>CA1416</NoWarn>
