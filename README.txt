@@ -11,11 +11,7 @@ WinHasher is a free, Open Source cryptographic hash or digest generator written 
 BUILDING WINHASHER
 ==================
 
-This source distribution for WinHasher is a Microsoft Visual Studio 2022 Windows Application project.
-
-If you've downloaded our source and built it yourself in the past, you may remember seeing a couple of Windows batch files that were used in tagging Subversion revision numbers into the application version numbers.  With our move to GitHub and git, these files are no longer necessary and have been removed from the project; you can simply load up the solution and build it as-is.  If this is your first time building WinHasher yourself, you can safely ignore this and move along.  (This is not the disclaimer you were looking for....)
-
-Once WinHasher is built, make sure to copy the HTML files in the InnoSetup folder into the same location as the binaries.  If WinHasher cannot find these files, the Help button will become disabled.
+Once WinHasher is built, make sure to copy the HTML files in the InnoSetup folder. If WinHasher cannot find these files, the Help button will become disabled.
 
 BUILDING THE WINHASHER INSTALLER
 ================================

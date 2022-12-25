@@ -16,7 +16,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 ChangesEnvironment=true
 
 OutputDir=.\bin
-OutputBaseFilename=WinHasher_1.7_Setup
+OutputBaseFilename=WinHasher_Setup
 
 MinVersion=6.1.7601sp1
 
