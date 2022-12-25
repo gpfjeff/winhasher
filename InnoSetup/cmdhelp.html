@@ -5,7 +5,7 @@ code, pre { color: maroon; }
 blockquote { background: #EEEEEE; }
 </style>
 </head>
-<body><h1>WinHasher Command-Line Help (not updated for 1.7, please refer to hash.exe's output)</h1>
+<body><h1>WinHasher Command-Line Help</h1>
 <p>Official WinHasher Site: <a href="https://github.com/gpfjeff/winhasher">https://github.com/gpfjeff/winhasher</a><br />
 Last Updated November 3, 2015</p>
 
@@ -13,18 +13,8 @@ Last Updated November 3, 2015</p>
 <ul>
 	<li><a href="#into">Introduction</a></li>
 	<ul>
-		<li><a href="#coreconcepts">Core Concepts</a></li>
 		<li><a href="#whywinhasher">Why WinHasher?</a></li>
-		<li><a href="#hashes">Currently Supported Hashes</a></li>
-		<li><a href="#output">Currently Supported Output Formats</a></li>
 		<li><a href="#disclaimer">Disclaimers</a></li>
-	</ul>
-	<li><a href="#install">Installing WinHasher</a></li>
-	<ul>
-		<li><a href="#sysreqs">System Requirements</a></li>
-		<li><a href="#installer">Running the Installer</a></li>
-		<li><a href="#nonwin">WinHasher Without the Win: Non-Windows Platforms</a></li>
-		<li><a href="#portable">Portable WinHasher</a></li>
 	</ul>
 	<li><a href="#using">Using WinHasher</a></li>
 	<ul>
@@ -35,80 +25,17 @@ Last Updated November 3, 2015</p>
 
 <a name="intro"><h2>Introduction</h2></a>
 
-<a name="coreconcepts"><h3>Core Concepts</h3></a>
-
-<p>From <a href="http://www.wikipedia.org/">Wikipedia:</a></p>
-<blockquote><p>In cryptography, a <em>cryptographic hash function</em> is a transformation that takes an input and returns a fixed-size string, which is called the hash value. Hash functions with this property are used for a variety of computational purposes, including cryptography. The hash value is a concise representation of the longer message or document from which it was computed. The message digest is a sort of "digital fingerprint" of the larger document. Cryptographic hash functions are used to do message integrity checks and digital signatures in various information security applications, such as authentication and message integrity.</p>
-<p>A hash function takes a long string (or "message") of any length as input and produces a fixed length string as output, sometimes termed a <em>message digest</em> or a <em>digital fingerprint.</em> A hash function (also called a "digest" or a "checksum") is a kind of "signature" for a stream of data that represents the contents. One analogy that explains the role of the hash function would be the "tamper-evident" seals used on a software package.</p>
-<p>In various standards and applications, the two most-commonly used hash functions are MD5 and SHA-1.</p></blockquote>
-<p>For more information, <a href="http://en.wikipedia.org/wiki/Cryptographic_hash_function">look up "cryptographic hash function" on Wikipedia</a>.</p>
-<p>As described in the synopsis above, one of the primary uses of cryptographic hashes is to verify and validate computer software or digital files. It is common practice among many developers, especially in the <a href="http://www.opensource.org/">Open Source</a> community, to provide a hash of a file next to its download link. Once the user has downloaded the file, they can generate a hash using the same hashing algorithm on their own machine and compare this computed hash to the hash listed on the originating site. If the two hashes match, the user can then safely assume that (1) the downloaded file arrived intact and uncorrupted and (2) it has not been tampered with since the original hash displayed on the site was posted.</p>
-<p>However, security experts will wisely caution that this does <strong><em>NOT</em></strong> guarantee that downloaded file is completely safe. A hacker or malicious system administrator could have easily modified the file after the developer posted it, recomputed the hash, and placed the modified file and hash in the original's place. It also does not guarantee that the file is free from viruses, trojans, or other malware that have infected the file before the hash was computed. Therefore, cryptographic hashes should be just one in a series of checks a user should perform before deciding that a file downloaded from the Internet is safe to use.</p>
-
 <a name="whywinhasher"><h3>Why WinHasher?</h3></a>
 
 <p>Cryptographic hashing is readily available on many computer operating systems. It often comes built-in to the OS or as a (relatively) standard optional package. Mac OS, Linux, Free/OpenBSD, and many other OSes include <a href="http://www.openssl.org/">OpenSSL</a> as either a pre-installed or easily installable optional component. OpenSSL includes several command-line components for generating cryptographic hashes and there are number of graphical user interface (GUI) applications that allow point-and-click access to its capabilities.</p>
-<p>Not so with Microsoft Windows. Windows does not include any built-in utilities for cryptographic hashes, and installing and using OpenSSL on Windows is not a trivial matter. The typical Windows user of today is much less familiar with the Windows Console (i.e. command line) let alone compiling software from source. And while cryptographic hashes are pretty much standard in programming libraries such as the Microsoft .NET Framework, the user is required to write and compile their own applications to use them.</p>
+<p>Not so with Microsoft Windows. Windows does not include any built-in utilities for cryptographic hashes, and installing and using OpenSSL on Windows is not a trivial matter. The typical Windows user of today is much less familiar with the Windows Console (i.e. command line) let alone compiling software from source. And while cryptographic hashes are pretty much standard in programming libraries such as those in Microsoft's .NET, the user is required to write and compile their own applications to use them.</p>
 <p>This "hashing divide" has annoyed me for some time. While I consider myself to be an operating system agnostic and find myself equally home on both Windows and Linux, there are many times I've downloaded Windows-only software but didn't have the capability to verify the file's hash. Either I've been unable to install and run OpenSSL on a given machine, or I haven't had the time or access to a Linux box to copy the file over, generate the hash, and verify it before install. So I wanted to create a quick, simple, easy-to-use Windows app so I could get the hash of a file without waiting or moving it around. I also thought it would be a nice idea to be able to quickly compare the hashes of multiple files without having to generate each one and manually check every hexadecimal digit, so I added that functionality too. After writing the program, I thought it might be useful to others, so I decided to share.</p>
-
-<a name="hashes"><h3>Currently Supported Hashes</h3></a>
-
-<p>WinHasher supports the following cryptographic hashes, which are made available by the <a href="http://www.bouncycastle.org/csharp/">Legion of the Bouncy Castle Crypto API</a>:</p>
-<ul>
-	<li><strong><a href="https://en.wikipedia.org/wiki/MD5">MD5</a>:</strong> A very common 128-bit hashing algorithm that is an Internet standard (<a href="http://tools.ietf.org/html/rfc1321">RFC 1321</a>). This is usually expressed as a 32-character hexadecimal number and was designed by Ronald Rivest in 1991 to replace an earlier hash function, <a href="https://en.wikipedia.org/wiki/MD4">MD4</a>. In 1996 and 2004, flaws were discovered in MD5 that now make it questionable for serious security purposes. In 2009, even more devastating evidence was presented when researchers demonstrated that fake SSL certificate authorities could be generated by using signatures from legitimate CAs signing certificates using MD5. <span class="alert">Therefore, we strongly discourage the use of MD5 for any purpose where security is paramount.</span> Still, MD5 continues to be widely used, so its support is generally expected.</li>
-	<li><strong><a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>:</strong> Considered the successor to MD5, SHA-1 produces a 160-bit digest. It was first published in 1995 as a "correction" to the previously released and withdrawn SHA-0 algorithm. While it is generally considered more secure than MD5, several attacks against it have been published and its future use is generally discouraged. <span class="alert">Therefore, we strongly discourage the use of SHA-1 for any purpose where security is paramount.</span> However, like MD5, its use online continues to be prevalent.</li>
-	<li><strong>SHA-224:</strong> This algorithm is a truncated version of SHA-256, computed with a different initial value. It produces a 224-bit digest and has no known weaknesses.</li>
-	<li><strong>SHA-256:</strong> Part of the <a href="https://en.wikipedia.org/wiki/SHA-2">SHA-2</a> family of successor algorithms to SHA-1 first published in 2001, SHA-256 generates a 256-bit digest. It is computed with 32-bit words and uses a block size of 512 bits. No known weaknesses have been found as of this writing.</li>
-	<li><strong>SHA-384:</strong> This algorithm is a truncated version of SHA-512, computed with a different initial value. It produces a 384-bit digest and has no known weaknesses.</li>
-	<li><strong>SHA-512:</strong> Like SHA-256, this algorithm is a SHA-2 successor to SHA-1. It produces a 512-bit digest, using 64-bit words and a block size of 1024 bits. It has no known weaknesses.</li>
-	<li><strong>RIPEMD-128:</strong> <a href="https://en.wikipedia.org/wiki/RIPEMD">RIPEMD</a> is a family of cryptographic hash functions developed in Leuven, Belgium, by Hans Dobbertin, Antoon Bosselaers and Bart Preneel at the COSIC research group at the Katholieke Universiteit Leuven, and first published in 1996. It was designed in the open academic community and is not known to be constrained by any patents. This 128-bit digest algorithm was designed as a "drop-in replacement" for the original RIPEMD to improve its security. A collision was found in the original RIPEMD algorithm in 2004, so its use should be discouraged.</li>
-	<li><strong>RIPEMD-160:</strong> This 160-bit variant of RIPEMD is generally the most commonly used variant. No known collisions exist in RIPEMD-160.</li>
-	<li><strong>RIPEMD-256:</strong> A 256-bit variant of RIPEMD.</li>
-	<li><strong>RIPEMD-320:</strong> A 320-bit variant of RIPEMD.</li>
-	<li><strong><a href="https://en.wikipedia.org/wiki/Whirlpool_(cryptography)">Whirlpool</a>:</strong> This 512-bit digest algorithm was designed by Vincent Rijmen and Paulo S. L. M. Barreto. Note that this is the 2003 second revision of Whirlpool, not the original "Whirlpool-0" of 2000 or the 2001 first revision "Whirlpool-T". For hashes of data shorter than 64 bits (8 bytes) this hash function has some of the same fundamental problems of hashes like MD5 or SHA-1. Longer hashes should be relatively safe, however.</li>
-	<li><strong><a href="https://en.wikipedia.org/wiki/Tiger_(cryptography)">Tiger</a>:</strong> This 192-bit digest algorithm was designed by Ross Anderson and Eli Biham in 1995 for efficiency on 64-bit platforms. Note that this is the original implementation of Tiger that uses padding similar to MD4, not "Tiger2" which is closer to MD5 or SHA-1. There are no known attacks against the full number of rounds of Tiger, although collisions have been detected in several reduced-round versions.</li>
-	<li><strong><a href="https://en.wikipedia.org/wiki/GOST_(hash_function)">GOST3411</a>:</strong> A 256-bit cryptographic hash function initially defined in the Russian national standard GOST R 34.11-94 <em>Information Technology - Cryptographic Information Security - Hash Function.</em> The equivalent standard used by other member-states of the CIS is GOST 34.311-95. In 2008, an attack was published that breaks the full-round GOST hash function.</li>
-</ul>
-<p>It is my eventual goal to include other cryptographic hashes into this application (especially <a href="https://en.wikipedia.org/wiki/SHA-3">SHA-3</a>) once more Open Source implementations become available.</p>
-
-<a name="output"><h3>Currently Supported Output Formats</h3></a>
-
-<p>The output of cryptographic hashes are raw binary data. However, it is usually represented by one of several output formats that encode raw binary data with easily identifiable text. WinHasher currently supports the following output formats:<p>
-
-<ul>
-	<li><strong>Hexadecimal</strong>, with either lower-case or upper-case letters. Lower-case hexadecimal is the default output for WinHasher, but upper-case hex can be selected by using the "-hexcaps" command-line switch.</li>
-	<li><strong>Base64</strong> (<a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a>): A few people (myself included) prefer to work with Base64-encoded hashes instead of hex. Base64 is a bit more compact than hexadecimal, with 64 characters per digit instead of 16. Base64 is also less well known than hexadecimal; even casual computer users have seen hexadecimal before and may recognize it, while Base64 is usually a bit more obscure and often hidden when used.</li>
-	<li><strong><a href="http://en.wikipedia.org/wiki/Bubble_Babble">Bubble Babble</a></strong>: This is a method of representing a message digest as a string of "real" words, to make the fingerprint easier to remember. The "words" are not necessarily real words, but they look more like words than a string of hex characters. Bubble Babble fingerprinting is used by the SSH2 suite to display easy-to-remember key fingerprints. The key (a DSA or RSA key) is converted into a textual form, digested using SHA-1, and run through Bubble Babble to create the key fingerprint. It can also be used when sharing digests with others as the "words" are easier to remember than seemingly random hex or Base64 characters.</li>
-</ul>
 
 <a name="disclaimer"><h3>Disclaimers</h3></a>
 
 <p>Please read the <a href="gpl.html">WinHasher license</a> for complete licensing information. WinHasher is released under the GNU General Public License version 2, which outlines information concerning its use, redistribution, and warranties. Please read this license fully before using this application.</p>
 <p>It should be noted that cryptographic hashes and digests do <em><strong>NOT</strong></em> guarantee authenticity or ownership of digital files. Hashes and digests should <em><strong>NOT</strong></em> be confused with digital signatures, which verify both file integrity and the authenticity of the file's creator. Hashes and digests <em><strong>ONLY</strong></em> guarantee that the file has not been altered or corrupted in transit, and it is trivial for a hacker to alter both a file and the displayed hash if a remote site is hacked. If both integrity and authenticity are required, please use an application such as <a href="http://www.pgp.com/">PGP</a> or <a href="http://www.gnupg.org/">GnuPG</a> to create and/or verify digital signatures.</p>
 <p>After releasing WinHasher, it came to my attention that there already exists a separate WinHasher application that performs a similar function. This application is unrelated to the other application by the same name and was independently developed. I make no claims of trademark on the name "WinHasher" and from my understanding, neither has the other application's developer. Since my application came second, I will happily defer and rename my WinHasher if the other developer asserts ownership of the name. However, since names can mean a great deal in today's world of search engines, I will continue to use the name unless explicitly asked to change it by the other application's developer. You can find the other WinHasher by <a href="http://www.google.com/search?q=WinHasher">searching for "WinHasher" at Google</a> and going to any of the shareware/freeware download sites listed. My WinHasher is currently only available at the <a href="https://github.com/gpfjeff/winhasher">GitHub project page</a>.</p>
-
-<p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
-
-<a name="install"><h2>Installing WinHasher</h2></a>
-
-<a name="sysreqs"><h3>System Requirements</h3></a>
-
-<p>The primary system requirement for WinHasher is the Microsoft .NET 2.0 Framework. This is a special series of common libraries that specially-built applications can call upon to provide standard Windows functionality. (Hard-core developers will recognize this is a gross oversimplification, but that should suffice for most people.) As such, WinHasher will not work unless .NET 2.0 is installed. .NET itself has its own system requirements that must be met in order for it to be usable, but if your system meets these requirements running WinHasher will be no problem.</p>
-<p>To download the Microsoft .NET 2.0 Framework or obtain more information about it, click <a href="http://msdn2.microsoft.com/en-us/netframework/aa731542.aspx">here</a>. It should also be available through Windows Update or Microsoft Update on most versions of Windows newer that Windows 98SE. Note that .NET 3.0 or higher is <strong><em>NOT</em></strong> an "upgrade" from 2.0; it is a separate framework, designed to be installed alongside 2.0. So if you have .NET 1.1, 3.0, or any other version of the framework installed, you <em>still</em> must install .NET 2.0 for WinHasher to work.</p>
-<p>Beyond .NET's own requirements, WinHasher doesn't require much. However, since cryptographic hashes are very CPU intensive to produce, it should be pointed out that WinHasher will perform better with more RAM and CPU horsepower available. Therefore, the faster your CPU is and the greater amount of free RAM available, the faster WinHasher will work. This is especially true for multi-file comparisons of very large files.</p>
-
-<a name="installer"><h3>Running the Installer</h3></a>
-
-<p>Installing WinHasher should be a breeze, thanks to <a href="http://www.jrsoftware.org/isinfo.php">InnoSetup</a>. Simply download and run the installer program, just like you would for virtually any Windows application. However, the setup program include a number of options that can get confusing, so let's talk a little about each one.</p>
-<p>After choosing the install location, you will be presented with a series installable "components." There are three main components: the WinHasher Windows application, the WinHasher console (command-line) application, and the HTML help files. Since this help file pertains to the console application, we will ignore the Windows application option for now. Installing the HTML help installs this file and the necessary shortcuts to access it.</p>
-
-<a name="nonwin"><h3>WinHasher Without the Win: Non-Windows Platforms</h3></a>
-
-<p>One of the beauties about using the .NET Framework to develop WinHasher is that it's technically not restricted to Microsoft Windows. Anyone can (in theory) develop their own .NET framework based on Microsoft's specifications to run on any platform, and thus run any .NET application built for that framework. <a href="http://www.mono-project.com/">Mono</a> is one such project which runs .NET client and server applications on Linux, Solaris, Mac OS X, Windows, and Unix. However, at the time of this writing, Mono mostly supports .NET 1.1 and only partially supports .NET 2.0. <a href="http://www.mono-project.com/Moma">MoMA</a> reports that WinHasher should work with Mono 2.2 (or higher, I assume). However, I do not plan to officially offer support for non-Windows use of WinHasher. Personally, I think there are much better tools already available for other OSes, and you'd be better off using those instead. Still, if you're a glutton for punishment, feel free to give it a try.</p>
-
-<a name="portable"><h3>Portable WinHasher</h3></a>
-
-<p>The WinHahser console applications do not save any preferences, so they are, by nature, already "portable". In order to run the console applications without using a full installation, download the binaries-only package from our <a href="https://github.com/gpfjeff/winhasher">GitHub project page</a>, rather than the installer. Copy <em>all</em> of the files from that archive to your portable device (USB drive, optical disc, etc.) and keep them together; WinHasher will not work if it cannot find all of its support files. See <a href="#using">Using WinHasher</a> for how to use the application.</p>
 
 <p>[ <a href="#toc">Return to Table of Contents</a> ]</p>
 
@@ -119,14 +46,15 @@ Last Updated November 3, 2015</p>
 <p>The primary console program for WinHasher is <code>hash.</code> Run without any arguments, <code>hash</code> will display a somewhat standard usage statement:</p>
 <blockquote><pre>C:\Program Files\WinHasher>hash
 
-WinHasher v. 1.7.0.0
-c Copyright 2015, Jeffrey T. Darlington.
+WinHasher v.1.7.0.0
+© Copyright 2016, Jeffrey T. Darlington.
 https://github.com/gpfjeff/winhasher
 
-Usage: hash [-md5|-sha1|-sha224|-sha256|-sha384|-sha512|-ripemd128|-ripemd160|
-       -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411]
-       [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]
-       [-in infile | filename1 [filename2 ...]]
+Usage: hash [-md5|-sha1|-sha-224|-sha-256|-sha-384|-sha-512|-ripemd128|-ripemd160|
+        -ripemd256|-ripemd320|-whirlpool|-tiger|-gost3411|-sha3-224|-sha3-256
+        -sha3-384|-sha3-512]
+        [-hex|-hexcaps|-base64|-bubbab] [-compare] [-out outfile [-append]]
+        [-in infile | filename1 [filename2 ...]]
 
 WinHasher is a command-line cryptographic hash generator for files.  It
 runs in one of two modes:  file hashing and multi-file comparison.  If the
@@ -136,9 +64,9 @@ input files will be hashed individually and the result for each displayed.
 In hashing mode, WinHasher computes the cryptographic hash of the given
 file(s) and prints it to the screen in mode similar to the UNIX md5sum,
 shasum, and related commands.  With no command-line switches, it computes
-the SHA-1 hash and displays it in hexadecimal format.  Various switches
+the SHA-256 hash and displays it in hexadecimal format.  Various switches
 allow you to change to other hashing algorithms, such as MD5, the SHA
-family, RIPEMD-160, Whirlpool, and Tiger.  The "-base64" switch causes
+family, RIPEMD-160, WHIRLPOOL, and TIGER.  The "-base64" switch causes
 WinHasher to output hashes in MIME Base64 (RFC 2045) format rather than
 hexadecimal, "-hexcaps" outputs hexadecimal with all capital letters,
 and "-bubbab" uses Bubble Babble encoding.  If multiple files are
